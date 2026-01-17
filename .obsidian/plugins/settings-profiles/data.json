@@ -8,7 +8,8 @@
   "uiUpdate": true,
   "uiUpdateInterval": 1000,
   "devices": {
-    "e2fed21a2a00494aa6017a2aaab30d0abf37f8d83abc5e0caa6b6dfdafde785a": "/Users/vsht/Library/Application Support/ObsidianPlugins/Profiles"
+    "e2fed21a2a00494aa6017a2aaab30d0abf37f8d83abc5e0caa6b6dfdafde785a": "/Users/vsht/Library/Application Support/ObsidianPlugins/Profiles",
+    "2c1f1d841865a99a47226da7408a44ef80278b9c569ab22960d072a685a090e5": "/home/vsht/.local/share/obsidianplugins/Profiles"
   },
   "statusbarInteraction": {
     "click": "auto",

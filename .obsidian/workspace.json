@@ -11,9 +11,24 @@
             "id": "d9fa67dfc5d4f9ca",
             "type": "leaf",
             "state": {
-              "type": "beautitab-react-view",
-              "state": {},
-              "title": "New tab"
+              "type": "markdown",
+              "state": {
+                "file": "Homepage.md",
+                "mode": "source",
+                "source": false,
+                "backlinks": true,
+                "backlinkOpts": {
+                  "collapseAll": false,
+                  "extraContext": false,
+                  "sortOrder": "alphabetical",
+                  "showSearch": false,
+                  "searchQuery": "",
+                  "backlinkCollapsed": false,
+                  "unlinkedCollapsed": true
+                }
+              },
+              "icon": "lucide-file",
+              "title": "Homepage"
             }
           }
         ]
@@ -56,13 +71,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "The Board.canvas",
+                "file": "Homepage.md",
                 "followCursor": true,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of The Board"
+              "title": "Outline of Homepage"
             }
           },
           {
@@ -188,12 +203,12 @@
       "command-palette:Open command palette": true,
       "workspaces:Manage workspace layouts": false,
       "markdown-importer:Open format converter": true,
+      "templater-obsidian:Templater": false,
       "homepage:Open homepage": false,
-      "widgets:Add widget": true,
-      "iconic:Open rulebook": true,
-      "css-editor:Open CSS editor quick switcher": true,
-      "templater-obsidian:Templater": true,
-      "obsidian-excalidraw-plugin:New drawing": true
+      "widgets:Add widget": false,
+      "css-editor:Open CSS editor quick switcher": false,
+      "iconic:Open rulebook": false,
+      "obsidian-excalidraw-plugin:New drawing": false
     }
   },
   "active": "d9fa67dfc5d4f9ca",
