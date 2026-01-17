@@ -1,0 +1,27 @@
+/* === READING MODE === */
+.markdown-preview-view.disable-link-styling a,
+.markdown-preview-view.disable-link-styling a:hover,
+.markdown-preview-view.disable-link-styling a:active,
+.markdown-preview-view.disable-link-styling a:visited {
+  color: inherit !important;
+  text-decoration: none !important;
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  cursor: default !important;
+}
+
+/* === EDITING MODE (Live Preview) === */
+.markdown-source-view.mod-cm6 .disable-link-styling .cm-link,
+.markdown-source-view.mod-cm6 .disable-link-styling .cm-url {
+  color: inherit !important;
+  text-decoration: none !important;
+}
+
+/* Optional: remove cursor change on hover in Live Preview */
+.markdown-source-view.mod-cm6 .disable-link-styling .cm-link:hover,
+.markdown-source-view.mod-cm6 .disable-link-styling .cm-url:hover {
+  color: inherit !important;
+  text-decoration: none !important;
+  cursor: default !important;
+}

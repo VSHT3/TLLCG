@@ -1,0 +1,19 @@
+{
+  "activeProfile": {
+    "name": "Board",
+    "modifiedAt": "2026-01-13T22:56:04.900Z"
+  },
+  "profileUpdate": true,
+  "profileUpdateDelay": 800,
+  "uiUpdate": true,
+  "uiUpdateInterval": 1000,
+  "devices": {
+    "e2fed21a2a00494aa6017a2aaab30d0abf37f8d83abc5e0caa6b6dfdafde785a": "/Users/vsht/Library/Application Support/ObsidianPlugins/Profiles"
+  },
+  "statusbarInteraction": {
+    "click": "auto",
+    "ctrl_click": "none",
+    "shift_click": "none",
+    "alt_click": "none"
+  }
+}

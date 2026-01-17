@@ -1,0 +1,170 @@
+{
+  "editor:open-search": [
+    {
+      "modifiers": [
+        "Mod",
+        "Shift"
+      ],
+      "key": "F"
+    }
+  ],
+  "omnisearch:show-modal": [
+    {
+      "modifiers": [
+        "Mod"
+      ],
+      "key": "F"
+    }
+  ],
+  "obsidian-export-image:export-to-image-zh": [
+    {
+      "modifiers": [
+        "Mod"
+      ],
+      "key": "Z"
+    }
+  ],
+  "global-search:open": [
+    {
+      "modifiers": [
+        "Mod"
+      ],
+      "key": "F"
+    }
+  ],
+  "workspace:split-vertical": [
+    {
+      "modifiers": [
+        "Mod"
+      ],
+      "key": "Numpad6"
+    }
+  ],
+  "templater-obsidian:Personal/Miscellaneous/Templates/Study note.md": [
+    {
+      "modifiers": [
+        "Alt"
+      ],
+      "key": "Numpad3"
+    }
+  ],
+  "optimize-canvas-connections:optimize-shortest-path-selection": [
+    {
+      "modifiers": [
+        "Alt",
+        "Mod"
+      ],
+      "key": "ArrowRight"
+    }
+  ],
+  "editor:add-cursor-below": [
+    {
+      "modifiers": [
+        "Alt"
+      ],
+      "key": "ArrowDown"
+    }
+  ],
+  "companion:accept": [
+    {
+      "modifiers": [
+        "Alt"
+      ],
+      "key": "Numpad1"
+    }
+  ],
+  "editor:delete-paragraph": [],
+  "daily-notes": [
+    {
+      "modifiers": [
+        "Mod"
+      ],
+      "key": "D"
+    }
+  ],
+  "daily-notes:goto-prev": [
+    {
+      "modifiers": [
+        "Mod",
+        "Shift"
+      ],
+      "key": "D"
+    }
+  ],
+  "editor:toggle-comments": [],
+  "colored-text:change-colored-text-mode": [],
+  "obsidian-minimal-settings:toggle-minimal-focus-mode": [
+    {
+      "modifiers": [
+        "Mod"
+      ],
+      "key": "0"
+    }
+  ],
+  "file-explorer:move-file": [
+    {
+      "modifiers": [
+        "Mod",
+        "Shift"
+      ],
+      "key": "6"
+    }
+  ],
+  "workspace:show-trash": [
+    {
+      "modifiers": [
+        "Mod"
+      ],
+      "key": "["
+    }
+  ],
+  "app:toggle-left-sidebar": [
+    {
+      "modifiers": [
+        "Mod"
+      ],
+      "key": "'"
+    }
+  ],
+  "app:toggle-right-sidebar": [
+    {
+      "modifiers": [
+        "Mod"
+      ],
+      "key": "\\"
+    }
+  ],
+  "app:toggle-ribbon": [
+    {
+      "modifiers": [
+        "Mod",
+        "Shift"
+      ],
+      "key": "'"
+    }
+  ],
+  "editor:toggle-source": [
+    {
+      "modifiers": [
+        "Mod"
+      ],
+      "key": "/"
+    }
+  ],
+  "homepage:open-homepage": [
+    {
+      "modifiers": [
+        "Mod"
+      ],
+      "key": "H"
+    }
+  ],
+  "window:reset-zoom": [
+    {
+      "modifiers": [
+        "Mod"
+      ],
+      "key": "0"
+    }
+  ]
+}

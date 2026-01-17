@@ -1,0 +1,24 @@
+{
+  "iconList": [
+    {
+      "name": "Card Rarity",
+      "icon": "crown",
+      "type": "lucide"
+    },
+    {
+      "name": "Card Faction",
+      "icon": "flag",
+      "type": "lucide"
+    },
+    {
+      "name": "Card Power",
+      "icon": "heart",
+      "type": "lucide"
+    },
+    {
+      "name": "Card Category",
+      "icon": "database",
+      "type": "lucide"
+    }
+  ]
+}

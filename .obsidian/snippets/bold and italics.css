@@ -1,0 +1,11 @@
+/* Bold text (strong and b) */
+strong, b, 
+.cm-strong {
+    color: orange !important;
+}
+
+/* Italic text (em and i) */
+em, i, 
+.cm-em {
+    color: rgb(170, 0, 255) !important;
+}

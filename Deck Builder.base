@@ -1,0 +1,436 @@
+filters:
+  and:
+    - file.tags.contains("card")
+formulas:
+  Untitled: ""
+  Untitled 2: note["Card Rarity"] + note["Card Type"]
+  new formula: |
+    if(
+      note["Card Type"].contains("Spell"),
+      "Spell " + icon("flame"),
+      if(
+        note["Card Type"].contains("Unit"),
+        "Unit " + icon("sword"),
+        if(
+          note["Card Type"].contains("Hero"),
+          "Hero " + icon("crown"),
+          if(
+            note["Card Type"].contains("Artifact"),
+     icon("pyramid")+"Artifact ",
+            null
+          )
+        )
+      )
+    )
+  Rarity & Type: note["Card Rarity"] + note["Card Type"]
+properties:
+  note.Card Type:
+    displayName: Type
+  note.Card Category:
+    displayName: Category
+  note.Card Power:
+    displayName: Power
+  note.Card Rarity:
+    displayName: Rarity
+  formula.Untitled 2:
+    displayName: IDK
+views:
+  - type: cards
+    name: Whole
+    groupBy:
+      property: Card Faction
+      direction: ASC
+    order:
+      - file.name
+      - Card Rarity
+      - Card Type
+      - Card Power
+      - Ability
+    sort:
+      - property: feature
+        direction: ASC
+      - property: Card Type
+        direction: DESC
+      - property: Card Category
+        direction: DESC
+      - property: Card Power
+        direction: ASC
+    cardSize: 130
+    imageAspectRatio: 1.5
+    image: note.feature
+  - type: cards
+    name: Small View
+    groupBy:
+      property: Card Faction
+      direction: ASC
+    order:
+      - file.name
+      - formula.Rarity & Type
+    sort:
+      - property: feature
+        direction: ASC
+      - property: Card Type
+        direction: DESC
+      - property: Card Category
+        direction: DESC
+      - property: Card Power
+        direction: ASC
+    cardSize: 130
+    imageAspectRatio: 1.5
+    image: note.feature
+  - type: cards
+    name: Artless
+    filters:
+      and:
+        - '!file.hasProperty("feature")'
+    order:
+      - file.name
+    sort:
+      - property: file.name
+        direction: ASC
+      - property: feature
+        direction: ASC
+      - property: Card Type
+        direction: DESC
+      - property: Card Category
+        direction: DESC
+      - property: Card Power
+        direction: ASC
+    cardSize: 130
+    imageAspectRatio: 1.5
+    image: note.feature
+  - type: cards
+    name: Factionless
+    filters:
+      and:
+        - note["Card Faction"].isEmpty()
+    groupBy:
+      property: Card Faction
+      direction: ASC
+    order:
+      - file.name
+      - formula.Rarity & Type
+    sort:
+      - property: feature
+        direction: ASC
+      - property: Card Type
+        direction: DESC
+      - property: Card Category
+        direction: DESC
+      - property: Card Power
+        direction: ASC
+    cardSize: 130
+    imageAspectRatio: 1.5
+    image: note.feature
+  - type: cards
+    name: Sir Can!
+    filters:
+      and:
+        - note["Card Faction"] == ["Sir Can"]
+    order:
+      - file.name
+      - Card Rarity
+      - Card Type
+      - Card Power
+      - Ability
+    sort:
+      - property: Card Type
+        direction: DESC
+      - property: Card Category
+        direction: DESC
+      - property: Card Power
+        direction: ASC
+      - property: feature
+        direction: ASC
+    cardSize: 130
+    imageAspectRatio: 1.5
+    image: note.feature
+  - type: cards
+    name: The Plague
+    filters:
+      and:
+        - note["Card Faction"] == ["The Plague"]
+    order:
+      - file.name
+      - Card Rarity
+      - Card Type
+      - Card Power
+    sort:
+      - property: feature
+        direction: ASC
+      - property: Card Type
+        direction: DESC
+      - property: Card Category
+        direction: DESC
+      - property: Card Power
+        direction: ASC
+    cardSize: 130
+    imageAspectRatio: 1.5
+    image: note.feature
+  - type: cards
+    name: A.I. Gods
+    filters:
+      and:
+        - note["Card Faction"] == ["A.I. Gods"]
+    groupBy:
+      property: Card Faction
+      direction: ASC
+    order:
+      - file.name
+      - Card Rarity
+      - Card Type
+      - Card Power
+    sort:
+      - property: feature
+        direction: ASC
+      - property: Card Type
+        direction: DESC
+      - property: Card Category
+        direction: DESC
+      - property: Card Power
+        direction: ASC
+    cardSize: 130
+    imageAspectRatio: 1.5
+    image: note.feature
+  - type: cards
+    name: Abeer Dawood Salman
+    filters:
+      and:
+        - note["Card Faction"] == ["Abeer Dawood Salman"]
+    groupBy:
+      property: Card Faction
+      direction: ASC
+    order:
+      - file.name
+      - Card Rarity
+      - Card Type
+      - Card Power
+    sort:
+      - property: feature
+        direction: ASC
+      - property: Card Type
+        direction: DESC
+      - property: Card Category
+        direction: DESC
+      - property: Card Power
+        direction: ASC
+    cardSize: 130
+    imageAspectRatio: 1.5
+    image: note.feature
+  - type: cards
+    name: Abilitless
+    filters:
+      and:
+        - Ability == false
+    groupBy:
+      property: Card Faction
+      direction: ASC
+    order:
+      - file.name
+      - Card Rarity
+      - Card Type
+      - Card Power
+    sort:
+      - property: feature
+        direction: ASC
+      - property: Card Type
+        direction: DESC
+      - property: Card Category
+        direction: DESC
+      - property: Card Power
+        direction: ASC
+    cardSize: 130
+    imageAspectRatio: 1.5
+    image: note.feature
+  - type: cards
+    name: Typeless
+    filters:
+      and:
+        - note["Card Type"].isEmpty()
+    order:
+      - file.name
+      - Card Type
+      - Card Rarity
+      - Card Power
+    sort:
+      - property: feature
+        direction: ASC
+      - property: Card Type
+        direction: DESC
+      - property: Card Category
+        direction: DESC
+      - property: Card Power
+        direction: ASC
+    cardSize: 130
+    imageAspectRatio: 1.5
+    image: note.feature
+  - type: cards
+    name: Arty
+    filters:
+      and:
+        - file.hasProperty("feature")
+    order:
+      - file.name
+    sort:
+      - property: feature
+        direction: ASC
+      - property: Card Type
+        direction: DESC
+      - property: Card Category
+        direction: DESC
+      - property: Card Power
+        direction: ASC
+    cardSize: 160
+    imageAspectRatio: 1.5
+    image: note.feature
+  - type: cards
+    name: Units
+    filters:
+      and:
+        - note["Card Type"] == ["Unit"]
+        - Ability == true
+    groupBy:
+      property: Card Faction
+      direction: ASC
+    order:
+      - file.name
+      - Card Rarity
+      - Card Type
+      - Card Power
+    sort:
+      - property: feature
+        direction: ASC
+      - property: Card Type
+        direction: DESC
+      - property: Card Category
+        direction: DESC
+      - property: Card Power
+        direction: ASC
+    cardSize: 130
+    imageAspectRatio: 1.5
+    image: note.feature
+  - type: cards
+    name: Neutral
+    filters:
+      and:
+        - note["Card Faction"] == ["Neutral"]
+    groupBy:
+      property: Card Faction
+      direction: ASC
+    order:
+      - file.name
+      - Card Rarity
+      - Card Type
+      - Card Power
+    sort:
+      - property: feature
+        direction: ASC
+      - property: Card Type
+        direction: DESC
+      - property: Card Category
+        direction: DESC
+      - property: Card Power
+        direction: ASC
+    cardSize: 130
+    imageAspectRatio: 1.5
+    image: note.feature
+  - type: cards
+    name: Able
+    filters:
+      and:
+        - Ability == true
+    groupBy:
+      property: Card Faction
+      direction: ASC
+    order:
+      - file.name
+      - Card Rarity
+      - Card Type
+      - Card Power
+    sort:
+      - property: feature
+        direction: ASC
+      - property: Card Type
+        direction: DESC
+      - property: Card Category
+        direction: DESC
+      - property: Card Power
+        direction: ASC
+    cardSize: 130
+    imageAspectRatio: 1.5
+    image: note.feature
+  - type: cards
+    name: Gold
+    filters:
+      and:
+        - note["Card Rarity"].containsAny("Epic", "Legendary")
+    groupBy:
+      property: Card Faction
+      direction: ASC
+    order:
+      - file.name
+      - Card Rarity
+      - Card Type
+      - Card Power
+      - Ability
+    sort:
+      - property: feature
+        direction: ASC
+      - property: Card Type
+        direction: DESC
+      - property: Card Category
+        direction: DESC
+      - property: Card Power
+        direction: ASC
+    cardSize: 130
+    imageAspectRatio: 1.5
+    image: note.feature
+  - type: cards
+    name: Bronze
+    filters:
+      and:
+        - note["Card Rarity"].containsAny("Common", "Rare")
+    groupBy:
+      property: Card Faction
+      direction: ASC
+    order:
+      - file.name
+      - Card Rarity
+      - Card Type
+      - Card Power
+      - Ability
+    sort:
+      - property: feature
+        direction: ASC
+      - property: Card Type
+        direction: DESC
+      - property: Card Category
+        direction: DESC
+      - property: Card Power
+        direction: ASC
+    cardSize: 130
+    imageAspectRatio: 1.5
+    image: note.feature
+  - type: cards
+    name: Artifacts
+    filters:
+      and:
+        - note["Card Type"] == ["Artifact"]
+    order:
+      - file.name
+      - Card Rarity
+      - Card Type
+      - Card Power
+      - Ability
+    sort:
+      - property: feature
+        direction: ASC
+      - property: Card Type
+        direction: DESC
+      - property: Card Category
+        direction: DESC
+      - property: Card Power
+        direction: ASC
+    cardSize: 130
+    imageAspectRatio: 1.5
+    image: note.feature

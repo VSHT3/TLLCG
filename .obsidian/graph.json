@@ -1,0 +1,72 @@
+{
+  "collapse-filter": false,
+  "search": "",
+  "showTags": true,
+  "showAttachments": true,
+  "hideUnresolved": false,
+  "showOrphans": true,
+  "collapse-color-groups": false,
+  "colorGroups": [
+    {
+      "query": "tag:#Book  ",
+      "color": {
+        "a": 1,
+        "rgb": 16711680
+      }
+    },
+    {
+      "query": "path:School  ",
+      "color": {
+        "a": 1,
+        "rgb": 10879231
+      }
+    },
+    {
+      "query": "path:\"Personal/Notes/Atomic Habits\"  ",
+      "color": {
+        "a": 1,
+        "rgb": 2031360
+      }
+    },
+    {
+      "query": "path:Personal/Travelling  ",
+      "color": {
+        "a": 1,
+        "rgb": 14971399
+      }
+    },
+    {
+      "query": "path:\"Personal/Daily notes\"  ",
+      "color": {
+        "a": 1,
+        "rgb": 16711803
+      }
+    },
+    {
+      "query": "path:\"Personal/Writing Fiction\"  ",
+      "color": {
+        "a": 1,
+        "rgb": 16711867
+      }
+    },
+    {
+      "query": "path:\"International Baccalaureate\"  ",
+      "color": {
+        "a": 1,
+        "rgb": 255
+      }
+    }
+  ],
+  "collapse-display": false,
+  "showArrow": false,
+  "textFadeMultiplier": 0,
+  "nodeSizeMultiplier": 1.81536444061693,
+  "lineSizeMultiplier": 1.20990151716795,
+  "collapse-forces": false,
+  "centerStrength": 0.718742660299068,
+  "repelStrength": 20,
+  "linkStrength": 1,
+  "linkDistance": 171,
+  "scale": 0.07303657601408918,
+  "close": true
+}

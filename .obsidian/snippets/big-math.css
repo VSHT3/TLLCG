@@ -1,0 +1,36 @@
+/* Bigger LaTeX formulas in Obsidian (Reading + Live Preview) */
+
+/* Reading view (preview mode) */
+.big-latex .math,
+.big-latex .math-display {
+  font-size: 1.5em !important; /* adjust to taste */
+  line-height: 1.4;
+}
+
+/* Live Preview editor (source/edit mode) */
+.big-latex .cm-s-obsidian span.cm-math {
+  font-size: 1.5em !important;
+  line-height: 1.4;
+}
+
+
+/* 3× bigger text in a note
+   Activate per note with:
+   ---
+   cssclasses: triple-text
+   ---
+*/
+
+/* Reading view */
+.triple-text.markdown-preview-view,
+.triple-text .markdown-preview-view {
+  font-size: 3em !important;
+  line-height: 1.6;
+}
+
+/* Live Preview editor */
+.triple-text.markdown-source-view.mod-cm6,
+.triple-text .markdown-source-view.mod-cm6 {
+  font-size: 3em !important;
+  line-height: 1.6;
+}

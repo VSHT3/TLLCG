@@ -1,0 +1,15 @@
+{
+  "types": {
+    "aliases": "aliases",
+    "cssclasses": "multitext",
+    "tags": "tags",
+    "Keywords": "multitext",
+    "Unit": "multitext",
+    "Page": "number",
+    "Card Type": "multitext",
+    "Card Rarity": "multitext",
+    "Card Category": "multitext",
+    "Card Power": "number",
+    "Faction": "multitext"
+  }
+}

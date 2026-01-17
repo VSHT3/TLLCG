@@ -1,0 +1,258 @@
+{
+  "main": {
+    "id": "043bfaed281f96ad",
+    "type": "split",
+    "children": [
+      {
+        "id": "758ff085dabe6737",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "d9fa67dfc5d4f9ca",
+            "type": "leaf",
+            "state": {
+              "type": "beautitab-react-view",
+              "state": {},
+              "title": "New tab"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "cda61f942dab23b1",
+    "type": "split",
+    "children": [
+      {
+        "id": "52376dbd15560a93",
+        "type": "tabs",
+        "dimension": 55.194805194805205,
+        "children": [
+          {
+            "id": "998c4dd7100fc29c",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          }
+        ]
+      },
+      {
+        "id": "c1201116308dcf33",
+        "type": "tabs",
+        "dimension": 21.645021645021647,
+        "children": [
+          {
+            "id": "f3e49e0f77a747cd",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "The Board.canvas",
+                "followCursor": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline of The Board"
+            }
+          },
+          {
+            "id": "0376eb40d6e44b6a",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          }
+        ],
+        "currentTab": 1
+      },
+      {
+        "id": "9540eebf05233e5b",
+        "type": "tabs",
+        "dimension": 23.160173160173166,
+        "children": [
+          {
+            "id": "5d4b4596a37496bc",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 200
+  },
+  "right": {
+    "id": "e4f6f62a97dd0d19",
+    "type": "split",
+    "children": [
+      {
+        "id": "c7564b462c8aba91",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "589bdf39b833fc32",
+            "type": "leaf",
+            "state": {
+              "type": "file-properties",
+              "state": {
+                "file": "The Board.canvas"
+              },
+              "icon": "lucide-info",
+              "title": "File properties for The Board"
+            }
+          },
+          {
+            "id": "e2d36ccc7d5b710f",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "The Board.canvas",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks for The Board"
+            }
+          },
+          {
+            "id": "edd2a6a071dbe66e",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "The Board.canvas",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links from The Board"
+            }
+          },
+          {
+            "id": "5d5956467831c03e",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "All properties"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 245.5,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "bases:Create new base": true,
+      "switcher:Open quick switcher": true,
+      "canvas:Create new canvas": true,
+      "command-palette:Open command palette": true,
+      "workspaces:Manage workspace layouts": false,
+      "markdown-importer:Open format converter": true,
+      "homepage:Open homepage": false,
+      "widgets:Add widget": true,
+      "iconic:Open rulebook": true,
+      "css-editor:Open CSS editor quick switcher": true,
+      "templater-obsidian:Templater": true,
+      "obsidian-excalidraw-plugin:New drawing": true
+    }
+  },
+  "active": "d9fa67dfc5d4f9ca",
+  "lastOpenFiles": [
+    "Cards/Choese.md",
+    "Drawing 2026-01-15 19.17.23.excalidraw.md",
+    "Cards/Ruah.md",
+    "The Board.canvas",
+    "Deck Builder.base",
+    "Cards/Sir Umm....md",
+    "tllc.md",
+    "Misc/Abeer Dawood Salman Deck.md",
+    "Misc/Sir Can Deck.md",
+    "Misc/Neutral Deck.md",
+    "thumbnails/resized/17a13f5ba92474ce8505ef6d8f968a9d_86cf658e.webp",
+    "thumbnails/resized",
+    "thumbnails",
+    "Artworks/Pasted image 20260114134414.png",
+    "Artworks",
+    "Cards/Kožný Kráčač.md",
+    "Cards/Rozmýšlaš Vyzeráš Hostiteľ.md",
+    "Helper.md",
+    "Misc",
+    "Homepage.md",
+    "Cards/Tuleň Tím Šesť.md",
+    "Cards/Claws the Production.md",
+    "Cards/Dawood.md",
+    "Cards/Individual Sailor.md",
+    "Cards/Sellers... Sailors!.md",
+    "Cards/Terminalthor.md",
+    "Cards/Damina.md",
+    "Cards/Matica Slovenská.md",
+    "Cards/Sir Veil.md",
+    "Cards/Mikrofónový Pokles.md",
+    "Systems/Statuses.md",
+    "Systems/Keywords.md",
+    "Cards/Walk the Plank.md",
+    "Cards/Sham BOO!.md",
+    "thumbnails/resized/02bc7cde830127da6dfc6ae7e08c1b78_86cf658e.webp",
+    "Cards/Artworks/Pasted image 20260113113110.png",
+    "Personal/Miscellaneous/Attatchments/resized/8806e6e6ab23a88a55c54b2ae2c7de73_86cf658e.webp",
+    "Cards/Artworks/coin-flip.mp3",
+    "Personal/Miscellaneous/Attatchments/resized",
+    "Personal/Miscellaneous/Attatchments",
+    "Personal/Miscellaneous",
+    "Personal",
+    "Cards/Artworks/coin-flip.gif",
+    "Personal/Miscellaneous/Attatchments/external/b297f2098c3c112c8e3e1ae8c624dcdb.failed.png",
+    "Personal/Miscellaneous/Attatchments/resized/027fa856532b0f309584b28d83b52d4c_86cf658e.webp",
+    "Personal/Miscellaneous/Attatchments/resized/9d03204436e816f0e4d92aa726c4b091_86cf658e.webp",
+    "Personal/Miscellaneous/Attatchments/resized/1af95e550903e2e794f8e73efc259dd5_86cf658e.webp",
+    "Personal/Vivi Family Tree.canvas",
+    "Personal/Writing/A subfolder full of darkness and starlight/Stories/Darkness & Starlight/Mindboard.canvas",
+    "International Baccalaureate/1 English A/1 Readers, Writers and Texts/IoBE relationships.canvas",
+    "School/06 HISTORY/Family tree.canvas",
+    "International Baccalaureate/3 Biology/Molecules/Bio molecules mindmaps.canvas",
+    "International Baccalaureate/1 English A/Types of texts.canvas",
+    "International Baccalaureate/2 Spanish Ab Initio/El Árbol Genealógico.canvas",
+    "Personal/Me/Family tree.canvas",
+    "Personal/Notes/Damian/I don't speak D&D.canvas"
+  ]
+}

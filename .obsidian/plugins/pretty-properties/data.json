@@ -1,0 +1,174 @@
+{
+  "hiddenProperties": [
+    "feature",
+    "thumbnail",
+    "tags",
+    "ability"
+  ],
+  "propertyPillColors": {
+    "Neil Gaiman": {
+      "pillColor": "red",
+      "textColor": "default"
+    },
+    "Hero": {
+      "pillColor": {
+        "h": 0,
+        "s": 0,
+        "l": 0
+      },
+      "textColor": "red"
+    },
+    "Unit": {
+      "pillColor": "yellow",
+      "textColor": "default"
+    },
+    "Common": {
+      "pillColor": "green",
+      "textColor": "default"
+    },
+    "Legendary": {
+      "pillColor": "orange",
+      "textColor": "default"
+    },
+    "Epic": {
+      "pillColor": "purple",
+      "textColor": "default"
+    },
+    "Rare": {
+      "pillColor": "blue",
+      "textColor": "default"
+    },
+    "Artifact": {
+      "pillColor": "cyan"
+    },
+    "Spell": {
+      "pillColor": {
+        "h": 29,
+        "s": 68,
+        "l": 53
+      },
+      "textColor": "default"
+    }
+  },
+  "propertyLongtextColors": {
+    "93/100": {
+      "pillColor": "default",
+      "textColor": "blue"
+    }
+  },
+  "tagColors": {},
+  "enableBanner": true,
+  "enableIcon": true,
+  "enableCover": true,
+  "bannerProperty": "banner",
+  "iconProperty": "icon",
+  "coverProperty": "cover",
+  "extraCoverProperties": [],
+  "bannerHeight": 150,
+  "bannerHeightMobile": 100,
+  "bannerHeightPopover": 100,
+  "bannerMargin": -20,
+  "bannerMarginMobile": 0,
+  "bannerFading": true,
+  "coverDefaultWidth1": 200,
+  "coverDefaultWidth2": 250,
+  "coverDefaultWidth3": 300,
+  "coverMaxHeight": 500,
+  "coverVerticalWidth": 200,
+  "coverHorizontalWidth": 300,
+  "coverSquareWidth": 250,
+  "coverCircleWidth": 250,
+  "coverMaxWidthPopover": 150,
+  "progressProperties": {},
+  "allTasksCount": "tasks",
+  "completedTasksCount": "tasks_completed",
+  "uncompletedTasksCount": "tasks_uncompleted",
+  "completedTasksStatuses": [
+    "x"
+  ],
+  "uncompletedTasksStatuses": [
+    " "
+  ],
+  "bannersFolder": "",
+  "coversFolder": "",
+  "showColorSettings": false,
+  "showTextColorSettings": false,
+  "showHiddenSettings": false,
+  "iconsFolder": "",
+  "iconSize": 70,
+  "iconTopMargin": 70,
+  "iconTopMarginMobile": 44,
+  "iconTopMarginWithoutBanner": -10,
+  "iconLeftMargin": 0,
+  "iconGap": 10,
+  "bannerIconGap": 0,
+  "bannerIconGapMobile": 20,
+  "iconColor": "",
+  "iconColorDark": "",
+  "iconBackground": false,
+  "bannerPositionProperty": "banner_position",
+  "addPillPadding": "all",
+  "addBaseTagColor": true,
+  "enableTasksCount": true,
+  "enableColorButtonInBases": true,
+  "customDateFormat": "",
+  "customDateTimeFormat": "",
+  "enableCustomDateFormat": false,
+  "enableCustomDateFormatInBases": false,
+  "enableRelativeDateColors": false,
+  "settingsTab": "OTHER",
+  "enableTaskNotesCount": false,
+  "allTNTasksCount": "tn_tasks",
+  "completedTNTasksCount": "tn_tasks_completed",
+  "uncompletedTNTasksCount": "tn_tasks_uncompleted",
+  "allTNProjectTasksCount": "tn_project_tasks",
+  "completedTNProjectTasksCount": "tn_project_tasks_completed",
+  "uncompletedTNProjectTasksCount": "tn_project_tasks_uncompleted",
+  "allTNInlineTasksCount": "tn_inline_tasks",
+  "completedTNInlineTasksCount": "tn_inline_tasks_completed",
+  "uncompletedTNInlineTasksCount": "tn_inline_tasks_uncompleted",
+  "allTNAndCheckboxTasksCount": "tn_and_checkbox_tasks",
+  "completedTNAndCheckboxTasksCount": "tn_and_checkbox_tasks_completed",
+  "uncompletedTNAndCheckboxTasksCount": "tn_and_checkbox_tasks_uncompleted",
+  "enableColoredProperties": true,
+  "enableColoredInlineTags": true,
+  "nonLatinTagsSupport": false,
+  "enableColorButton": true,
+  "propertySearchKey": "Ctrl",
+  "showTagColorSettings": false,
+  "iconSizeMobile": 70,
+  "iconSizePopover": 50,
+  "hidePropertiesInPropTab": false,
+  "autoTasksCount": true,
+  "enableColoredTagsInTagPane": true,
+  "mathProperties": [],
+  "enableMath": true,
+  "dataVersion": 1,
+  "dateColors": {
+    "past": {
+      "pillColor": "default",
+      "textColor": "default"
+    },
+    "present": {
+      "pillColor": "default",
+      "textColor": "default"
+    },
+    "future": {
+      "pillColor": "default",
+      "textColor": "default"
+    }
+  },
+  "coverPosition": "left",
+  "enableBannersInPopover": false,
+  "enableIconsInPopover": false,
+  "enableCoversInPopover": false,
+  "hideAllEmptyProperties": false,
+  "hiddenWhenEmptyProperties": [
+    "card power"
+  ],
+  "iconInTitle": false,
+  "titleIconSize": 30,
+  "titleTextIconMatchTitleSize": true,
+  "imageLinkFormat": "link",
+  "enableBases": false
+}

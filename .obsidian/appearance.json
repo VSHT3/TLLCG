@@ -1,0 +1,23 @@
+{
+  "accentColor": "",
+  "interfaceFontFamily": "Inter",
+  "textFontFamily": "Inter",
+  "baseFontSize": 16,
+  "cssTheme": "Baseline",
+  "theme": "obsidian",
+  "translucency": false,
+  "showViewHeader": true,
+  "enabledCssSnippets": [
+    "AnuPpuccinNyan_Cat_Progress_Bars",
+    "custom scrollbar",
+    "invis scrollbar",
+    "rainbow folder colr copy",
+    "MCL Multi Column",
+    "Mathematics Callouts",
+    "big-math",
+    "bold and italics",
+    "class for hover preview"
+  ],
+  "nativeMenus": false,
+  "showRibbon": true
+}

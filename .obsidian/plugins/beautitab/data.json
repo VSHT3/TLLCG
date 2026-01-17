@@ -1,0 +1,26 @@
+{
+  "backgroundTheme": "transparent with shadows",
+  "customBackground": "",
+  "localBackgrounds": [],
+  "showTopLeftSearchButton": false,
+  "topLeftSearchProvider": {
+    "command": "switcher:open",
+    "display": "Quick switcher: Open quick switcher"
+  },
+  "showTime": true,
+  "timeFormat": "24-hour",
+  "showGreeting": true,
+  "greetingText": "Welcome to TLLCG!",
+  "showInlineSearch": true,
+  "inlineSearchProvider": {
+    "command": "switcher:open",
+    "display": "Quick switcher: Open quick switcher"
+  },
+  "showRecentFiles": false,
+  "showBookmarks": true,
+  "bookmarkSource": "all",
+  "bookmarkGroup": "",
+  "showQuote": false,
+  "quoteSource": "Quoteable",
+  "customQuotes": []
+}

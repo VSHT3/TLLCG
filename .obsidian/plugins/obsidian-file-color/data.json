@@ -1,0 +1,148 @@
+{
+  "cascadeColors": false,
+  "colorBackground": false,
+  "palette": [
+    {
+      "id": "L6re0NTJtQzjdEyXCQFI_",
+      "name": "red",
+      "value": "#ff0000"
+    },
+    {
+      "id": "KvWctlpPfx1OBEuV2t4rY",
+      "name": "",
+      "value": "#0000ff"
+    },
+    {
+      "id": "ZeRs2ipxuyRfJhbNWOklA",
+      "name": "",
+      "value": "#00ffff"
+    },
+    {
+      "id": "vxC2nyQx1r40Vap2-mVlE",
+      "name": "",
+      "value": "#00ff00"
+    },
+    {
+      "id": "uJVtuttSHS0iArJk6TUYy",
+      "name": "",
+      "value": "#a52a2a"
+    },
+    {
+      "id": "pOR4MzpkS__8lVrBCAzhn",
+      "name": "",
+      "value": "#654321"
+    },
+    {
+      "id": "5iBuMWZDPN0OTxmkirnB0",
+      "name": "",
+      "value": "#ffea00"
+    },
+    {
+      "id": "NYSXFWtvBmaiwZDGUPfdI",
+      "name": "",
+      "value": "#ff00c8"
+    },
+    {
+      "id": "0Y0x0WOldiHm1OmEJp9Ic",
+      "name": "",
+      "value": "#045309"
+    },
+    {
+      "id": "fhsxp3IXbhM3bexOLcBu0",
+      "name": "",
+      "value": "#8c00ff"
+    },
+    {
+      "id": "YOzTIW7WUA9UtfmCZ1amP",
+      "name": "",
+      "value": "#ff6a00"
+    },
+    {
+      "id": "FL3ln-Fg3PmdV4Es_Y--3",
+      "name": "",
+      "value": "#870075"
+    },
+    {
+      "id": "mY3zH6AHMuIjbssxAJphZ",
+      "name": "",
+      "value": "#368700"
+    },
+    {
+      "id": "PLEmZnraIP0afdmZN_8sq",
+      "name": "",
+      "value": "#0084ff"
+    },
+    {
+      "id": "zWR1Rkak3-aEZz7qJJzUd",
+      "name": "",
+      "value": "#00fad0"
+    },
+    {
+      "id": "h9nHNhapklwhsmGNY-L2C",
+      "name": "",
+      "value": "#0064ff"
+    }
+  ],
+  "fileColors": [
+    {
+      "path": "School/00 ACADEMIC WRITING/Final Assignment/Scar's Too Deep/STD IDEAS.md",
+      "color": "ZeRs2ipxuyRfJhbNWOklA"
+    },
+    {
+      "path": "School/00 ACADEMIC WRITING/Final Assignment/Scar's Too Deep/STD(1).pdf",
+      "color": "L6re0NTJtQzjdEyXCQFI_"
+    },
+    {
+      "path": "School/00 ACADEMIC WRITING/Final Assignment/Scar's Too Deep/C STD(1).pdf",
+      "color": "L6re0NTJtQzjdEyXCQFI_"
+    },
+    {
+      "path": "School/00 ACADEMIC WRITING/Final Assignment/Scar's Too Deep",
+      "color": "L6re0NTJtQzjdEyXCQFI_"
+    },
+    {
+      "path": "School/00 ACADEMIC WRITING/Final Assignment/Scar's Too Deep/STD NOTES.md",
+      "color": "ZeRs2ipxuyRfJhbNWOklA"
+    },
+    {
+      "path": "School/00 ACADEMIC WRITING/Final Assignment/Scar's Too Deep/STD test.md",
+      "color": "ZeRs2ipxuyRfJhbNWOklA"
+    },
+    {
+      "path": "School/00 ACADEMIC WRITING/Final Assignment/Scar's Too Deep/Writing map of STD.canvas",
+      "color": "fhsxp3IXbhM3bexOLcBu0"
+    },
+    {
+      "path": "School/03 BIOLOGY/YEAR II/Hormones and plant growth.md",
+      "color": "KvWctlpPfx1OBEuV2t4rY"
+    },
+    {
+      "path": "School/03 BIOLOGY/YEAR II/Plant metabolism map.canvas",
+      "color": "vxC2nyQx1r40Vap2-mVlE"
+    },
+    {
+      "path": "School",
+      "color": "KvWctlpPfx1OBEuV2t4rY"
+    },
+    {
+      "path": "School/03 BIOLOGY/Vocab rules.md",
+      "color": "L6re0NTJtQzjdEyXCQFI_"
+    },
+    {
+      "path": "School/Subjects Navigation.md",
+      "color": "ZeRs2ipxuyRfJhbNWOklA"
+    },
+    {
+      "path": "IB Navigation.md",
+      "color": "ZeRs2ipxuyRfJhbNWOklA"
+    },
+    {
+      "path": "International Baccalaureate",
+      "color": "PLEmZnraIP0afdmZN_8sq"
+    },
+    {
+      "path": "CAS writing",
+      "color": "fhsxp3IXbhM3bexOLcBu0"
+    }
+  ]
+}

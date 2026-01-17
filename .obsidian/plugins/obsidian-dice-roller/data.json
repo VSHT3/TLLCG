@@ -1,0 +1,128 @@
+{
+  "position": "RIGHT",
+  "showFudgeIcon": false,
+  "rollLinksForTags": false,
+  "copyContentButton": true,
+  "customFormulas": [
+    "1d8",
+    "1d20",
+    "1d20"
+  ],
+  "displayFormulaForMod": true,
+  "displayResultsInline": false,
+  "displayFormulaAfter": false,
+  "escapeDiceMod": true,
+  "signed": false,
+  "displayLookupRoll": true,
+  "formulas": {},
+  "defaultRoll": 1,
+  "defaultFace": 100,
+  "renderer": true,
+  "renderAllDice": true,
+  "addToView": false,
+  "renderTime": 0,
+  "colorfulDice": true,
+  "scaler": 1.5,
+  "diceColor": "#202020",
+  "textColor": "#ffffff",
+  "textFont": "Arial",
+  "showLeafOnStartup": false,
+  "narrativeSymbolSet": "Genesys",
+  "displayAsSymbols": false,
+  "displayAsEmbed": true,
+  "round": "None",
+  "initialDisplay": "None",
+  "icons": [
+    {
+      "id": "dice-roller-d4",
+      "shape": "Triangle",
+      "formula": "d4",
+      "text": "4"
+    },
+    {
+      "id": "dice-roller-d6",
+      "shape": "Square",
+      "formula": "d6",
+      "text": "6"
+    },
+    {
+      "id": "dice-roller-d8",
+      "shape": "Diamond",
+      "formula": "d8",
+      "text": "8"
+    },
+    {
+      "id": "dice-roller-d10",
+      "shape": "Diamond",
+      "formula": "d10",
+      "text": "10"
+    },
+    {
+      "id": "dice-roller-d12",
+      "shape": "Dodecahedron",
+      "formula": "d12",
+      "text": "12"
+    },
+    {
+      "id": "dice-roller-d20",
+      "shape": "Icosahedron",
+      "formula": "d20",
+      "text": "20"
+    },
+    {
+      "id": "dice-roller-d100",
+      "shape": "Circle",
+      "formula": "d%",
+      "text": "%"
+    }
+  ],
+  "showRenderNotice": false,
+  "diceModTemplateFolders": {},
+  "replaceDiceModInLivePreview": true,
+  "version": "11.4.2",
+  "viewResults": [
+    {
+      "result": "3",
+      "original": "1d8",
+      "resultText": "1d8\n[3]",
+      "timestamp": 1768259083352,
+      "id": "PiUienPXYmy0"
+    },
+    {
+      "result": "6",
+      "original": "1d8",
+      "resultText": "1d8\n[6]",
+      "timestamp": 1768259093701,
+      "id": "rQagdh-zOmUt"
+    },
+    {
+      "result": "4",
+      "original": "1d20",
+      "resultText": "1d20\n[4]",
+      "timestamp": 1768259434268,
+      "id": "aREnbmisYoTO"
+    },
+    {
+      "result": "20",
+      "original": "1d20",
+      "resultText": "1d20\n[20]",
+      "timestamp": 1768259500584,
+      "id": "q6f5mvyks2nY"
+    },
+    {
+      "result": "3",
+      "original": "1d20",
+      "resultText": "1d20\n[3]",
+      "timestamp": 1768259645586,
+      "id": "r6YO1dImeaFg"
+    },
+    {
+      "result": "157",
+      "original": "1d% + 4d20 + 1d12 + 1d10 + 1d8 + 1d6 + 1d4",
+      "resultText": "1d% + 4d20 + 1d12 + 1d10 + 1d8 + 1d6 + 1d4\n[78] + [20, 11, 17, 5] + [5] + [10] + [6] + [4] + [1]",
+      "timestamp": 1768259657052,
+      "id": "xBpUlD9bjSGc"
+    }
+  ],
+  "showDice": true
+}

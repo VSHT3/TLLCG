@@ -1,0 +1,197 @@
+{
+  "main": {
+    "id": "8cb05b18661b953f",
+    "type": "split",
+    "children": [
+      {
+        "id": "69c603b67e46085d",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "bb669730ac7b040c",
+            "type": "leaf",
+            "state": {
+              "type": "empty",
+              "state": {},
+              "icon": "lucide-file",
+              "title": "New tab"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "6efbc67d0490f86a",
+    "type": "mobile-drawer",
+    "children": [
+      {
+        "id": "3f01bf7091856b01",
+        "type": "leaf",
+        "state": {
+          "type": "file-explorer",
+          "state": {
+            "sortOrder": "alphabetical",
+            "autoReveal": false
+          },
+          "icon": "lucide-folder-closed",
+          "title": "Files"
+        }
+      },
+      {
+        "id": "c98e1c1acb21bef2",
+        "type": "leaf",
+        "state": {
+          "type": "search",
+          "state": {
+            "query": "",
+            "matchingCase": false,
+            "explainSearch": false,
+            "collapseAll": false,
+            "extraContext": false,
+            "sortOrder": "alphabetical"
+          },
+          "icon": "lucide-search",
+          "title": "Search"
+        }
+      },
+      {
+        "id": "209a46488349bdea",
+        "type": "leaf",
+        "state": {
+          "type": "tag",
+          "state": {
+            "sortOrder": "frequency",
+            "useHierarchy": true,
+            "showSearch": false,
+            "searchQuery": ""
+          },
+          "icon": "lucide-tags",
+          "title": "Tags"
+        }
+      },
+      {
+        "id": "da5a25a4e6d93a28",
+        "type": "leaf",
+        "state": {
+          "type": "all-properties",
+          "state": {
+            "sortOrder": "frequency",
+            "showSearch": false,
+            "searchQuery": ""
+          },
+          "icon": "lucide-archive",
+          "title": "All properties"
+        }
+      },
+      {
+        "id": "183b47b0f7deef5b",
+        "type": "leaf",
+        "state": {
+          "type": "bookmarks",
+          "state": {},
+          "icon": "lucide-bookmark",
+          "title": "Bookmarks"
+        }
+      }
+    ],
+    "currentTab": 0
+  },
+  "right": {
+    "id": "e102e05edaacce88",
+    "type": "mobile-drawer",
+    "children": [
+      {
+        "id": "05b17c3c29ccbcf8",
+        "type": "leaf",
+        "state": {
+          "type": "backlink",
+          "state": {
+            "collapseAll": false,
+            "extraContext": false,
+            "sortOrder": "alphabetical",
+            "showSearch": false,
+            "searchQuery": "",
+            "backlinkCollapsed": false,
+            "unlinkedCollapsed": true
+          },
+          "icon": "links-coming-in",
+          "title": "Backlinks"
+        }
+      },
+      {
+        "id": "e4b851dcb98ccccc",
+        "type": "leaf",
+        "state": {
+          "type": "outgoing-link",
+          "state": {
+            "linksCollapsed": false,
+            "unlinkedCollapsed": true
+          },
+          "icon": "links-going-out",
+          "title": "Outgoing links"
+        }
+      },
+      {
+        "id": "4b10c3d718764acb",
+        "type": "leaf",
+        "state": {
+          "type": "outline",
+          "state": {
+            "followCursor": false,
+            "showSearch": false,
+            "searchQuery": ""
+          },
+          "icon": "lucide-list",
+          "title": "Outline"
+        }
+      },
+      {
+        "id": "8b99635124538559",
+        "type": "leaf",
+        "state": {
+          "type": "file-properties",
+          "state": {},
+          "icon": "lucide-info",
+          "title": "File properties"
+        }
+      }
+    ],
+    "currentTab": 3,
+    "pinned": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "command-palette:Open command palette": false,
+      "markdown-importer:Open format converter": false,
+      "workspaces:Manage workspace layouts": false,
+      "bases:Create new base": false,
+      "templater-obsidian:Templater": false,
+      "obsidian-projects:Open projects": false,
+      "obsidian-book-search-plugin:Create new book note": false,
+      "homepage:Open homepage": false,
+      "widgets:Add widget": false,
+      "omnisearch:Omnisearch": false,
+      "banyan:Open dashboard": false,
+      "banyan:Add card note": false,
+      "banyan:Random open a note - Random review": false,
+      "notebook-navigator:Notebook Navigator": false,
+      "iconic:Open rulebook": false
+    }
+  },
+  "active": "bb669730ac7b040c",
+  "lastOpenFiles": [
+    "Personal/TLLCG — Think Look Like Card Game/Think Look Like Card Game — TLLCG.base",
+    "Personal/TLLCG — Think Look Like Card Game/Systems/Keywords.md",
+    "Personal/TLLCG — Think Look Like Card Game/Cards/Neutral/Units/The Wither.md",
+    "Personal/Obsidian/Books/The Wise Man's Fear - Patrick Rothfuss.md",
+    "Personal/TLLCG — Think Look Like Card Game/Cards/Sir Veil.md",
+    "Personal/TLLCG — Think Look Like Card Game/Cards/Faction/A.I. Pantheon/Units/Scrolling Papers.md",
+    "Personal/Memories/01 - January/09 - 01.md"
+  ]
+}

@@ -1,0 +1,78 @@
+{
+  "folderMappings": [],
+  "icon": "circle-ellipsis",
+  "showEditInFabMenu": false,
+  "toolbarProp": "notetoolbar",
+  "toolbars": [
+    {
+      "defaultStyles": [
+        "border",
+        "even",
+        "sticky",
+        "button"
+      ],
+      "items": [
+        {
+          "label": "graph",
+          "icon": "lucide-activity",
+          "link": "Graph view: Open local graph",
+          "linkAttr": {
+            "commandId": "graph:open-local",
+            "hasVars": false,
+            "type": "command"
+          },
+          "tooltip": "uwu?",
+          "visibility": {
+            "desktop": {
+              "allViews": {
+                "components": [
+                  "icon",
+                  "label"
+                ]
+              }
+            },
+            "mobile": {
+              "allViews": {
+                "components": [
+                  "icon",
+                  "label"
+                ]
+              }
+            },
+            "tablet": {
+              "allViews": {
+                "components": [
+                  "icon",
+                  "label"
+                ]
+              }
+            }
+          },
+          "uuid": "0c079974-b72e-492e-8b8b-189f82a1b32e"
+        }
+      ],
+      "mobileStyles": [],
+      "name": "test",
+      "updated": "2024-04-27T06:12:26.657Z",
+      "position": {
+        "desktop": {
+          "allViews": {
+            "position": "props"
+          }
+        },
+        "mobile": {
+          "allViews": {
+            "position": "props"
+          }
+        },
+        "tablet": {
+          "allViews": {
+            "position": "props"
+          }
+        }
+      },
+      "uuid": "b0163ec2-2c9d-41a3-9c7a-16a98b15431c"
+    }
+  ],
+  "version": 20240727.1
+}

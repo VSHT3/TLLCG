@@ -1,0 +1,107 @@
+{
+  "history": {
+    "2024-05-15": {
+      "words": 24,
+      "characters": 185,
+      "sentences": 1,
+      "pages": 0.19999999999999998,
+      "files": 830,
+      "footnotes": 0,
+      "citations": 0,
+      "totalWords": 210499,
+      "totalCharacters": 1430111,
+      "totalSentences": 8700,
+      "totalFootnotes": 45,
+      "totalCitations": 44,
+      "totalPages": 702.3999999999997
+    },
+    "2024-05-16": {
+      "words": 79,
+      "characters": 618,
+      "sentences": 0,
+      "pages": 0.1999999999999993,
+      "files": 831,
+      "footnotes": 0,
+      "citations": 0,
+      "totalWords": 210599,
+      "totalCharacters": 1430853,
+      "totalSentences": 8702,
+      "totalFootnotes": 29464,
+      "totalCitations": 29463,
+      "totalPages": 702.5999999999998
+    },
+    "2024-05-17": {
+      "words": 95,
+      "characters": 674,
+      "sentences": 3,
+      "pages": 0.30000000000000004,
+      "files": 833,
+      "footnotes": 0,
+      "citations": 0,
+      "totalWords": 211411,
+      "totalCharacters": 1437795,
+      "totalSentences": 8710,
+      "totalFootnotes": 1,
+      "totalCitations": 0,
+      "totalPages": 705.2999999999996
+    },
+    "2024-05-19": {
+      "words": 120,
+      "characters": 703,
+      "sentences": 11,
+      "pages": 0.5,
+      "files": 833,
+      "footnotes": 0,
+      "citations": 0,
+      "totalWords": 211688,
+      "totalCharacters": 1439700,
+      "totalSentences": 8727,
+      "totalFootnotes": 1,
+      "totalCitations": 0,
+      "totalPages": 706.3999999999996
+    },
+    "2024-05-20": {
+      "words": 96,
+      "characters": 674,
+      "sentences": 0,
+      "pages": 0.4,
+      "files": 835,
+      "footnotes": 0,
+      "citations": 0,
+      "totalWords": 212273,
+      "totalCharacters": 1443605,
+      "totalSentences": 8753,
+      "totalFootnotes": 713,
+      "totalCitations": 712,
+      "totalPages": 708.3999999999997
+    }
+  },
+  "modifiedFiles": {
+    "School/BIOLOGY/Classification of Plants/Fungi/Plant Drugs.md": {
+      "words": {
+        "initial": 11,
+        "current": 107
+      },
+      "characters": {
+        "initial": 62,
+        "current": 736
+      },
+      "sentences": {
+        "initial": 1,
+        "current": 1
+      },
+      "footnotes": {
+        "initial": 0,
+        "current": 0
+      },
+      "citations": {
+        "initial": 0,
+        "current": 0
+      },
+      "pages": {
+        "initial": 0,
+        "current": 0.4
+      }
+    }
+  }
+}

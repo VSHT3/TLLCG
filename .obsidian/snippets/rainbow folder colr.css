@@ -1,0 +1,91 @@
+/* Define folder colors */
+:root {
+  --folder-color-1: rgb(255, 69, 0);    /* Red-Orange */
+  --folder-color-2: rgb(255, 140, 0);   /* Dark Orange */
+  --folder-color-3: rgb(255, 215, 0);   /* Gold */
+  --folder-color-4: rgb(173, 255, 47);  /* Green Yellow */
+  --folder-color-5: rgb(50, 205, 50);   /* Lime Green */
+  --folder-color-6: rgb(0, 255, 127);   /* Spring Green */
+  --folder-color-7: rgb(0, 255, 255);   /* Cyan */
+  --folder-color-8: rgb(30, 144, 255);  /* Dodger Blue */
+  --folder-color-9: rgb(0, 0, 255);     /* Blue */
+  --folder-color-10: rgb(138, 43, 226); /* Blue Violet */
+  --folder-color-11: rgb(148, 0, 211);  /* Dark Violet */
+  --folder-color-12: rgb(255, 20, 147); /* Deep Pink */
+  --folder-color-13: rgb(255, 105, 180);/* Hot Pink */
+  --folder-color-14: rgb(255, 182, 193);/* Light Pink */
+  --folder-color-15: rgb(240, 128, 128);/* Light Coral */
+  --folder-color-16: rgb(255, 255, 255);/* White */
+}
+
+/* Apply folder colors to 2nd-level and deeper subfolders under "school" */
+.nav-folder-children .nav-folder-children .nav-folder,
+.nav-files-container > div .nav-folder-children .nav-folder {
+  --nav-item-color: var(--folder-color);
+}
+
+/* Apply folder colors using nth-child */
+.nav-folder-children .nav-folder-children .nav-folder:nth-child(16n + 1),
+.nav-files-container > div .nav-folder-children .nav-folder:nth-child(16n + 1) {
+  --folder-color: var(--folder-color-1);
+}
+.nav-folder-children .nav-folder-children .nav-folder:nth-child(16n + 2),
+.nav-files-container > div .nav-folder-children .nav-folder:nth-child(16n + 2) {
+  --folder-color: var(--folder-color-2);
+}
+.nav-folder-children .nav-folder-children .nav-folder:nth-child(16n + 3),
+.nav-files-container > div .nav-folder-children .nav-folder:nth-child(16n + 3) {
+  --folder-color: var(--folder-color-3);
+}
+.nav-folder-children .nav-folder-children .nav-folder:nth-child(16n + 4),
+.nav-files-container > div .nav-folder-children .nav-folder:nth-child(16n + 4) {
+  --folder-color: var(--folder-color-4);
+}
+.nav-folder-children .nav-folder-children .nav-folder:nth-child(16n + 5),
+.nav-files-container > div .nav-folder-children .nav-folder:nth-child(16n + 5) {
+  --folder-color: var(--folder-color-5);
+}
+.nav-folder-children .nav-folder-children .nav-folder:nth-child(16n + 6),
+.nav-files-container > div .nav-folder-children .nav-folder:nth-child(16n + 6) {
+  --folder-color: var(--folder-color-6);
+}
+.nav-folder-children .nav-folder-children .nav-folder:nth-child(16n + 7),
+.nav-files-container > div .nav-folder-children .nav-folder:nth-child(16n + 7) {
+  --folder-color: var(--folder-color-7);
+}
+.nav-folder-children .nav-folder-children .nav-folder:nth-child(16n + 8),
+.nav-files-container > div .nav-folder-children .nav-folder:nth-child(16n + 8) {
+  --folder-color: var(--folder-color-8);
+}
+.nav-folder-children .nav-folder-children .nav-folder:nth-child(16n + 9),
+.nav-files-container > div .nav-folder-children .nav-folder:nth-child(16n + 9) {
+  --folder-color: var(--folder-color-9);
+}
+.nav-folder-children .nav-folder-children .nav-folder:nth-child(16n + 10),
+.nav-files-container > div .nav-folder-children .nav-folder:nth-child(16n + 10) {
+  --folder-color: var(--folder-color-10);
+}
+.nav-folder-children .nav-folder-children .nav-folder:nth-child(16n + 11),
+.nav-files-container > div .nav-folder-children .nav-folder:nth-child(16n + 11) {
+  --folder-color: var(--folder-color-11);
+}
+.nav-folder-children .nav-folder-children .nav-folder:nth-child(16n + 12),
+.nav-files-container > div .nav-folder-children .nav-folder:nth-child(16n + 12) {
+  --folder-color: var(--folder-color-12);
+}
+.nav-folder-children .nav-folder-children .nav-folder:nth-child(16n + 13),
+.nav-files-container > div .nav-folder-children .nav-folder:nth-child(16n + 13) {
+  --folder-color: var(--folder-color-13);
+}
+.nav-folder-children .nav-folder-children .nav-folder:nth-child(16n + 14),
+.nav-files-container > div .nav-folder-children .nav-folder:nth-child(16n + 14) {
+  --folder-color: var(--folder-color-14);
+}
+.nav-folder-children .nav-folder-children .nav-folder:nth-child(16n + 15),
+.nav-files-container > div .nav-folder-children .nav-folder:nth-child(16n + 15) {
+  --folder-color: var(--folder-color-15);
+}
+.nav-folder-children .nav-folder-children .nav-folder:nth-child(16n + 16),
+.nav-files-container > div .nav-folder-children .nav-folder:nth-child(16n + 16) {
+  --folder-color: var(--folder-color-16);
+}

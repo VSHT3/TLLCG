@@ -1,0 +1,170 @@
+{
+  "cascadeColors": false,
+  "colorBackground": false,
+  "palette": [
+    {
+      "id": "L6re0NTJtQzjdEyXCQFI_",
+      "name": "red",
+      "value": "#ff0000"
+    },
+    {
+      "id": "KvWctlpPfx1OBEuV2t4rY",
+      "name": "",
+      "value": "#0000ff"
+    },
+    {
+      "id": "ZeRs2ipxuyRfJhbNWOklA",
+      "name": "",
+      "value": "#00ffff"
+    },
+    {
+      "id": "vxC2nyQx1r40Vap2-mVlE",
+      "name": "",
+      "value": "#00ff00"
+    },
+    {
+      "id": "uJVtuttSHS0iArJk6TUYy",
+      "name": "",
+      "value": "#a52a2a"
+    },
+    {
+      "id": "pOR4MzpkS__8lVrBCAzhn",
+      "name": "",
+      "value": "#654321"
+    },
+    {
+      "id": "5iBuMWZDPN0OTxmkirnB0",
+      "name": "",
+      "value": "#ffea00"
+    },
+    {
+      "id": "NYSXFWtvBmaiwZDGUPfdI",
+      "name": "",
+      "value": "#ff00c8"
+    },
+    {
+      "id": "0Y0x0WOldiHm1OmEJp9Ic",
+      "name": "",
+      "value": "#045309"
+    },
+    {
+      "id": "fhsxp3IXbhM3bexOLcBu0",
+      "name": "",
+      "value": "#8c00ff"
+    },
+    {
+      "id": "YOzTIW7WUA9UtfmCZ1amP",
+      "name": "",
+      "value": "#ff6a00"
+    },
+    {
+      "id": "FL3ln-Fg3PmdV4Es_Y--3",
+      "name": "",
+      "value": "#870075"
+    },
+    {
+      "id": "mY3zH6AHMuIjbssxAJphZ",
+      "name": "",
+      "value": "#368700"
+    },
+    {
+      "id": "PLEmZnraIP0afdmZN_8sq",
+      "name": "",
+      "value": "#0084ff"
+    }
+  ],
+  "fileColors": [
+    {
+      "path": "Obsidian",
+      "color": "KvWctlpPfx1OBEuV2t4rY"
+    },
+    {
+      "path": "School/ACADEMICAL WRITING",
+      "color": "L6re0NTJtQzjdEyXCQFI_"
+    },
+    {
+      "path": "School/BIOLOGY",
+      "color": "YOzTIW7WUA9UtfmCZ1amP"
+    },
+    {
+      "path": "School/GEOGRAPHY",
+      "color": "mY3zH6AHMuIjbssxAJphZ"
+    },
+    {
+      "path": "School/HISTORY",
+      "color": "0Y0x0WOldiHm1OmEJp9Ic"
+    },
+    {
+      "path": "School/SPANISH",
+      "color": "FL3ln-Fg3PmdV4Es_Y--3"
+    },
+    {
+      "path": "School/ENGLISH",
+      "color": "vxC2nyQx1r40Vap2-mVlE"
+    },
+    {
+      "path": "School/U&K",
+      "color": "fhsxp3IXbhM3bexOLcBu0"
+    },
+    {
+      "path": "School/CHEMISTRY",
+      "color": "5iBuMWZDPN0OTxmkirnB0"
+    },
+    {
+      "path": "School/ACADEMICAL WRITING/Final Assignment/Scar's Too Deep/STD IDEAS.md",
+      "color": "ZeRs2ipxuyRfJhbNWOklA"
+    },
+    {
+      "path": "School/ACADEMICAL WRITING/Final Assignment/Scar's Too Deep/STD(1).pdf",
+      "color": "L6re0NTJtQzjdEyXCQFI_"
+    },
+    {
+      "path": "School/ACADEMICAL WRITING/Final Assignment/Scar's Too Deep/C STD(1).pdf",
+      "color": "L6re0NTJtQzjdEyXCQFI_"
+    },
+    {
+      "path": "School/ACADEMICAL WRITING/Final Assignment/Scar's Too Deep",
+      "color": "L6re0NTJtQzjdEyXCQFI_"
+    },
+    {
+      "path": "School/ACADEMICAL WRITING/Final Assignment/Scar's Too Deep/STD NOTES.md",
+      "color": "ZeRs2ipxuyRfJhbNWOklA"
+    },
+    {
+      "path": "School/ACADEMICAL WRITING/Final Assignment/Scar's Too Deep/STD test.md",
+      "color": "ZeRs2ipxuyRfJhbNWOklA"
+    },
+    {
+      "path": "School/ACADEMICAL WRITING/Final Assignment/Scar's Too Deep/Writing map of STD.canvas",
+      "color": "fhsxp3IXbhM3bexOLcBu0"
+    },
+    {
+      "path": "School/INFORMATICS",
+      "color": "ZeRs2ipxuyRfJhbNWOklA"
+    },
+    {
+      "path": "School/SLOVAK",
+      "color": "NYSXFWtvBmaiwZDGUPfdI"
+    },
+    {
+      "path": "School/MATHEMATICS",
+      "color": "PLEmZnraIP0afdmZN_8sq"
+    },
+    {
+      "path": "School/PHYSICS",
+      "color": "KvWctlpPfx1OBEuV2t4rY"
+    },
+    {
+      "path": "School",
+      "color": "L6re0NTJtQzjdEyXCQFI_"
+    },
+    {
+      "path": "Miscellaneous",
+      "color": "fhsxp3IXbhM3bexOLcBu0"
+    },
+    {
+      "path": "Travelling",
+      "color": "vxC2nyQx1r40Vap2-mVlE"
+    }
+  ]
+}
