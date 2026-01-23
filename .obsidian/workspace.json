@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Homepage.md",
+                "file": "Cards/Bangár Hangár.md",
                 "mode": "source",
                 "source": false,
                 "backlinks": true,
@@ -28,7 +28,7 @@
                 }
               },
               "icon": "lucide-file",
-              "title": "Homepage"
+              "title": "Bangár Hangár"
             }
           }
         ]
@@ -119,7 +119,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 200
+    "width": 200,
+    "collapsed": true
   },
   "right": {
     "id": "e4f6f62a97dd0d19",
@@ -213,11 +214,12 @@
   },
   "active": "d9fa67dfc5d4f9ca",
   "lastOpenFiles": [
+    "Deck Builder.base",
+    "Homepage.md",
     "Cards/Choese.md",
     "Drawing 2026-01-15 19.17.23.excalidraw.md",
     "Cards/Ruah.md",
     "The Board.canvas",
-    "Deck Builder.base",
     "Cards/Sir Umm....md",
     "tllc.md",
     "Misc/Abeer Dawood Salman Deck.md",
@@ -232,7 +234,6 @@
     "Cards/Rozmýšlaš Vyzeráš Hostiteľ.md",
     "Helper.md",
     "Misc",
-    "Homepage.md",
     "Cards/Tuleň Tím Šesť.md",
     "Cards/Claws the Production.md",
     "Cards/Dawood.md",
@@ -246,7 +247,6 @@
     "Systems/Statuses.md",
     "Systems/Keywords.md",
     "Cards/Walk the Plank.md",
-    "Cards/Sham BOO!.md",
     "thumbnails/resized/02bc7cde830127da6dfc6ae7e08c1b78_86cf658e.webp",
     "Cards/Artworks/Pasted image 20260113113110.png",
     "Personal/Miscellaneous/Attatchments/resized/8806e6e6ab23a88a55c54b2ae2c7de73_86cf658e.webp",
