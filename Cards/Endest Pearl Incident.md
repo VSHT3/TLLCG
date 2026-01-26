@@ -18,4 +18,7 @@ Ability: true
 ## Ability
 Damage all units on the board by 2 or [[Keywords#^destroy|destroy]] an artifact, then gain [[Statuses#**Cursed**|Cursed]] and shuffle self into the deck.
 
+
+*First one was odd, but somehow it happened thrice…*
+
 ![[Pasted image 20251228190757.png|400]]
