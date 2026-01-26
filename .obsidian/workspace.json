@@ -4,31 +4,16 @@
     "type": "split",
     "children": [
       {
-        "id": "758ff085dabe6737",
+        "id": "1e37e1f8d1d9f713",
         "type": "tabs",
         "children": [
           {
-            "id": "d9fa67dfc5d4f9ca",
+            "id": "9d19710e0f8e29e4",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Cards/Bangár Hangár.md",
-                "mode": "source",
-                "source": false,
-                "backlinks": true,
-                "backlinkOpts": {
-                  "collapseAll": false,
-                  "extraContext": false,
-                  "sortOrder": "alphabetical",
-                  "showSearch": false,
-                  "searchQuery": "",
-                  "backlinkCollapsed": false,
-                  "unlinkedCollapsed": true
-                }
-              },
-              "icon": "lucide-file",
-              "title": "Bangár Hangár"
+              "type": "beautitab-react-view",
+              "state": {},
+              "title": "New tab"
             }
           }
         ]
@@ -71,13 +56,12 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Homepage.md",
                 "followCursor": true,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Homepage"
+              "title": "Outline"
             }
           },
           {
@@ -119,8 +103,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 200,
-    "collapsed": true
+    "width": 200
   },
   "right": {
     "id": "e4f6f62a97dd0d19",
@@ -135,11 +118,9 @@
             "type": "leaf",
             "state": {
               "type": "file-properties",
-              "state": {
-                "file": "The Board.canvas"
-              },
+              "state": {},
               "icon": "lucide-info",
-              "title": "File properties for The Board"
+              "title": "File properties"
             }
           },
           {
@@ -193,8 +174,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 245.5,
-    "collapsed": true
+    "width": 245.5
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -212,10 +192,37 @@
       "obsidian-excalidraw-plugin:New drawing": false
     }
   },
-  "active": "d9fa67dfc5d4f9ca",
+  "active": "9d19710e0f8e29e4",
   "lastOpenFiles": [
     "Deck Builder.base",
+    "Cards/Troll Diagrams.md",
+    "Systems/Keywords.md",
+    "Cards/Bart P.md",
+    "Cards/P.E.S..md",
+    "Cards/Artworks/troll diagram.png",
+    "Cards/Damina.md",
+    "Cards/Lie of Production.md",
+    "Cards/Carry On.md",
+    "Cards/Is real.md",
+    "Helper.md",
+    "Cards/Catch-up.md",
+    "Cards/HHMDS.md",
+    "Cards/Miss Fortune.md",
+    "thumbnails/resized/3e6490424faae0a59be28ea52c792180_86cf658e.webp",
+    "Cards/Artworks/Pasted image 20260126124410.png",
+    "thumbnails/resized/41bbb4b01ff9da15562f6a4f980b936d_86cf658e.webp",
+    "Cards/Artworks/Pasted image 20260126124129.png",
+    "thumbnails/resized/878b78947ed8a95126ba5e853cd0f918_86cf658e.webp",
+    "Cards/Artworks/Pasted image 20260126123514.png",
+    "Cards/CLass.md",
+    "thumbnails/resized/a96c32a080ad0d2e174bf4eebf0ab833_86cf658e.webp",
+    "Cards/Artworks/Pasted image 20260126121944.png",
+    "Cards/Eggsamples.md",
+    "Cards/67.md",
+    "Cards/untitled folder",
+    "Cards/Lake Competition.md",
     "Homepage.md",
+    "Cards/Bangár Hangár.md",
     "Cards/Choese.md",
     "Drawing 2026-01-15 19.17.23.excalidraw.md",
     "Cards/Ruah.md",
@@ -224,42 +231,15 @@
     "tllc.md",
     "Misc/Abeer Dawood Salman Deck.md",
     "Misc/Sir Can Deck.md",
-    "Misc/Neutral Deck.md",
     "thumbnails/resized/17a13f5ba92474ce8505ef6d8f968a9d_86cf658e.webp",
     "thumbnails/resized",
     "thumbnails",
-    "Artworks/Pasted image 20260114134414.png",
     "Artworks",
-    "Cards/Kožný Kráčač.md",
-    "Cards/Rozmýšlaš Vyzeráš Hostiteľ.md",
-    "Helper.md",
     "Misc",
-    "Cards/Tuleň Tím Šesť.md",
-    "Cards/Claws the Production.md",
-    "Cards/Dawood.md",
-    "Cards/Individual Sailor.md",
-    "Cards/Sellers... Sailors!.md",
-    "Cards/Terminalthor.md",
-    "Cards/Damina.md",
-    "Cards/Matica Slovenská.md",
-    "Cards/Sir Veil.md",
-    "Cards/Mikrofónový Pokles.md",
-    "Systems/Statuses.md",
-    "Systems/Keywords.md",
-    "Cards/Walk the Plank.md",
-    "thumbnails/resized/02bc7cde830127da6dfc6ae7e08c1b78_86cf658e.webp",
-    "Cards/Artworks/Pasted image 20260113113110.png",
-    "Personal/Miscellaneous/Attatchments/resized/8806e6e6ab23a88a55c54b2ae2c7de73_86cf658e.webp",
     "Cards/Artworks/coin-flip.mp3",
     "Personal/Miscellaneous/Attatchments/resized",
     "Personal/Miscellaneous/Attatchments",
     "Personal/Miscellaneous",
-    "Personal",
-    "Cards/Artworks/coin-flip.gif",
-    "Personal/Miscellaneous/Attatchments/external/b297f2098c3c112c8e3e1ae8c624dcdb.failed.png",
-    "Personal/Miscellaneous/Attatchments/resized/027fa856532b0f309584b28d83b52d4c_86cf658e.webp",
-    "Personal/Miscellaneous/Attatchments/resized/9d03204436e816f0e4d92aa726c4b091_86cf658e.webp",
-    "Personal/Miscellaneous/Attatchments/resized/1af95e550903e2e794f8e73efc259dd5_86cf658e.webp",
     "Personal/Vivi Family Tree.canvas",
     "Personal/Writing/A subfolder full of darkness and starlight/Stories/Darkness & Starlight/Mindboard.canvas",
     "International Baccalaureate/1 English A/1 Readers, Writers and Texts/IoBE relationships.canvas",

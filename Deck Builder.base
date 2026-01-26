@@ -222,9 +222,6 @@ views:
     filters:
       and:
         - Ability == false
-    groupBy:
-      property: Card Faction
-      direction: ASC
     order:
       - file.name
       - Card Rarity
