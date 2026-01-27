@@ -216,4 +216,3 @@ btnRow.appendChild(clearLastDrawBtn);
 
 
 #### Last Draw
-[[Eggsamples]]

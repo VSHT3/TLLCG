@@ -7,10 +7,14 @@ Card Type:
 Card Rarity:
 Card Faction:
 Card Category:
-Card Power: 0
-Ability: false
+Card Power:
+Ability: true
 ---
 
 ## Ability
+Timer 3 --> destroy self.  
+Pay 2 --> increase timer by 3.  
+At the start of your turn, profit 1. If timer is greater than 10, profit 2 and timer reduces by 2 instead.
+
 
 *That’s really fucking gross!*

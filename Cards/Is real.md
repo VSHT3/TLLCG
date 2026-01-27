@@ -14,5 +14,5 @@ Ability: true
 ---
 
 ## Ability
-Timer 3 —> Destroy self and damage all units on this row by 1.
+Timer 3 —> damage all units on this row by 1 and destroy self.
 At the start of your turn, draw the top card from the graveyard.

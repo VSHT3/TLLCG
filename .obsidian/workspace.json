@@ -4,16 +4,16 @@
     "type": "split",
     "children": [
       {
-        "id": "72b5aa3aa6f699e7",
+        "id": "40182c28854fa0d1",
         "type": "tabs",
         "children": [
           {
-            "id": "e23cbfcfb2675cb5",
+            "id": "05ed8fbd81439799",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Cards/Stastistics.md",
+                "file": "Cards/Trembling Lips.md",
                 "mode": "source",
                 "source": false,
                 "backlinks": true,
@@ -28,11 +28,54 @@
                 }
               },
               "icon": "lucide-file",
-              "title": "Stastistics"
+              "title": "Trembling Lips"
+            }
+          }
+        ]
+      },
+      {
+        "id": "c3260020c63f2f78",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "9fcf67e84145380c",
+            "type": "leaf",
+            "state": {
+              "type": "bases",
+              "state": {
+                "file": "Deck Builder.base",
+                "viewName": "The Plague"
+              },
+              "icon": "lucide-layout-grid",
+              "title": "Deck Builder"
             }
           },
           {
-            "id": "5410d9e623a82fd5",
+            "id": "022fd4ae91637c0f",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Cards/Damina.md",
+                "mode": "source",
+                "source": false,
+                "backlinks": true,
+                "backlinkOpts": {
+                  "collapseAll": false,
+                  "extraContext": false,
+                  "sortOrder": "alphabetical",
+                  "showSearch": false,
+                  "searchQuery": "",
+                  "backlinkCollapsed": false,
+                  "unlinkedCollapsed": true
+                }
+              },
+              "icon": "lucide-file",
+              "title": "Damina"
+            }
+          },
+          {
+            "id": "0cd07b3a33c36902",
             "type": "leaf",
             "state": {
               "type": "markdown",
@@ -54,57 +97,9 @@
               "icon": "lucide-file",
               "title": "Keywords"
             }
-          },
-          {
-            "id": "890ffcae32427167",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Cards/Sham BOO!.md",
-                "mode": "source",
-                "source": false,
-                "backlinks": true,
-                "backlinkOpts": {
-                  "collapseAll": false,
-                  "extraContext": false,
-                  "sortOrder": "alphabetical",
-                  "showSearch": false,
-                  "searchQuery": "",
-                  "backlinkCollapsed": false,
-                  "unlinkedCollapsed": true
-                }
-              },
-              "icon": "lucide-file",
-              "title": "Sham BOO!"
-            }
-          },
-          {
-            "id": "f7b77435403a1714",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Systems/Statuses.md",
-                "mode": "preview",
-                "source": false,
-                "backlinks": true,
-                "backlinkOpts": {
-                  "collapseAll": false,
-                  "extraContext": false,
-                  "sortOrder": "alphabetical",
-                  "showSearch": false,
-                  "searchQuery": "",
-                  "backlinkCollapsed": false,
-                  "unlinkedCollapsed": true
-                }
-              },
-              "icon": "lucide-file",
-              "title": "Statuses"
-            }
           }
         ],
-        "currentTab": 3
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -116,7 +111,7 @@
       {
         "id": "52376dbd15560a93",
         "type": "tabs",
-        "dimension": 55.194805194805205,
+        "dimension": 44.066620402498266,
         "children": [
           {
             "id": "998c4dd7100fc29c",
@@ -136,7 +131,7 @@
       {
         "id": "c1201116308dcf33",
         "type": "tabs",
-        "dimension": 21.645021645021647,
+        "dimension": 32.75503122831367,
         "children": [
           {
             "id": "f3e49e0f77a747cd",
@@ -144,21 +139,22 @@
             "state": {
               "type": "outline",
               "state": {
+                "file": "Cards/Damina.md",
                 "followCursor": true,
-                "showSearch": false,
+                "showSearch": true,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline"
+              "title": "Outline of Damina"
             }
           },
           {
-            "id": "0376eb40d6e44b6a",
+            "id": "0b29c3b513f91694",
             "type": "leaf",
             "state": {
               "type": "search",
               "state": {
-                "query": "",
+                "query": "egg",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -175,7 +171,7 @@
       {
         "id": "9540eebf05233e5b",
         "type": "tabs",
-        "dimension": 23.160173160173166,
+        "dimension": 23.178348369188065,
         "children": [
           {
             "id": "5d4b4596a37496bc",
@@ -191,8 +187,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 200,
-    "collapsed": true
+    "width": 200
   },
   "right": {
     "id": "e4f6f62a97dd0d19",
@@ -208,10 +203,10 @@
             "state": {
               "type": "file-properties",
               "state": {
-                "file": "Systems/Statuses.md"
+                "file": "Cards/Damina.md"
               },
               "icon": "lucide-info",
-              "title": "File properties for Statuses"
+              "title": "File properties for Damina"
             }
           },
           {
@@ -283,47 +278,46 @@
       "obsidian-excalidraw-plugin:New drawing": false
     }
   },
-  "active": "f7b77435403a1714",
+  "active": "022fd4ae91637c0f",
   "lastOpenFiles": [
-    "Systems/Keywords.md",
-    "Cards/Sham BOO!.md",
-    "Cards/Lynn & Mlynn.md",
-    "Cards/Stastistics.md",
-    "Cards/Classical Jellyfish.md",
-    "Cards/Hnusný Domáci Produkt.md",
-    "Cards/Mr. Ruler.md",
+    "Cards/Trembling Lips.md",
+    "Cards/Damina.md",
     "Deck Builder.base",
+    "Systems/Keywords.md",
+    "Cards/Chad GBD.md",
+    "Cards/Mr. Rural.md",
+    "Cards/Eggsplaining.md",
+    "Cards/Eggsamples.md",
+    "Misc/Abeer Dawood Salman Deck.md",
+    "Cards/Rozmýšlaš Vyzeráš Hostiteľ.md",
+    "Cards/Is real.md",
+    "thumbnails/resized/a2c5369793380d7790a1981162dd88c0_86cf658e.webp",
+    "Cards/Artworks/Pasted image 20260127213035.png",
+    "Cards/Cierna Smrt.md",
+    "Cards/I'm Sandevastated.md",
+    "Cards/Miss Fortune.md",
+    "Cards/Hnusný Domáci Produkt.md",
+    "Cards/HHMDS.md",
+    "Cards/Stastistics.md",
+    "thumbnails/resized/a138a5f608d70dc53d58687a510670a4_86cf658e.webp",
+    "Cards/Artworks/Pasted image 20260127204833.png",
+    "Cards/Dr. Glass Cannon Chasuble.md",
+    "thumbnails/resized/76b866e52136acdfaac9896d21d1b1b0_86cf658e.webp",
+    "Cards/Artworks/Pasted image 20260127204324.png",
+    "Systems/Statuses.md",
+    "Cards/Lynn & Mlynn.md",
+    "Cards/ATM star.md",
+    "Cards/Sham BOO!.md",
+    "Cards/Classical Jellyfish.md",
+    "Cards/Mr. Ruler.md",
     "Cards/Troll Diagrams.md",
     "Cards/Bart P.md",
-    "Cards/P.E.S..md",
     "Cards/Artworks/troll diagram.png",
-    "Cards/Damina.md",
-    "Cards/Lie of Production.md",
-    "Cards/Carry On.md",
-    "Cards/Is real.md",
-    "Helper.md",
-    "Cards/Catch-up.md",
-    "Cards/HHMDS.md",
-    "Cards/Miss Fortune.md",
     "thumbnails/resized/3e6490424faae0a59be28ea52c792180_86cf658e.webp",
     "Cards/Artworks/Pasted image 20260126124410.png",
     "thumbnails/resized/41bbb4b01ff9da15562f6a4f980b936d_86cf658e.webp",
-    "Cards/Artworks/Pasted image 20260126124129.png",
-    "thumbnails/resized/878b78947ed8a95126ba5e853cd0f918_86cf658e.webp",
-    "Cards/Artworks/Pasted image 20260126123514.png",
-    "Cards/CLass.md",
-    "thumbnails/resized/a96c32a080ad0d2e174bf4eebf0ab833_86cf658e.webp",
-    "Cards/Artworks/Pasted image 20260126121944.png",
-    "Cards/Eggsamples.md",
-    "Cards/67.md",
     "Cards/untitled folder",
-    "Cards/Lake Competition.md",
-    "Homepage.md",
-    "Cards/Bangár Hangár.md",
-    "Cards/Choese.md",
-    "Drawing 2026-01-15 19.17.23.excalidraw.md",
     "The Board.canvas",
-    "thumbnails/resized/17a13f5ba92474ce8505ef6d8f968a9d_86cf658e.webp",
     "thumbnails/resized",
     "thumbnails",
     "Artworks",

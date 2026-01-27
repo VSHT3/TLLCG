@@ -6,10 +6,12 @@ Ability: false
 **Cursed**
 This card is [[Keywords#^banish|banished]] after it’s [[Keywords#^destroy|destroyed]]. ^cursed
 
-
 **Vulnerable**
 If this unit gets damaged during this turn, at the end of it damage self by 1 per stack. 
 One stack dissepates  per turn. ^vulnerable
+
+**Invisible**
+This unit can not be targeted manually. ^invisible
 
 **Cancerous**
 

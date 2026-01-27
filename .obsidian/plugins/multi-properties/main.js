@@ -681,6 +681,43 @@ function apply_adjustments(error) {
   }
 }
 
+// node_modules/svelte/src/internal/client/reactivity/status.js
+var STATUS_MASK = ~(DIRTY | MAYBE_DIRTY | CLEAN);
+function set_signal_status(signal, status) {
+  signal.f = signal.f & STATUS_MASK | status;
+}
+function update_derived_status(derived2) {
+  if ((derived2.f & CONNECTED) !== 0 || derived2.deps === null) {
+    set_signal_status(derived2, CLEAN);
+  } else {
+    set_signal_status(derived2, MAYBE_DIRTY);
+  }
+}
+
+// node_modules/svelte/src/internal/client/reactivity/utils.js
+function clear_marked(deps) {
+  if (deps === null) return;
+  for (const dep of deps) {
+    if ((dep.f & DERIVED) === 0 || (dep.f & WAS_MARKED) === 0) {
+      continue;
+    }
+    dep.f ^= WAS_MARKED;
+    clear_marked(
+      /** @type {Derived} */
+      dep.deps
+    );
+  }
+}
+function defer_effect(effect2, dirty_effects, maybe_dirty_effects) {
+  if ((effect2.f & DIRTY) !== 0) {
+    dirty_effects.add(effect2);
+  } else if ((effect2.f & MAYBE_DIRTY) !== 0) {
+    maybe_dirty_effects.add(effect2);
+  }
+  clear_marked(effect2.deps);
+  set_signal_status(effect2, CLEAN);
+}
+
 // node_modules/svelte/src/internal/client/reactivity/batch.js
 var batches = /* @__PURE__ */ new Set();
 var current_batch = null;
@@ -731,14 +768,14 @@ var Batch = class _Batch {
   #deferred = null;
   /**
    * Deferred effects (which run after async work has completed) that are DIRTY
-   * @type {Effect[]}
+   * @type {Set<Effect>}
    */
-  #dirty_effects = [];
+  #dirty_effects = /* @__PURE__ */ new Set();
   /**
    * Deferred effects that are MAYBE_DIRTY
-   * @type {Effect[]}
+   * @type {Set<Effect>}
    */
-  #maybe_dirty_effects = [];
+  #maybe_dirty_effects = /* @__PURE__ */ new Set();
   /**
    * A set of branches that still exist, but will be destroyed when this batch
    * is committed — we skip over these during `process`
@@ -757,28 +794,22 @@ var Batch = class _Batch {
     queued_root_effects = [];
     previous_batch = null;
     this.apply();
-    var target = {
-      parent: null,
-      effect: null,
-      effects: [],
-      render_effects: [],
-      block_effects: []
-    };
+    var effects = [];
+    var render_effects = [];
     for (const root6 of root_effects) {
-      this.#traverse_effect_tree(root6, target);
+      this.#traverse_effect_tree(root6, effects, render_effects);
     }
     if (!this.is_fork) {
       this.#resolve();
     }
     if (this.is_deferred()) {
-      this.#defer_effects(target.effects);
-      this.#defer_effects(target.render_effects);
-      this.#defer_effects(target.block_effects);
+      this.#defer_effects(render_effects);
+      this.#defer_effects(effects);
     } else {
       previous_batch = this;
       current_batch = null;
-      flush_queued_effects(target.render_effects);
-      flush_queued_effects(target.effects);
+      flush_queued_effects(render_effects);
+      flush_queued_effects(effects);
       previous_batch = null;
       this.#deferred?.resolve();
     }
@@ -788,34 +819,32 @@ var Batch = class _Batch {
    * Traverse the effect tree, executing effects or stashing
    * them for later execution as appropriate
    * @param {Effect} root
-   * @param {EffectTarget} target
+   * @param {Effect[]} effects
+   * @param {Effect[]} render_effects
    */
-  #traverse_effect_tree(root6, target) {
+  #traverse_effect_tree(root6, effects, render_effects) {
     root6.f ^= CLEAN;
     var effect2 = root6.first;
+    var pending_boundary = null;
     while (effect2 !== null) {
       var flags2 = effect2.f;
       var is_branch = (flags2 & (BRANCH_EFFECT | ROOT_EFFECT)) !== 0;
       var is_skippable_branch = is_branch && (flags2 & CLEAN) !== 0;
       var skip = is_skippable_branch || (flags2 & INERT) !== 0 || this.skipped_effects.has(effect2);
-      if ((effect2.f & BOUNDARY_EFFECT) !== 0 && effect2.b?.is_pending()) {
-        target = {
-          parent: target,
-          effect: effect2,
-          effects: [],
-          render_effects: [],
-          block_effects: []
-        };
+      if (async_mode_flag && pending_boundary === null && (flags2 & BOUNDARY_EFFECT) !== 0 && effect2.b?.is_pending) {
+        pending_boundary = effect2;
       }
       if (!skip && effect2.fn !== null) {
         if (is_branch) {
           effect2.f ^= CLEAN;
+        } else if (pending_boundary !== null && (flags2 & (EFFECT | RENDER_EFFECT | MANAGED_EFFECT)) !== 0) {
+          pending_boundary.b.defer_effect(effect2);
         } else if ((flags2 & EFFECT) !== 0) {
-          target.effects.push(effect2);
+          effects.push(effect2);
         } else if (async_mode_flag && (flags2 & (RENDER_EFFECT | MANAGED_EFFECT)) !== 0) {
-          target.render_effects.push(effect2);
+          render_effects.push(effect2);
         } else if (is_dirty(effect2)) {
-          if ((effect2.f & BLOCK_EFFECT) !== 0) target.block_effects.push(effect2);
+          if ((flags2 & BLOCK_EFFECT) !== 0) this.#dirty_effects.add(effect2);
           update_effect(effect2);
         }
         var child2 = effect2.first;
@@ -827,12 +856,8 @@ var Batch = class _Batch {
       var parent = effect2.parent;
       effect2 = effect2.next;
       while (effect2 === null && parent !== null) {
-        if (parent === target.effect) {
-          this.#defer_effects(target.effects);
-          this.#defer_effects(target.render_effects);
-          this.#defer_effects(target.block_effects);
-          target = /** @type {EffectTarget} */
-          target.parent;
+        if (parent === pending_boundary) {
+          pending_boundary = null;
         }
         effect2 = parent.next;
         parent = parent.parent;
@@ -843,27 +868,8 @@ var Batch = class _Batch {
    * @param {Effect[]} effects
    */
   #defer_effects(effects) {
-    for (const e of effects) {
-      const target = (e.f & DIRTY) !== 0 ? this.#dirty_effects : this.#maybe_dirty_effects;
-      target.push(e);
-      this.#clear_marked(e.deps);
-      set_signal_status(e, CLEAN);
-    }
-  }
-  /**
-   * @param {Value[] | null} deps
-   */
-  #clear_marked(deps) {
-    if (deps === null) return;
-    for (const dep of deps) {
-      if ((dep.f & DERIVED) === 0 || (dep.f & WAS_MARKED) === 0) {
-        continue;
-      }
-      dep.f ^= WAS_MARKED;
-      this.#clear_marked(
-        /** @type {Derived} */
-        dep.deps
-      );
+    for (var i = 0; i < effects.length; i += 1) {
+      defer_effect(effects[i], this.#dirty_effects, this.#maybe_dirty_effects);
     }
   }
   /**
@@ -873,7 +879,7 @@ var Batch = class _Batch {
    * @param {any} value
    */
   capture(source2, value) {
-    if (!this.previous.has(source2)) {
+    if (value !== UNINITIALIZED && !this.previous.has(source2)) {
       this.previous.set(source2, value);
     }
     if ((source2.f & ERROR_VALUE) === 0) {
@@ -920,13 +926,6 @@ var Batch = class _Batch {
       this.previous.clear();
       var previous_batch_values = batch_values;
       var is_earlier = true;
-      var dummy_target = {
-        parent: null,
-        effect: null,
-        effects: [],
-        render_effects: [],
-        block_effects: []
-      };
       for (const batch of batches) {
         if (batch === this) {
           is_earlier = false;
@@ -959,7 +958,7 @@ var Batch = class _Batch {
             current_batch = batch;
             batch.apply();
             for (const root6 of queued_root_effects) {
-              batch.#traverse_effect_tree(root6, dummy_target);
+              batch.#traverse_effect_tree(root6, [], []);
             }
             batch.deactivate();
           }
@@ -991,6 +990,7 @@ var Batch = class _Batch {
   }
   revive() {
     for (const e of this.#dirty_effects) {
+      this.#maybe_dirty_effects.delete(e);
       set_signal_status(e, DIRTY);
       schedule_effect(e);
     }
@@ -998,8 +998,6 @@ var Batch = class _Batch {
       set_signal_status(e, MAYBE_DIRTY);
       schedule_effect(e);
     }
-    this.#dirty_effects = [];
-    this.#maybe_dirty_effects = [];
     this.flush();
   }
   /** @param {() => void} fn */
@@ -1284,7 +1282,7 @@ function boundary(node, props, children) {
 var Boundary = class {
   /** @type {Boundary | null} */
   parent;
-  #pending = false;
+  is_pending = false;
   /** @type {TemplateNode} */
   #anchor;
   /** @type {TemplateNode | null} */
@@ -1308,6 +1306,10 @@ var Boundary = class {
   #local_pending_count = 0;
   #pending_count = 0;
   #is_creating_fallback = false;
+  /** @type {Set<Effect>} */
+  #dirty_effects = /* @__PURE__ */ new Set();
+  /** @type {Set<Effect>} */
+  #maybe_dirty_effects = /* @__PURE__ */ new Set();
   /**
    * A source containing the number of pending async deriveds/expressions.
    * Only created if `$effect.pending()` is used inside the boundary,
@@ -1336,7 +1338,7 @@ var Boundary = class {
     this.#children = children;
     this.parent = /** @type {Effect} */
     active_effect.b;
-    this.#pending = !!this.#props.pending;
+    this.is_pending = !!this.#props.pending;
     this.#effect = block(() => {
       active_effect.b = this;
       if (hydrating) {
@@ -1351,6 +1353,9 @@ var Boundary = class {
           this.#hydrate_pending_content();
         } else {
           this.#hydrate_resolved_content();
+          if (this.#pending_count === 0) {
+            this.is_pending = false;
+          }
         }
       } else {
         var anchor = this.#get_anchor();
@@ -1362,7 +1367,7 @@ var Boundary = class {
         if (this.#pending_count > 0) {
           this.#show_pending_snippet();
         } else {
-          this.#pending = false;
+          this.is_pending = false;
         }
       }
       return () => {
@@ -1379,7 +1384,6 @@ var Boundary = class {
     } catch (error) {
       this.error(error);
     }
-    this.#pending = false;
   }
   #hydrate_pending_content() {
     const pending2 = this.#props.pending;
@@ -1403,13 +1407,13 @@ var Boundary = class {
             this.#pending_effect = null;
           }
         );
-        this.#pending = false;
+        this.is_pending = false;
       }
     });
   }
   #get_anchor() {
     var anchor = this.#anchor;
-    if (this.#pending) {
+    if (this.is_pending) {
       this.#pending_anchor = create_text();
       this.#anchor.before(this.#pending_anchor);
       anchor = this.#pending_anchor;
@@ -1417,11 +1421,18 @@ var Boundary = class {
     return anchor;
   }
   /**
-   * Returns `true` if the effect exists inside a boundary whose pending snippet is shown
+   * Defer an effect inside a pending boundary until the boundary resolves
+   * @param {Effect} effect
+   */
+  defer_effect(effect2) {
+    defer_effect(effect2, this.#dirty_effects, this.#maybe_dirty_effects);
+  }
+  /**
+   * Returns `false` if the effect exists inside a boundary whose pending snippet is shown
    * @returns {boolean}
    */
-  is_pending() {
-    return this.#pending || !!this.parent && this.parent.is_pending();
+  is_rendered() {
+    return !this.is_pending && (!this.parent || this.parent.is_rendered());
   }
   has_pending_snippet() {
     return !!this.#props.pending;
@@ -1478,7 +1489,17 @@ var Boundary = class {
     }
     this.#pending_count += d;
     if (this.#pending_count === 0) {
-      this.#pending = false;
+      this.is_pending = false;
+      for (const e of this.#dirty_effects) {
+        set_signal_status(e, DIRTY);
+        schedule_effect(e);
+      }
+      for (const e of this.#maybe_dirty_effects) {
+        set_signal_status(e, MAYBE_DIRTY);
+        schedule_effect(e);
+      }
+      this.#dirty_effects.clear();
+      this.#maybe_dirty_effects.clear();
       if (this.#pending_effect) {
         pause_effect(this.#pending_effect, () => {
           this.#pending_effect = null;
@@ -1555,7 +1576,7 @@ var Boundary = class {
           this.#failed_effect = null;
         });
       }
-      this.#pending = this.has_pending_snippet();
+      this.is_pending = this.has_pending_snippet();
       this.#main_effect = this.#run(() => {
         this.#is_creating_fallback = false;
         return branch(() => this.#children(this.#anchor));
@@ -1563,7 +1584,7 @@ var Boundary = class {
       if (this.#pending_count > 0) {
         this.#show_pending_snippet();
       } else {
-        this.#pending = false;
+        this.is_pending = false;
       }
     };
     var previous_reaction = active_reaction;
@@ -1717,7 +1738,7 @@ function derived(fn) {
   return signal;
 }
 // @__NO_SIDE_EFFECTS__
-function async_derived(fn, location) {
+function async_derived(fn, label, location) {
   let parent = (
     /** @type {Effect | null} */
     active_effect
@@ -1738,6 +1759,7 @@ function async_derived(fn, location) {
     /** @type {V} */
     UNINITIALIZED
   );
+  if (dev_fallback_default) signal.label = label;
   var should_suspend = !active_reaction;
   var deferreds = /* @__PURE__ */ new Map();
   async_effect(() => {
@@ -1761,7 +1783,7 @@ function async_derived(fn, location) {
       current_batch
     );
     if (should_suspend) {
-      var blocking = !boundary2.is_pending();
+      var blocking = boundary2.is_rendered();
       boundary2.update_pending_count(1);
       batch.increment(blocking);
       deferreds.get(batch)?.reject(STALE_REACTION);
@@ -1901,10 +1923,14 @@ function execute_derived(derived2) {
 function update_derived(derived2) {
   var value = execute_derived(derived2);
   if (!derived2.equals(value)) {
-    if (!current_batch?.is_fork) {
-      derived2.v = value;
-    }
     derived2.wv = increment_write_version();
+    if (!current_batch?.is_fork || derived2.deps === null) {
+      derived2.v = value;
+      if (derived2.deps === null) {
+        set_signal_status(derived2, CLEAN);
+        return;
+      }
+    }
   }
   if (is_destroying_effect) {
     return;
@@ -1914,8 +1940,7 @@ function update_derived(derived2) {
       batch_values.set(derived2, value);
     }
   } else {
-    var status = (derived2.f & CONNECTED) === 0 ? MAYBE_DIRTY : CLEAN;
-    set_signal_status(derived2, status);
+    update_derived_status(derived2);
   }
 }
 
@@ -2016,13 +2041,14 @@ function internal_set(source2, value) {
       }
     }
     if ((source2.f & DERIVED) !== 0) {
+      const derived2 = (
+        /** @type {Derived} */
+        source2
+      );
       if ((source2.f & DIRTY) !== 0) {
-        execute_derived(
-          /** @type {Derived} */
-          source2
-        );
+        execute_derived(derived2);
       }
-      set_signal_status(source2, (source2.f & CONNECTED) !== 0 ? CLEAN : MAYBE_DIRTY);
+      update_derived_status(derived2);
     }
     source2.wv = increment_write_version();
     mark_reactions(source2, DIRTY);
@@ -2989,23 +3015,24 @@ function is_dirty(reaction) {
     reaction.f &= ~WAS_MARKED;
   }
   if ((flags2 & MAYBE_DIRTY) !== 0) {
-    var dependencies = reaction.deps;
-    if (dependencies !== null) {
-      var length = dependencies.length;
-      for (var i = 0; i < length; i++) {
-        var dependency = dependencies[i];
-        if (is_dirty(
+    var dependencies = (
+      /** @type {Value[]} */
+      reaction.deps
+    );
+    var length = dependencies.length;
+    for (var i = 0; i < length; i++) {
+      var dependency = dependencies[i];
+      if (is_dirty(
+        /** @type {Derived} */
+        dependency
+      )) {
+        update_derived(
           /** @type {Derived} */
           dependency
-        )) {
-          update_derived(
-            /** @type {Derived} */
-            dependency
-          );
-        }
-        if (dependency.wv > reaction.wv) {
-          return true;
-        }
+        );
+      }
+      if (dependency.wv > reaction.wv) {
+        return true;
       }
     }
     if ((flags2 & CONNECTED) !== 0 && // During time traveling we don't want to reset the status so that
@@ -3154,20 +3181,17 @@ function remove_reaction(signal, dependency) {
   // to be unused, when in fact it is used by the currently-updating parent. Checking `new_deps`
   // allows us to skip the expensive work of disconnecting and immediately reconnecting it
   (new_deps === null || !new_deps.includes(dependency))) {
-    set_signal_status(dependency, MAYBE_DIRTY);
-    if ((dependency.f & CONNECTED) !== 0) {
-      dependency.f ^= CONNECTED;
-      dependency.f &= ~WAS_MARKED;
-    }
-    destroy_derived_effects(
-      /** @type {Derived} **/
+    var derived2 = (
+      /** @type {Derived} */
       dependency
     );
-    remove_reactions(
-      /** @type {Derived} **/
-      dependency,
-      0
-    );
+    if ((derived2.f & CONNECTED) !== 0) {
+      derived2.f ^= CONNECTED;
+      derived2.f &= ~WAS_MARKED;
+    }
+    update_derived_status(derived2);
+    destroy_derived_effects(derived2);
+    remove_reactions(derived2, 0);
   }
 }
 function remove_reactions(signal, start_index) {
@@ -3284,15 +3308,15 @@ function get(signal) {
       }
     }
   }
-  if (is_destroying_effect) {
-    if (old_values.has(signal)) {
-      return old_values.get(signal);
-    }
-    if (is_derived) {
-      var derived2 = (
-        /** @type {Derived} */
-        signal
-      );
+  if (is_destroying_effect && old_values.has(signal)) {
+    return old_values.get(signal);
+  }
+  if (is_derived) {
+    var derived2 = (
+      /** @type {Derived} */
+      signal
+    );
+    if (is_destroying_effect) {
       var value = derived2.v;
       if ((derived2.f & CLEAN) === 0 && derived2.reactions !== null || depends_on_old_values(derived2)) {
         value = execute_derived(derived2);
@@ -3300,13 +3324,15 @@ function get(signal) {
       old_values.set(derived2, value);
       return value;
     }
-  } else if (is_derived && (!batch_values?.has(signal) || current_batch?.is_fork && !effect_tracking())) {
-    derived2 = /** @type {Derived} */
-    signal;
+    var should_connect = (derived2.f & CONNECTED) === 0 && !untracking && active_reaction !== null && (is_updating_effect || (active_reaction.f & CONNECTED) !== 0);
+    var is_new = derived2.deps === null;
     if (is_dirty(derived2)) {
+      if (should_connect) {
+        derived2.f |= CONNECTED;
+      }
       update_derived(derived2);
     }
-    if (is_updating_effect && effect_tracking() && (derived2.f & CONNECTED) === 0) {
+    if (should_connect && !is_new) {
       reconnect(derived2);
     }
   }
@@ -3320,7 +3346,7 @@ function get(signal) {
 }
 function reconnect(derived2) {
   if (derived2.deps === null) return;
-  derived2.f ^= CONNECTED;
+  derived2.f |= CONNECTED;
   for (const dep of derived2.deps) {
     (dep.reactions ??= []).push(derived2);
     if ((dep.f & DERIVED) !== 0 && (dep.f & CONNECTED) === 0) {
@@ -3355,10 +3381,6 @@ function untrack(fn) {
   } finally {
     untracking = previous_untracking;
   }
-}
-var STATUS_MASK = ~(DIRTY | MAYBE_DIRTY | CLEAN);
-function set_signal_status(signal, status) {
-  signal.f = signal.f & STATUS_MASK | status;
 }
 
 // node_modules/svelte/src/utils.js
@@ -4432,14 +4454,6 @@ function remove_input_defaults(input) {
   queue_micro_task(remove_defaults);
   add_form_reset_listener();
 }
-function set_checked(element2, checked) {
-  var attributes = get_attributes(element2);
-  if (attributes.checked === (attributes.checked = // treat null and undefined the same for the initial value
-  checked ?? void 0)) {
-    return;
-  }
-  element2.checked = checked;
-}
 function set_attribute2(element2, attribute, value, skip_warning) {
   var attributes = get_attributes(element2);
   if (hydrating) {
@@ -5417,9 +5431,9 @@ var KNOWN_BAD_CHARACTERS = [
 ];
 
 // src/AddPropForm.svelte
-var root_12 = from_html(`<button type="button" class="prop-chip"> </button>`);
+var root_12 = from_html(`<button type="button" class="suggested-prop"> </button>`);
 var root2 = from_html(`<div id="multi-properties-modal" class="modal-content"><div id="alert-container" class="alert-container hidden svelte-18exwij"><div>ERROR</div> <div id="alert-text"> </div></div> <p>Select from existing properties or create new ones:</p> <div class="suggested-props svelte-18exwij"></div> <p>Type in a property name, then value. Use the dropbox to choose what type of
-    data you wish to store.</p> <p> </p> <p>If you want to add Tags, use the name "tags".</p> <form><label><input type="checkbox"/> </label> <div class="modal-inputs-container svelte-18exwij"></div> <div class="modal-add-container svelte-18exwij"><button type="button" class="a-btn">Add</button></div> <div class="modal-button-container"><button type="submit" class="btn-submit">Submit</button></div></form></div>`);
+    data you wish to store.</p> <p> </p> <p>If you want to add Tags, use the name "tags".</p> <form><label> <select id="alter-prop-select"><option>Ignore the prop entirely.</option><option>Overwrite new value over prop.</option><option>Append new value to prop.</option></select></label> <div class="modal-inputs-container svelte-18exwij"></div> <div class="modal-add-container svelte-18exwij"><button type="button" class="a-btn">Add</button></div> <div class="modal-button-container"><button type="submit" class="btn-submit">Submit</button></div></form></div>`);
 var $$css2 = {
   hash: "svelte-18exwij",
   code: ".modal-inputs-container.svelte-18exwij {height:200px;width:100%;overflow-y:scroll;border-radius:5px;border-style:solid;display:flex;flex-direction:column;align-items:center;}.modal-add-container.svelte-18exwij {margin-top:10px;}.alert-container.svelte-18exwij {display:flex;flex-direction:column;align-items:center;justify-content:center;margin-bottom:10px;background-color:red;font-weight:bold;}.suggested-props.svelte-18exwij {overflow-y:scroll;max-height:100px;}.hidden.svelte-18exwij {display:none;}"
@@ -5427,15 +5441,14 @@ var $$css2 = {
 function AddPropForm($$anchor, $$props) {
   push($$props, true);
   append_styles($$anchor, $$css2);
-  let overwrite = prop($$props, "overwrite", 15);
+  let alterProp = prop($$props, "alterProp", 15);
   let countInputs = 0;
   let formEl = state(proxy(document.createElement("form")));
   let errorEl = state(proxy(document.createElement("div")));
   let alertText = state(".");
   let inputEls = state(proxy([]));
-  function onCheckboxChange() {
-    overwrite(!overwrite());
-    $$props.changeBool(overwrite());
+  function onDropdownChange(newSetting) {
+    $$props.changeSetting(newSetting);
   }
   onMount(() => {
     $$props.defaultProps.length > 0 ? addInputs($$props.defaultProps) : addInputs([{ type: "text", name: "", value: "" }]);
@@ -5523,7 +5536,7 @@ function AddPropForm($$anchor, $$props) {
       let propObj = {
         type: obsidianType,
         data: value,
-        overwrite: false,
+        alterProp: alterProp(),
         delimiter: $$props.delimiter
       };
       obj.set(name, propObj);
@@ -5553,11 +5566,17 @@ function AddPropForm($$anchor, $$props) {
   reset(p);
   var form = sibling(p, 4);
   var label = child(form);
-  var input_1 = child(label);
-  remove_input_defaults(input_1);
-  input_1.__change = onCheckboxChange;
-  var text_3 = sibling(input_1, 1, true);
-  text_3.nodeValue = "Overwrite existing properties";
+  var text_3 = child(label);
+  text_3.nodeValue = "How to alter props that already exist on notes. ";
+  var select = sibling(text_3);
+  select.__change = () => onDropdownChange(alterProp());
+  var option = child(select);
+  option.value = option.__value = "ignore";
+  var option_1 = sibling(option);
+  option_1.value = option_1.__value = "overwrite";
+  var option_2 = sibling(option_1);
+  option_2.value = option_2.__value = "append";
+  reset(select);
   reset(label);
   var div_4 = sibling(label, 2);
   each(div_4, 21, () => get(inputEls), (input) => input.id, ($$anchor2, input, $$index_1) => {
@@ -5602,9 +5621,9 @@ function AddPropForm($$anchor, $$props) {
     set_text(text2, get(alertText));
     set_text(text_2, `If you want to make a List property, use the Text data type and separate
     each value with a "${$$props.delimiter ?? ""}".`);
-    set_checked(input_1, overwrite());
   });
   event("submit", form, onSubmit);
+  bind_select_value(select, alterProp);
   append($$anchor, div);
   pop();
 }
@@ -5623,9 +5642,18 @@ var $$css3 = {
 function AddConfirmForm($$anchor, $$props) {
   push($$props, true);
   append_styles($$anchor, $$css3);
-  let overwrite = prop($$props, "overwrite", 3, true);
   let btnCancel = state(null);
-  let msg = user_derived(() => overwrite() ? "Any pre-existing text props will have their values overwritten." : "Any pre-existing text props will have their values be appended to.");
+  let msg = user_derived(() => createPropMsg($$props.alterProp));
+  function createPropMsg(value) {
+    switch (value) {
+      case "ignore":
+        return "Any of these text props on existing notes will not be affected.";
+      case "append":
+        return "NOTE: Any pre-existing text props will have their values be appended to.";
+      case "overwrite":
+        return "WARNING: Any pre-existing text props will have their values overwritten.";
+    }
+  }
   function onSubmit(e) {
     e.preventDefault();
     $$props.submission();
@@ -5666,10 +5694,10 @@ delegate(["click"]);
 
 // src/AddConfirmModal.ts
 var AddConfirmModal = class extends import_obsidian.Modal {
-  constructor(app, props, overwrite, submission) {
+  constructor(app, props, alterProp, submission) {
     super(app);
     this.props = props;
-    this.overwrite = overwrite;
+    this.alterProp = alterProp;
     this.submission = submission;
   }
   onSubmit() {
@@ -5685,7 +5713,7 @@ var AddConfirmModal = class extends import_obsidian.Modal {
       target: this.contentEl,
       props: {
         newProps: this.props,
-        overwrite: this.overwrite,
+        alterProp: this.alterProp,
         submission: this.onSubmit.bind(this),
         cancel: this.onCancel.bind(this)
       }
@@ -5695,13 +5723,13 @@ var AddConfirmModal = class extends import_obsidian.Modal {
 
 // src/AddPropModal.ts
 var PropModal = class extends import_obsidian2.Modal {
-  constructor(app, submission, overwrite, delimiter, defaultProps, changeBool, suggestedProps) {
+  constructor(app, submission, alterProp, delimiter, defaultProps, changeSetting, suggestedProps) {
     super(app);
     this.submission = submission;
-    this.overwrite = overwrite;
+    this.alterProp = alterProp;
     this.delimiter = delimiter;
     this.defaultProps = defaultProps;
-    this.changeBool = changeBool;
+    this.changeSetting = changeSetting;
     this.suggestedProps = suggestedProps;
   }
   //Run form submission if user clicks confirm.
@@ -5709,9 +5737,9 @@ var PropModal = class extends import_obsidian2.Modal {
     this.submission(this.props);
     this.close();
   }
-  updateBool(bool) {
-    this.overwrite = bool;
-    this.changeBool(bool);
+  updateSetting(value) {
+    this.alterProp = value;
+    this.changeSetting(value);
   }
   //Pull up confirmation form when user submits base form.
   onSubmit(props) {
@@ -5719,7 +5747,7 @@ var PropModal = class extends import_obsidian2.Modal {
     new AddConfirmModal(
       this.app,
       this.props,
-      this.overwrite,
+      this.alterProp,
       this.onConfirm.bind(this)
     ).open();
   }
@@ -5729,10 +5757,10 @@ var PropModal = class extends import_obsidian2.Modal {
       target: this.contentEl,
       props: {
         submission: this.onSubmit.bind(this),
-        overwrite: this.overwrite,
+        alterProp: this.alterProp,
         delimiter: this.delimiter,
         defaultProps: this.defaultProps,
-        changeBool: this.updateBool.bind(this),
+        changeSetting: this.updateSetting.bind(this),
         suggestedProps: this.suggestedProps
       }
     });
@@ -5749,12 +5777,11 @@ var SettingTab = class extends import_obsidian3.PluginSettingTab {
   display() {
     let { containerEl } = this;
     containerEl.empty();
-    new import_obsidian3.Setting(containerEl).setName("Overwrite existing text").setDesc(
-      "When adding a property with a name that already exists, the text will overwrite the prop's existing value.  If left disabled, the new value will be appended to the old as a List."
-    ).addToggle((toggle) => {
-      toggle.setValue(this.plugin.settings.overwrite);
-      toggle.onChange(async (value) => {
-        this.plugin.settings.overwrite = value;
+    new import_obsidian3.Setting(containerEl).setName("How to alter existing properties.").setDesc(
+      "Determine what to do when a property with the same name already exists in a file.  Note that incompatible types cannot be appended.(adding a number to a date)"
+    ).addDropdown((dropdown) => {
+      dropdown.addOption("overwrite", "Overwrite prop").addOption("append", "Append to prop").addOption("ignore", "Ignore prop").setValue(this.plugin.settings.alterProp).onChange(async (value) => {
+        this.plugin.settings.alterProp = value;
         await this.plugin.saveSettings();
       });
     });
@@ -5818,8 +5845,8 @@ function RemovePropForm($$anchor, $$props) {
   });
   let isMaxChecked = user_derived(() => get(inputs).length > 0 && get(checkCount) >= get(inputs).length);
   function onCheckboxChange(event2) {
-    let checked = event2.target.checked;
-    checked ? update(checkCount) : update(checkCount, -1);
+    const target = event2.currentTarget;
+    target.checked ? update(checkCount) : update(checkCount, -1);
   }
   function toggleAll() {
     const shouldCheckAll = !get(isMaxChecked);
@@ -5989,14 +6016,17 @@ var RemoveModal = class extends import_obsidian5.Modal {
 
 // src/frontmatter.ts
 var import_obsidian6 = require("obsidian");
-async function addProperties(fileProcessor, file, props, overwrite, propCache) {
+async function addProperties(fileProcessor, file, props, alterProp, propCache) {
   await fileProcessor(file, (frontmatter) => {
     for (const [key2, value] of props) {
+      if (alterProp === "ignore" && frontmatter[key2]) {
+        continue;
+      }
       if (key2 === "tags" && !frontmatter.hasOwnProperty("tags") && !Array.isArray(value.data)) {
         frontmatter[key2] = [value.data];
         continue;
       }
-      if (!frontmatter[key2] || overwrite) {
+      if (!frontmatter[key2] || alterProp === "overwrite") {
         frontmatter[key2] = value.data;
         continue;
       }
@@ -6009,7 +6039,6 @@ async function addProperties(fileProcessor, file, props, overwrite, propCache) {
         frontmatter[key2] = arr;
         continue;
       } else {
-        frontmatter[key2] = value.data;
         continue;
       }
     }
@@ -6044,7 +6073,7 @@ function mergeIntoArrays(...args) {
 
 // src/main.ts
 var defaultSettings = {
-  overwrite: false,
+  alterProp: "ignore",
   recursive: true,
   delimiter: ",",
   defaultPropPath: ""
@@ -6056,8 +6085,8 @@ var MultiPropPlugin2 = class extends import_obsidian7.Plugin {
   async saveSettings() {
     await this.saveData(this.settings);
   }
-  async changeOverwrite(bool) {
-    this.settings.overwrite = bool;
+  async changeAlterProp(value) {
+    this.settings.alterProp = value;
     await this.saveSettings();
   }
   _getFilesFromTabGroup(leaf) {
@@ -6247,8 +6276,9 @@ var MultiPropPlugin2 = class extends import_obsidian7.Plugin {
       })
     );
   }
-  async getPropsFromFolder(folder, names) {
-    for (let obj of folder.children) {
+  async getPropsFromFolder(iterable, names) {
+    let objs = iterable instanceof import_obsidian7.TFolder ? iterable.children : iterable;
+    for (let obj of objs) {
       if (obj instanceof import_obsidian7.TFile && obj.extension === "md") {
         names = await addPropToSet(
           this.app.fileManager.processFrontMatter.bind(this.app.fileManager),
@@ -6277,8 +6307,9 @@ var MultiPropPlugin2 = class extends import_obsidian7.Plugin {
     return [...names];
   }
   /** Iterates through all files in a folder and runs callback on each file. */
-  async searchFolders(folder, callback) {
-    for (let obj of folder.children) {
+  async searchFolders(iterable, callback) {
+    let objs = iterable instanceof import_obsidian7.TFolder ? iterable.children : iterable;
+    for (let obj of objs) {
       if (obj instanceof import_obsidian7.TFolder) {
         if (this.settings.recursive) {
           await this.searchFolders(obj, callback);
@@ -6305,31 +6336,22 @@ var MultiPropPlugin2 = class extends import_obsidian7.Plugin {
   }
   async createPropModal(iterable) {
     let iterateFunc;
-    if (iterable instanceof import_obsidian7.TFolder) {
-      const allFiles = [];
-      this.searchFolders(iterable, async (f) => allFiles.push(f));
-      iterateFunc = async (props) => {
-        await this.searchFolders(
-          iterable,
-          await this.addPropsCallback(props, allFiles.length)
-        );
-      };
-    } else {
-      iterateFunc = async (props) => this.searchFiles(
-        iterable,
-        await this.addPropsCallback(props, iterable.length)
-      );
-    }
+    const allFiles = [];
+    this.searchFolders(iterable, async (f) => allFiles.push(f));
+    iterateFunc = async (props) => this.searchFolders(
+      iterable,
+      await this.addPropsCallback(props, allFiles.length)
+    );
     let defaultProps;
     defaultProps = this.loadDefaultProps();
     const allProps = this.getAllUsedProperties();
     new PropModal(
       this.app,
       iterateFunc,
-      this.settings.overwrite,
+      this.settings.alterProp,
       this.settings.delimiter,
       defaultProps,
-      this.changeOverwrite.bind(this),
+      this.changeAlterProp.bind(this),
       allProps
     ).open();
   }
@@ -6340,25 +6362,17 @@ var MultiPropPlugin2 = class extends import_obsidian7.Plugin {
     );
   }
   /** Create modal for removing properties.
-   * Will call a different function depending on whether files or a folder is used. */
+   * Will create a different callback function depending on whether files or a folder is used. */
   async createRemoveModal(iterable) {
     let names;
     let iterateFunc;
-    if (iterable instanceof import_obsidian7.TFolder) {
-      names = await this.getPropsFromFolder(iterable, /* @__PURE__ */ new Set());
-      const allFiles = [];
-      this.searchFolders(iterable, async (f) => allFiles.push(f));
-      iterateFunc = (props) => this.searchFolders(
-        iterable,
-        this.removePropsCallback(props, allFiles.length)
-      );
-    } else {
-      names = await this.getPropsFromFiles(iterable, /* @__PURE__ */ new Set());
-      iterateFunc = (props) => this.searchFiles(
-        iterable,
-        this.removePropsCallback(props, iterable.length)
-      );
-    }
+    names = await this.getPropsFromFolder(iterable, /* @__PURE__ */ new Set());
+    const allFiles = [];
+    this.searchFolders(iterable, async (f) => allFiles.push(f));
+    iterateFunc = (props) => this.searchFolders(
+      iterable,
+      this.removePropsCallback(props, allFiles.length)
+    );
     if (names.length === 0) {
       new import_obsidian7.Notice("No properties to remove", 4e3);
       return;
@@ -6417,7 +6431,7 @@ var MultiPropPlugin2 = class extends import_obsidian7.Plugin {
         this.app.fileManager.processFrontMatter.bind(this.app.fileManager),
         file,
         props,
-        this.settings.overwrite,
+        this.settings.alterProp,
         this.app.metadataCache.getAllPropertyInfos()
       );
       count++;

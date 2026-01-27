@@ -791,3 +791,91 @@
     font-style: italic;
     color: var(--text-muted);
 }
+
+/* Input validation error states */
+.akl-input-error {
+    border-color: var(--text-error) !important;
+    box-shadow: 0 0 0 2px rgba(var(--text-error-rgb), 0.2) !important;
+}
+
+.akl-error-text {
+    color: var(--text-error) !important;
+    font-weight: 500;
+}
+
+/* Controls row (search + fold button) */
+.akl-controls-row {
+    display: flex;
+    gap: 0.75em;
+    align-items: center;
+    margin-bottom: 1em;
+}
+
+.akl-controls-row .akl-search-container {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+.akl-fold-btn-container {
+    flex-shrink: 0;
+}
+
+.akl-fold-button {
+    padding: 0.6em 1em;
+    background: var(--background-secondary);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 6px;
+    color: var(--text-normal);
+    cursor: pointer;
+    font-size: 0.9em;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+}
+
+.akl-fold-button:hover {
+    background: var(--background-modifier-hover);
+    border-color: var(--interactive-accent);
+}
+
+/* Quick Add Keyword Modal Styles */
+.akl-quick-add-modal {
+    width: 450px;
+}
+
+.akl-quick-add-modal .modal-content {
+    padding: 1em;
+}
+
+.akl-quick-add-modal .akl-modal-title {
+    margin: 0 0 1em 0;
+    padding-bottom: 0.5em;
+    border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.akl-quick-add-modal .setting-item {
+    border: none;
+    padding: 0.75em 0;
+}
+
+.akl-quick-add-modal .akl-input {
+    width: 100%;
+}
+
+/* Highlight card animation (for scroll-to feature) */
+.akl-highlight-card {
+    border-color: var(--interactive-accent) !important;
+    box-shadow: 0 0 0 2px var(--interactive-accent-hover) !important;
+}
+
+.akl-highlight-pulse {
+    animation: highlightPulse 0.5s ease-in-out 2;
+}
+
+@keyframes highlightPulse {
+    0%, 100% {
+        box-shadow: 0 0 0 2px var(--interactive-accent-hover);
+    }
+    50% {
+        box-shadow: 0 0 0 4px var(--interactive-accent-hover), 0 0 20px var(--interactive-accent);
+    }
+}

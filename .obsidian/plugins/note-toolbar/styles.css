@@ -168,6 +168,12 @@ settings:
         default: 24
         format: px
     -
+        id: cg-nt-fab-z-index
+        title: 'Z-index'
+        description: "Controls stacking order relative to other elements. Increase if the button appears behind other components, or decrease if it covers them."
+        type: variable-number
+        default: 44
+    -
         id: toolbar-fab-sizing-spacing
         title: '↳ 📐 Sizing and Spacing'
         title.uk: '↳ 📐 Розміри та інтервали'
@@ -847,11 +853,17 @@ settings:
         title.zh: '移动端顶部 Sticky 附着的偏移量（单位：rem）📱'
         description: 'See above.'
         description.uk: 'Дивіться вище.'
-        description.de: Siehe oben.
+        description.de: 'Siehe oben.'
         description.zh: '参见上面的说明。'
         type: variable-number
         default: -0.5
         format: rem
+    -
+        id: cg-nt-tbar-z-index
+        title: 'Z-index'
+        description: "Controls stacking order relative to other elements. Increase if bottom or top-positioned toolbars appear behind other components, or decrease if it covers them."
+        type: variable-number
+        default: 44
     -
         id: toolbar-sizing-spacing
         title: '↳ 📐 Sizing and Spacing'
@@ -883,6 +895,13 @@ settings:
         type: variable-number
         default: 0
         format: em
+    -
+        id: cg-nt-tbar-top-padding-x-mobile
+        title: 'Top toolbar horizontal padding on mobile (in px units) 📱'
+        description: 'Horizontal spacing around top-positioned toolbars.'
+        type: variable-number
+        default: 12
+        format: px
     -
         id: toolbar-styles
         title: '↳ 😎 Style'
@@ -1015,7 +1034,7 @@ settings:
         description.zh: '工具栏周围的间距。'
         description.uk: 'Проміжки навколо панелі.'
         type: variable-number
-        default: 24
+        default: 12
         format: px
     -
         id: toolbar-bottom-styles
@@ -1039,7 +1058,7 @@ settings:
         format: px
     -
         id: toolbar-text-tbar
-        title: 'Toolbars (text)'
+        title: 'Toolbars (floating)'
         title.zh: '工具栏（文本）'
         description: 'Styles for floating toolbars (including text toolbars)'
         description.zh: '文本工具栏的样式'
@@ -1114,6 +1133,21 @@ settings:
         format: hex
         default-light: '#'
         default-dark: '#'
+    -
+        id: toolbar-text-positioning
+        title: '↳ ↕ Positioning'
+        title.uk: '↳ ↕ Позиціонування'
+        title.de: '↳ ↕ Positionierung'
+        title.zh: '↳ ↕ 位置'
+        type: heading
+        level: 2
+        collapsed: true
+    -
+        id: cg-nt-tbar-text-z-index
+        title: 'Z-index'
+        description: "Controls stacking order relative to other elements. Increase if floating toolbars appear behind other components, or decrease if it covers them."
+        type: variable-number
+        default: 44
     -
         id: tbar-text-item-sizing-spacing
         title: '↳ 📐 Sizing and Spacing'
@@ -1271,7 +1305,7 @@ body {
     --cg-nt-tbar-bottom-border-radius: 5px;
     --cg-nt-tbar-bottom-margin-bottom-phone: var(--safe-area-inset-bottom);
     --cg-nt-tbar-bottom-padding-x-desktop: var(--size-4-8);
-    --cg-nt-tbar-bottom-padding-x-mobile: var(--size-4-6);
+    --cg-nt-tbar-bottom-padding-x-mobile: var(--size-4-3);
     --cg-nt-tbar-bottom-pos-y-desktop: 4.25em;
     --cg-nt-tbar-bottom-pos-y-mobile: 0;
     --cg-nt-tbar-text-item-font-size: var(--metadata-label-font-size);
@@ -1290,9 +1324,12 @@ body {
     --cg-nt-tbar-text-max-width-phone: calc(100vw - 32px);
     --cg-nt-tbar-text-max-width-tablet: 650px;
     --cg-nt-tbar-text-shadow: var(--shadow-s);
+    --cg-nt-tbar-text-z-index: calc(var(--layer-slides) - 1); /* above popovers + Hover Editor plugin */
+    --cg-nt-tbar-top-padding-x-mobile: var(--size-4-3);
     --cg-nt-tbar-top-padding-top-phone: var(--safe-area-inset-top);
     --cg-nt-tbar-top-sticky-pos-desktop: calc(var(--header-height) * -1);
     --cg-nt-tbar-top-sticky-pos-mobile: -0.5rem;
+    --cg-nt-tbar-z-index: calc(var(--layer-slides) - 1); /* above popovers + Hover Editor plugin */
     --cg-nt-fab-autohide-opacity: 0;
     --cg-nt-fab-bg-color: var(--raised-background);
     --cg-nt-fab-bg-color-desktop: var(--interactive-normal);
@@ -1314,6 +1351,7 @@ body {
     --cg-nt-fab-border-radius-desktop: 999px;
     --cg-nt-fab-padding: calc(var(--icon-l) / 2);
     --cg-nt-fab-padding-desktop: calc(var(--cg-nt-fab-icon-size-desktop) / 1.3);
+    --cg-nt-fab-z-index: calc(var(--layer-slides) - 1); /* above popovers + Hover Editor plugin */
     --cg-nt-item-bg-color-hover: var(--background-modifier-hover);
     --cg-nt-item-border-radius: var(--button-radius);
     --cg-nt-item-button-bg-color: var(--interactive-normal);
@@ -1365,7 +1403,6 @@ body {
      * Licensed under the MIT License; see the LICENSE file.
      */
     --ntb-anim-duration-moderate: 320ms;
-    --ntb-blur-s: blur(2px) saturate(1.5) brightness(1.05);
     &.theme-light {
         --ntb-liquid-glass-background: rgba(255, 255, 255, 0.5);
         --ntb-shadow-base: inset 1px 1px 2px rgba(255, 255, 255, 0.5), inset -1px -1px 2px rgba(255, 255, 255, 0.5), inset 0 4px 16px rgba(255, 255, 255, 0.025);
@@ -1386,8 +1423,16 @@ body {
 
 }
 
-.note-toolbar-hidden {
+.ntb-hidden {
     display: none !important;
+}
+
+.is-phone.ntb-remove-nav .mobile-navbar {
+    display: none !important;
+}
+
+body.is-phone.ntb-remove-nav {
+    --navbar-height: 0;
 }
 /*
  * Default adjustments for various themes (CSS variables)
@@ -1401,13 +1446,17 @@ body {
     &[data-ntb-csstheme="Cupertino"] {
         --cg-nt-tbar-top-sticky-pos-desktop: calc(var(--header-height) * -1 + 24px);
         --ntb-anim-duration-moderate: var(--anim-duration-moderate);
-        /* --ntb-blur-s: var(--blur-s); */
-        --ntb-liquid-glass-background: var(--liquid-glass-background);
+        --cg-nt-item-button-bg-color: var(--ntb-liquid-glass-background);
+        --cg-nt-item-border-radius: 32px;
         --ntb-shadow-base: var(--shadow-base);
         --ntb-shadow-xs: var(--shadow-xs);
     }
     &[data-ntb-csstheme="Baseline"], &[data-ntb-csstheme="Cupertino"] {        
         --cg-nt-fab-pos-x-mobile: var(--navbar-side-padding);
+        --cg-nt-fab-inactive-opacity: 0.5;
+        --cg-nt-tbar-inactive-opacity-desktop: 0.5;
+        --cg-nt-tbar-inactive-opacity-mobile: 0.5;
+        --cg-nt-tbar-bg-color: rgba(0,0,0,0);
         &.is-phone {
             --cg-nt-fab-pos-y-mobile: calc(48px + var(--navbar-bottom-padding) + 1rem);
             --cg-nt-tbar-bottom-pos-y-mobile: calc(48px + var(--navbar-bottom-padding) + 1rem);
@@ -1822,6 +1871,8 @@ body {
     &[data-callout-metadata*="mnwrp"] ul {
         .is-mobile & {
             flex-wrap: nowrap;
+            overflow-x: auto;
+            scrollbar-width: none;
         }
     }
 
@@ -1955,7 +2006,7 @@ body.is-mobile .callout[data-callout="note-toolbar"][data-callout-metadata*="mgl
         gap: var(--size-4-2);
         & a, span.external-link {
             background-color: var(--ntb-liquid-glass-background) !important;
-            backdrop-filter: var(--ntb-blur-s);
+            backdrop-filter: var(--raised-blur) !important;
             border: var(--border-width) solid var(--background-modifier-border);
             border-radius: 32px;
             box-shadow: var(--ntb-shadow-xs);
@@ -1965,6 +2016,7 @@ body.is-mobile .callout[data-callout="note-toolbar"][data-callout-metadata*="mgl
         @media (hover: hover) {
             & a:hover, span.external-link:hover {
                 box-shadow: none;
+                opacity: unset;
             }
         }
     }
@@ -2018,7 +2070,7 @@ body:not(.is-mobile):not(.is-focused), .workspace-leaf:not(.mod-active) {
     left: var(--cg-nt-fab-pos-x-desktop);
     right: unset;
     /* fix: puts toolbar above popovers + Hover Editor plugin */
-    z-index: calc(var(--layer-slides) - 1);
+    z-index: var(--cg-nt-fab-z-index);
 
     &[data-tbar-position="fabr"] {
         left: unset;
@@ -2126,7 +2178,7 @@ body button.cg-note-toolbar-fab[data-fab-metadata*="glass"],
 body.is-mobile button.cg-note-toolbar-fab[data-fab-metadata*="mgls"] {
     background-color: var(--ntb-liquid-glass-background) !important;
     background-image: unset !important;
-    backdrop-filter: var(--ntb-blur-s) !important;
+    backdrop-filter: var(--raised-blur) !important;
     border: var(--border-width) solid var(--background-modifier-border);
     box-shadow: var(--ntb-shadow-xs);
     /* fix? ghosting effect with overlays when glass style is being used; happens on desktop */
@@ -2137,6 +2189,7 @@ body.is-mobile button.cg-note-toolbar-fab[data-fab-metadata*="mgls"] {
     @media (hover: hover) {
         &:hover {
             box-shadow: none;
+            opacity: unset;
         }
     }
     .is-mobile & {
@@ -2177,8 +2230,7 @@ body.is-mobile button.cg-note-toolbar-fab[data-fab-metadata*="mgls"] {
         padding: var(--file-margins);
         padding-bottom: 0;
         padding-top: 0;
-        /* fix: puts toolbar above popovers + Hover Editor plugin */
-        z-index: calc(var(--layer-slides) - 1);
+        z-index: var(--cg-nt-tbar-z-index);
         &:hover {
             /* undoes fix (#14) which causes a layout shift on hover */
             overflow: visible !important;
@@ -2210,8 +2262,9 @@ body.is-mobile button.cg-note-toolbar-fab[data-fab-metadata*="mgls"] {
                 }
             }
             /* fix: bottom margin needs to be removed when keyboard is open on phone */
-            .is-phone.mod-toolbar-open & {
-                margin-bottom: unset;
+            .is-phone.ntb-is-keyboard-open & {
+                margin-bottom: unset !important;
+                transition: unset !important;
             }
         }
 
@@ -2228,6 +2281,12 @@ body.is-mobile button.cg-note-toolbar-fab[data-fab-metadata*="mgls"] {
         }
     }
 
+    &[data-tbar-position="top"] {
+        .is-mobile & {
+            padding-inline: var(--cg-nt-tbar-top-padding-x-mobile);
+        }
+    }
+
     &[data-tbar-position="float"], &[data-tbar-position="text"] {
         border-radius: var(--cg-nt-tbar-text-border-radius);
         box-shadow: var(--cg-nt-tbar-text-shadow);
@@ -2240,7 +2299,7 @@ body.is-mobile button.cg-note-toolbar-fab[data-fab-metadata*="mgls"] {
             max-width: var(--cg-nt-tbar-text-max-width-phone);
         }
         /* fix: puts toolbar above popovers + Hover Editor plugin */
-        z-index: calc(var(--layer-slides) - 1);
+        z-index: var(--cg-nt-tbar-text-z-index);
         & .cg-note-toolbar-callout {
             margin-bottom: 0;
             & a, span.external-link {
@@ -2276,6 +2335,27 @@ body.is-mobile button.cg-note-toolbar-fab[data-fab-metadata*="mgls"] {
             }
         }
     }
+}
+.is-phone .cg-note-toolbar-container[data-tbar-position*="bottom"] {
+    /* if toolbar doesn't wrap, container needs a constrained width so it's scrollable */
+    &:has(.cg-note-toolbar-callout[data-callout-metadata*="mnwrp"]) {
+        max-width: 100%;
+    }
+    /* reduce padding to better align with formatting toolbar */
+    .ntb-is-keyboard-open & {
+        padding-inline: 0;
+    }
+}
+/* if Navbar is completely hidden by Note Toolbar, don't shift bottom toolbars */
+.is-phone.ntb-remove-nav .cg-note-toolbar-container[data-tbar-position*="bottom"] {
+    & .cg-note-toolbar-callout {
+        margin-bottom: var(--cg-nt-tbar-bottom-margin-bottom-phone);
+    }
+}
+/* hides the FAB when a sidebar is open on phones */
+.is-phone .app-container:has(.workspace.is-left-sidedock-open) .cg-note-toolbar-container[data-tbar-position*="fab"],
+.is-phone .app-container:has(.workspace.is-right-sidedock-open) .cg-note-toolbar-container[data-tbar-position*="fab"] {
+    display: none;
 }
 /* remove spacing after props section, only if toolbar is in props position */
 .metadata-container:has(+ .cg-note-toolbar-bar-container[data-tbar-position="props"]) {
@@ -4199,15 +4279,17 @@ body[data-ntb-csstheme="Cupertino"] {
     /* Liquid Glass effect for the Cupertino theme, thanks to @aaaaalexis */
     /* Licensed under the MIT License; see the LICENSE file */
     & .callout[data-callout="note-toolbar"] {
-        background: unset !important;
+        background-color: var(--cg-nt-tbar-bg-color);
         mix-blend-mode: normal !important;
         & ul {
             gap: var(--size-4-2);
             & a, span.external-link {
-                background-color: var(--ntb-liquid-glass-background) !important;
-                backdrop-filter: var(--ntb-blur-s);
-                border: var(--border-width) solid var(--background-modifier-border);
-                border-radius: 32px;
+                background-color: var(--cg-nt-item-button-bg-color);
+                backdrop-filter: var(--raised-blur) !important;
+                border-color: var(--background-modifier-border);
+                border-radius: var(--cg-nt-item-border-radius);
+                border-style: solid;
+                border-width: var(--border-width);
                 box-shadow: var(--ntb-shadow-xs);
                 /* fix: ghosting effect with overlays when glass style is being used */
                 /* transition: var(--ntb-anim-duration-moderate); */
@@ -4222,9 +4304,11 @@ body[data-ntb-csstheme="Cupertino"] {
     /* Liquid Glass effect for the Cupertino theme, thanks to @aaaaalexis */
     /* Licensed under the MIT License; see the LICENSE file */
     & button.cg-note-toolbar-fab {
-        background-color: var(--ntb-liquid-glass-background) !important;
-        backdrop-filter: var(--ntb-blur-s) !important;
-        border: var(--border-width) solid var(--background-modifier-border);
+        background-color: var(--cg-nt-item-button-bg-color);
+        backdrop-filter: var(--raised-blur) !important;
+        border-color: var(--background-modifier-border);
+        border-radius: var(--cg-nt-item-border-radius);
+        border-style: solid;
         box-shadow: var(--ntb-shadow-xs);
         /* fix: ghosting effect with overlays when glass style is being used */
         /* transition: var(--ntb-anim-duration-moderate); */
