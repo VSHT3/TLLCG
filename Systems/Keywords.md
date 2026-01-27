@@ -61,6 +61,8 @@ Increase unit’s power by $X$, but can’t go over base health. ^boost
 **Spot Valid 67**
 If you see the number 6 adjacent to number 7, trigger the ability. ^67
 
+**Deathblow**
+Trigger the ability upon destroying a unit. ^deathblow
 # Keyword linker
 ```bash
 cd "/run/media/vsht/External SS/Citadel/Personal/TLLCG — Think Look Like Card Game/"
