@@ -16,7 +16,10 @@ Ability: true
 ---
 
 ## Ability
-Damage all units on the board by 2 or [[Keywords#^destroy|destroy]] an artifact, then gain [[Statuses#**Cursed**|Cursed]] and shuffle self into the deck.
+Pick one, then gain [[Statuses#**Cursed**|Cursed]] and shuffle self into the deck.
+1. Damage all units on the board by 2.
+2. [[Keywords#^destroy|Destroy]] an artifact.
+3. Damage a hero by 8.
 
 
 *First one was odd, but somehow it happened thrice…*
