@@ -4,37 +4,7 @@
     "type": "split",
     "children": [
       {
-        "id": "40182c28854fa0d1",
-        "type": "tabs",
-        "children": [
-          {
-            "id": "05ed8fbd81439799",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Cards/Trembling Lips.md",
-                "mode": "source",
-                "source": false,
-                "backlinks": true,
-                "backlinkOpts": {
-                  "collapseAll": false,
-                  "extraContext": false,
-                  "sortOrder": "alphabetical",
-                  "showSearch": false,
-                  "searchQuery": "",
-                  "backlinkCollapsed": false,
-                  "unlinkedCollapsed": true
-                }
-              },
-              "icon": "lucide-file",
-              "title": "Trembling Lips"
-            }
-          }
-        ]
-      },
-      {
-        "id": "c3260020c63f2f78",
+        "id": "7c9df229269be85e",
         "type": "tabs",
         "children": [
           {
@@ -44,62 +14,13 @@
               "type": "bases",
               "state": {
                 "file": "Deck Builder.base",
-                "viewName": "The Plague"
+                "viewName": "Whole"
               },
               "icon": "lucide-layout-grid",
               "title": "Deck Builder"
             }
-          },
-          {
-            "id": "022fd4ae91637c0f",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Cards/Damina.md",
-                "mode": "source",
-                "source": false,
-                "backlinks": true,
-                "backlinkOpts": {
-                  "collapseAll": false,
-                  "extraContext": false,
-                  "sortOrder": "alphabetical",
-                  "showSearch": false,
-                  "searchQuery": "",
-                  "backlinkCollapsed": false,
-                  "unlinkedCollapsed": true
-                }
-              },
-              "icon": "lucide-file",
-              "title": "Damina"
-            }
-          },
-          {
-            "id": "0cd07b3a33c36902",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Systems/Keywords.md",
-                "mode": "preview",
-                "source": false,
-                "backlinks": true,
-                "backlinkOpts": {
-                  "collapseAll": false,
-                  "extraContext": false,
-                  "sortOrder": "alphabetical",
-                  "showSearch": false,
-                  "searchQuery": "",
-                  "backlinkCollapsed": false,
-                  "unlinkedCollapsed": true
-                }
-              },
-              "icon": "lucide-file",
-              "title": "Keywords"
-            }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -154,7 +75,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "egg",
+                "query": "",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -203,10 +124,10 @@
             "state": {
               "type": "file-properties",
               "state": {
-                "file": "Cards/Damina.md"
+                "file": "Deck Builder.base"
               },
               "icon": "lucide-info",
-              "title": "File properties for Damina"
+              "title": "File properties for Deck Builder"
             }
           },
           {
@@ -278,16 +199,30 @@
       "obsidian-excalidraw-plugin:New drawing": false
     }
   },
-  "active": "022fd4ae91637c0f",
+  "active": "9fcf67e84145380c",
   "lastOpenFiles": [
-    "Cards/Trembling Lips.md",
-    "Cards/Damina.md",
+    "Cards/vysávač duší alebo dušo cucač.md",
+    "Cards/Mr. Hornier.md",
     "Deck Builder.base",
     "Systems/Keywords.md",
+    "Cards/Mr. Horny.md",
+    "Cards/Sir Plus.md",
+    "Cards/Humongusný AI Folder.md",
+    "thumbnails/resized/a6c991ab8e61fd295914002268ae1cea_86cf658e.webp",
+    "Cards/Artworks/Pasted image 20260128113219.png",
+    "Cards/Lake Competition.md",
+    "Cards/Eggsamples.md",
+    "thumbnails/resized/56c4036e2f7a1c8e113360e79132791d_86cf658e.webp",
+    "Cards/Artworks/Pasted image 20260128112426.png",
+    "Cards/Sub Cities.md",
+    "Cards/Sham BOO!.md",
+    "Cards/Som Puclovaný.md",
+    "Cards/I Will Erase You Now.md",
+    "Cards/Damina.md",
+    "Cards/Trembling Lips.md",
     "Cards/Chad GBD.md",
     "Cards/Mr. Rural.md",
     "Cards/Eggsplaining.md",
-    "Cards/Eggsamples.md",
     "Misc/Abeer Dawood Salman Deck.md",
     "Cards/Rozmýšlaš Vyzeráš Hostiteľ.md",
     "Cards/Is real.md",
@@ -298,24 +233,10 @@
     "Cards/Miss Fortune.md",
     "Cards/Hnusný Domáci Produkt.md",
     "Cards/HHMDS.md",
-    "Cards/Stastistics.md",
     "thumbnails/resized/a138a5f608d70dc53d58687a510670a4_86cf658e.webp",
     "Cards/Artworks/Pasted image 20260127204833.png",
-    "Cards/Dr. Glass Cannon Chasuble.md",
     "thumbnails/resized/76b866e52136acdfaac9896d21d1b1b0_86cf658e.webp",
     "Cards/Artworks/Pasted image 20260127204324.png",
-    "Systems/Statuses.md",
-    "Cards/Lynn & Mlynn.md",
-    "Cards/ATM star.md",
-    "Cards/Sham BOO!.md",
-    "Cards/Classical Jellyfish.md",
-    "Cards/Mr. Ruler.md",
-    "Cards/Troll Diagrams.md",
-    "Cards/Bart P.md",
-    "Cards/Artworks/troll diagram.png",
-    "thumbnails/resized/3e6490424faae0a59be28ea52c792180_86cf658e.webp",
-    "Cards/Artworks/Pasted image 20260126124410.png",
-    "thumbnails/resized/41bbb4b01ff9da15562f6a4f980b936d_86cf658e.webp",
     "Cards/untitled folder",
     "The Board.canvas",
     "thumbnails/resized",

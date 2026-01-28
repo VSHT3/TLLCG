@@ -49,8 +49,8 @@ Place the card on opponent’s board. ^spy
 **Pay $X$**
 Spend **$X$** sellary to trigger the abiliity. ^pay
 
-**Order**
-Use 1 charge to triger an ability ^order
+**Order $X$** 
+Use $X$ charges to triger an ability. If there’s no $X$,   ^order
 
 **Boost $X$**
 Increase unit’s power by $X$. ^boost
