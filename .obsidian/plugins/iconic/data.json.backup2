@@ -1,0 +1,99 @@
+{
+  "biggerIcons": "mobile",
+  "clickableIcons": "desktop",
+  "showAllFileIcons": false,
+  "showAllFolderIcons": true,
+  "minimalFolderIcons": true,
+  "showMarkdownTabIcons": true,
+  "showTitleIcons": false,
+  "showTagPillIcons": true,
+  "showMenuActions": true,
+  "showSuggestionIcons": true,
+  "showQuickSwitcherIcons": true,
+  "showMoveFileIcons": true,
+  "showItemName": "desktop",
+  "biggerSearchResults": "mobile",
+  "maxSearchResults": 50,
+  "colorPicker1": "list",
+  "colorPicker2": "rgb",
+  "uncolorHover": false,
+  "uncolorDrag": false,
+  "uncolorSelect": false,
+  "uncolorQuick": false,
+  "rememberDeletedItems": false,
+  "maxBackups": 5,
+  "dialogState": {
+    "iconMode": true,
+    "emojiMode": true,
+    "rulePage": "file"
+  },
+  "appIcons": {},
+  "tabIcons": {},
+  "fileIcons": {},
+  "bookmarkIcons": {},
+  "tagIcons": {},
+  "propertyIcons": {},
+  "ribbonIcons": {},
+  "fileRules": [
+    {
+      "id": "UTI1b",
+      "name": "artifacts",
+      "match": "all",
+      "conditions": [
+        {
+          "source": "property:Card Type",
+          "operator": "includes",
+          "value": "Artifact"
+        }
+      ],
+      "enabled": true,
+      "icon": "lucide-pyramid",
+      "color": "cyan"
+    },
+    {
+      "id": "pJJov",
+      "name": "spells",
+      "match": "all",
+      "conditions": [
+        {
+          "source": "property:Card Type",
+          "operator": "includes",
+          "value": "Spell"
+        }
+      ],
+      "enabled": true,
+      "icon": "🔥"
+    },
+    {
+      "id": "tKMvx",
+      "name": "hero",
+      "match": "all",
+      "conditions": [
+        {
+          "source": "property:Card Type",
+          "operator": "includes",
+          "value": "Hero"
+        }
+      ],
+      "enabled": true,
+      "icon": "lucide-crown",
+      "color": "red"
+    },
+    {
+      "id": "wbXsu",
+      "name": "TLLCG",
+      "match": "all",
+      "conditions": [
+        {
+          "source": "extension",
+          "operator": "is",
+          "value": "base"
+        }
+      ],
+      "enabled": true,
+      "icon": "lucide-book-open",
+      "color": "purple"
+    }
+  ],
+  "folderRules": []
+}

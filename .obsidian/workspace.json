@@ -4,20 +4,16 @@
     "type": "split",
     "children": [
       {
-        "id": "7c9df229269be85e",
+        "id": "9fbbdfc26018b9b6",
         "type": "tabs",
         "children": [
           {
-            "id": "9fcf67e84145380c",
+            "id": "2ae83521a108ec81",
             "type": "leaf",
             "state": {
-              "type": "bases",
-              "state": {
-                "file": "Deck Builder.base",
-                "viewName": "Whole"
-              },
-              "icon": "lucide-layout-grid",
-              "title": "Deck Builder"
+              "type": "beautitab-react-view",
+              "state": {},
+              "title": "New tab"
             }
           }
         ]
@@ -123,11 +119,9 @@
             "type": "leaf",
             "state": {
               "type": "file-properties",
-              "state": {
-                "file": "Deck Builder.base"
-              },
+              "state": {},
               "icon": "lucide-info",
-              "title": "File properties for Deck Builder"
+              "title": "File properties"
             }
           },
           {
@@ -199,11 +193,11 @@
       "obsidian-excalidraw-plugin:New drawing": false
     }
   },
-  "active": "9fcf67e84145380c",
+  "active": "2ae83521a108ec81",
   "lastOpenFiles": [
+    "Deck Builder.base",
     "Cards/vysávač duší alebo dušo cucač.md",
     "Cards/Mr. Hornier.md",
-    "Deck Builder.base",
     "Systems/Keywords.md",
     "Cards/Mr. Horny.md",
     "Cards/Sir Plus.md",
