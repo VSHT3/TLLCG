@@ -15,9 +15,9 @@
     "MCL Multi Column",
     "Mathematics Callouts",
     "big-math",
-    "bold and italics",
-    "class for hover preview"
+    "class for hover preview",
+    "bold and italics"
   ],
   "nativeMenus": false,
-  "showRibbon": true
+  "showRibbon": false
 }

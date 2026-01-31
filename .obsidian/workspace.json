@@ -4,11 +4,11 @@
     "type": "split",
     "children": [
       {
-        "id": "9fbbdfc26018b9b6",
+        "id": "22fc2c29b111040f",
         "type": "tabs",
         "children": [
           {
-            "id": "2ae83521a108ec81",
+            "id": "eb778fc839afa129",
             "type": "leaf",
             "state": {
               "type": "beautitab-react-view",
@@ -28,7 +28,7 @@
       {
         "id": "52376dbd15560a93",
         "type": "tabs",
-        "dimension": 44.066620402498266,
+        "dimension": 50.05417118093174,
         "children": [
           {
             "id": "998c4dd7100fc29c",
@@ -48,7 +48,7 @@
       {
         "id": "c1201116308dcf33",
         "type": "tabs",
-        "dimension": 32.75503122831367,
+        "dimension": 49.945828819068254,
         "children": [
           {
             "id": "f3e49e0f77a747cd",
@@ -84,23 +84,6 @@
           }
         ],
         "currentTab": 1
-      },
-      {
-        "id": "9540eebf05233e5b",
-        "type": "tabs",
-        "dimension": 23.178348369188065,
-        "children": [
-          {
-            "id": "5d4b4596a37496bc",
-            "type": "leaf",
-            "state": {
-              "type": "bookmarks",
-              "state": {},
-              "icon": "lucide-bookmark",
-              "title": "Bookmarks"
-            }
-          }
-        ]
       }
     ],
     "direction": "horizontal",
@@ -172,10 +155,27 @@
             }
           }
         ]
+      },
+      {
+        "id": "c60063f51809b0f8",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "5d4b4596a37496bc",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
       }
     ],
     "direction": "horizontal",
-    "width": 245.5
+    "width": 245.5,
+    "collapsed": true
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -193,21 +193,36 @@
       "obsidian-excalidraw-plugin:New drawing": false
     }
   },
-  "active": "2ae83521a108ec81",
+  "active": "eb778fc839afa129",
   "lastOpenFiles": [
-    "Deck Builder.base",
-    "Cards/vysávač duší alebo dušo cucač.md",
     "Cards/Mr. Hornier.md",
-    "Systems/Keywords.md",
     "Cards/Mr. Horny.md",
+    "Cards/Mr. Ruler.md",
+    "Cards/Sir Vival.md",
     "Cards/Sir Plus.md",
+    "Vivi delete.md",
+    "Cards/Sir Con.md",
+    "Cards/Sir Prise.md",
+    "Cards/Sir Cadian.md",
+    "Deck Builder.base",
+    "thumbnails/resized/047536cd4e2180f0c6bb946258b52fdf_86cf658e.webp",
+    "Cards/Artworks/Pasted image 20260129122837.png",
+    "thumbnails/resized/194fe0d97ac0a4743946eb9bf39dbed4_86cf658e.webp",
+    "Cards/Artworks/Pasted image 20260129110648.png",
+    "Cards/Sir Mony.md",
+    "Cards/Sir Ration.md",
+    "thumbnails/resized/12b3cd5a3ffa7fe29f720b21cbfc56da_86cf658e.webp",
+    "Cards/Artworks/Pasted image 20260129110300.png",
+    "thumbnails/resized/55ce4bfd5ef8a75c96e0117400828c94_86cf658e.webp",
+    "Cards/Artworks/Pasted image 20260129105938.png",
+    "thumbnails/resized/6c7a314ba6da3cecb79bd02c10731413_86cf658e.webp",
+    "Cards/Artworks/Pasted image 20260129105631.png",
+    "Cards/Scrolling Papers.md",
+    "Cards/vysávač duší alebo dušo cucač.md",
+    "Systems/Keywords.md",
     "Cards/Humongusný AI Folder.md",
-    "thumbnails/resized/a6c991ab8e61fd295914002268ae1cea_86cf658e.webp",
-    "Cards/Artworks/Pasted image 20260128113219.png",
     "Cards/Lake Competition.md",
     "Cards/Eggsamples.md",
-    "thumbnails/resized/56c4036e2f7a1c8e113360e79132791d_86cf658e.webp",
-    "Cards/Artworks/Pasted image 20260128112426.png",
     "Cards/Sub Cities.md",
     "Cards/Sham BOO!.md",
     "Cards/Som Puclovaný.md",
@@ -217,20 +232,6 @@
     "Cards/Chad GBD.md",
     "Cards/Mr. Rural.md",
     "Cards/Eggsplaining.md",
-    "Misc/Abeer Dawood Salman Deck.md",
-    "Cards/Rozmýšlaš Vyzeráš Hostiteľ.md",
-    "Cards/Is real.md",
-    "thumbnails/resized/a2c5369793380d7790a1981162dd88c0_86cf658e.webp",
-    "Cards/Artworks/Pasted image 20260127213035.png",
-    "Cards/Cierna Smrt.md",
-    "Cards/I'm Sandevastated.md",
-    "Cards/Miss Fortune.md",
-    "Cards/Hnusný Domáci Produkt.md",
-    "Cards/HHMDS.md",
-    "thumbnails/resized/a138a5f608d70dc53d58687a510670a4_86cf658e.webp",
-    "Cards/Artworks/Pasted image 20260127204833.png",
-    "thumbnails/resized/76b866e52136acdfaac9896d21d1b1b0_86cf658e.webp",
-    "Cards/Artworks/Pasted image 20260127204324.png",
     "Cards/untitled folder",
     "The Board.canvas",
     "thumbnails/resized",
