@@ -19,7 +19,7 @@ Ability: true
 Deploy —> Play [[Damina]] from the deck or the graveyard, if it’s already on the baord 
 Counter 3. 
 Timer 6 —> destroy self.
-At the start of your turn, if the timer is divisible by 2, apply invisible to all cards in this and opposite row. 
+At the start of your turn, if the timer is divisible by 2, apply invisible to all cards on this and opposite row. 
 
 *My lips are trembling [[Damina]]!*
 

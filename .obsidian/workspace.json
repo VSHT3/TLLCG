@@ -4,11 +4,11 @@
     "type": "split",
     "children": [
       {
-        "id": "22fc2c29b111040f",
+        "id": "9568009ff0f2f759",
         "type": "tabs",
         "children": [
           {
-            "id": "eb778fc839afa129",
+            "id": "804d3e2de6feb55d",
             "type": "leaf",
             "state": {
               "type": "beautitab-react-view",
@@ -28,7 +28,7 @@
       {
         "id": "52376dbd15560a93",
         "type": "tabs",
-        "dimension": 50.05417118093174,
+        "dimension": 50.05417118093173,
         "children": [
           {
             "id": "998c4dd7100fc29c",
@@ -48,7 +48,7 @@
       {
         "id": "c1201116308dcf33",
         "type": "tabs",
-        "dimension": 49.945828819068254,
+        "dimension": 49.94582881906827,
         "children": [
           {
             "id": "f3e49e0f77a747cd",
@@ -96,6 +96,7 @@
       {
         "id": "c7564b462c8aba91",
         "type": "tabs",
+        "dimension": 68.18181818181819,
         "children": [
           {
             "id": "589bdf39b833fc32",
@@ -159,6 +160,7 @@
       {
         "id": "c60063f51809b0f8",
         "type": "tabs",
+        "dimension": 31.81818181818182,
         "children": [
           {
             "id": "5d4b4596a37496bc",
@@ -174,8 +176,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 245.5,
-    "collapsed": true
+    "width": 245.5
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -193,45 +194,44 @@
       "obsidian-excalidraw-plugin:New drawing": false
     }
   },
-  "active": "eb778fc839afa129",
+  "active": "804d3e2de6feb55d",
   "lastOpenFiles": [
-    "Cards/Mr. Hornier.md",
-    "Cards/Mr. Horny.md",
-    "Cards/Mr. Ruler.md",
-    "Cards/Sir Vival.md",
-    "Cards/Sir Plus.md",
-    "Vivi delete.md",
-    "Cards/Sir Con.md",
-    "Cards/Sir Prise.md",
-    "Cards/Sir Cadian.md",
+    "Cards/—.md",
+    "Cards/CruiseChip.md",
+    "Cards/Economic Fury.md",
+    "Systems/Statuses.md",
     "Deck Builder.base",
+    "Cards/Damina.md",
+    "Cards/Individual Sailor.md",
+    "Cards/Discard This-Card.md",
+    "Cards/Google Balls.md",
+    "Cards/Som Puclovaný.md",
+    "Cards/Nigative.md",
+    "thumbnails/resized/95074d6f47147b0a923f1ad49a46515a_86cf658e.webp",
+    "Cards/Artworks/Pasted image 20260206134822.png",
+    "thumbnails/resized/46f7b22003b20dbd116e5bec39d269b5_86cf658e.webp",
+    "Cards/Artworks/Pasted image 20260206133753.png",
+    "thumbnails/resized/cde8b5c394a97ce23c12c6a36268148d_86cf658e.webp",
+    "Cards/Artworks/Pasted image 20260206131613.png",
+    "Cards/Mr. Horny.md",
+    "Helper.md",
+    "Cards/Mr. Ruler.md",
+    "Cards/Trembling Lips.md",
+    "Cards/Mr. Hornier.md",
+    "Cards/Inverter.md",
+    "Cards/The Wither.md",
+    "Cards/Lynn & Mlynn.md",
+    "Cards/Endest Pearl Incident.md",
+    "Cards/Is real.md",
+    "Cards/Talking to my friend.md",
+    "Systems/Keywords.md",
+    "Cards/I Will Erase You Now.md",
+    "Cards/Bart P.md",
+    "Cards/Sir Vival.md",
     "thumbnails/resized/047536cd4e2180f0c6bb946258b52fdf_86cf658e.webp",
     "Cards/Artworks/Pasted image 20260129122837.png",
     "thumbnails/resized/194fe0d97ac0a4743946eb9bf39dbed4_86cf658e.webp",
     "Cards/Artworks/Pasted image 20260129110648.png",
-    "Cards/Sir Mony.md",
-    "Cards/Sir Ration.md",
-    "thumbnails/resized/12b3cd5a3ffa7fe29f720b21cbfc56da_86cf658e.webp",
-    "Cards/Artworks/Pasted image 20260129110300.png",
-    "thumbnails/resized/55ce4bfd5ef8a75c96e0117400828c94_86cf658e.webp",
-    "Cards/Artworks/Pasted image 20260129105938.png",
-    "thumbnails/resized/6c7a314ba6da3cecb79bd02c10731413_86cf658e.webp",
-    "Cards/Artworks/Pasted image 20260129105631.png",
-    "Cards/Scrolling Papers.md",
-    "Cards/vysávač duší alebo dušo cucač.md",
-    "Systems/Keywords.md",
-    "Cards/Humongusný AI Folder.md",
-    "Cards/Lake Competition.md",
-    "Cards/Eggsamples.md",
-    "Cards/Sub Cities.md",
-    "Cards/Sham BOO!.md",
-    "Cards/Som Puclovaný.md",
-    "Cards/I Will Erase You Now.md",
-    "Cards/Damina.md",
-    "Cards/Trembling Lips.md",
-    "Cards/Chad GBD.md",
-    "Cards/Mr. Rural.md",
-    "Cards/Eggsplaining.md",
     "Cards/untitled folder",
     "The Board.canvas",
     "thumbnails/resized",

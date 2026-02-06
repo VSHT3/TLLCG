@@ -13,7 +13,7 @@ cssclasses:
 // CONFIG
 const totalDuration = 2500;          // ms for progress bar
 const barLength     = 20;            // characters
-const spinnerChars  = ["/", "-", "\\", "-"];
+const spinnerChars  = ["/", "-", "\\", "-", "6", "7"];
 const audioPath     = "coin-flip.mp3"; // vault path or URL
 
 function easeOutQuad(t) {
