@@ -50,19 +50,28 @@ Place the card on opponent’s board. ^spy
 Spend **$X$** sellary to trigger the abiliity. ^pay
 
 **Order $X$** 
-Use $X$ charges to triger an ability. If there’s no $X$,   ^order
+Use $X$ charges to triger an ability. If there’s no $X$, use 1 charge.  ^order
 
 **Boost $X$**
 Increase unit’s power by $X$. ^boost
 
 **Heal $X$**
-Increase unit’s power by $X$, but can’t go over base health. ^boost
+Increase unit’s power by $X$, but can’t go over base health. If there’s no $X$, boost fully until base health. ^boost
 
 **Spot Valid 67**
 If you see the number 6 adjacent to number 7, trigger the ability. ^67
 
 **Deathblow**
 Trigger the ability upon destroying a unit. ^deathblow
+
+**Cleanse**
+Remove all status effects. 
+
+**Permanent {status}**
+The status does not diminish, and cannot be cleansed by any means.
+
+
+
 # Keyword linker
 ```bash
 cd "/run/media/vsht/External SS/Citadel/Personal/TLLCG — Think Look Like Card Game/"
