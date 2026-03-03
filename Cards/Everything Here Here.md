@@ -1,16 +1,12 @@
 ---
+Card Rarity:
+Card Type:
+Card Power:
 tags:
   - TLLCG
   - Card
-Card Type:
-  - Spell
-Card Rarity:
-  - Rare
 Card Faction:
-  - Neutral
 Card Category:
-  - Copyright
-Card Power:
 Ability: false
 ---
 

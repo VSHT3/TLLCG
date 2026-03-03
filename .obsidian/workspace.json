@@ -4,19 +4,155 @@
     "type": "split",
     "children": [
       {
-        "id": "850b25c6b5e2a67d",
+        "id": "0c0836ed84513bb3",
         "type": "tabs",
         "children": [
           {
-            "id": "f0499141c69b53cc",
+            "id": "0c5539cd67f35d47",
             "type": "leaf",
             "state": {
-              "type": "beautitab-react-view",
-              "state": {},
-              "title": "New tab"
+              "type": "markdown",
+              "state": {
+                "file": "Stas.md",
+                "mode": "preview",
+                "source": false,
+                "backlinks": true,
+                "backlinkOpts": {
+                  "collapseAll": false,
+                  "extraContext": false,
+                  "sortOrder": "alphabetical",
+                  "showSearch": false,
+                  "searchQuery": "",
+                  "backlinkCollapsed": false,
+                  "unlinkedCollapsed": true
+                }
+              },
+              "icon": "lucide-file",
+              "title": "Stas"
+            }
+          },
+          {
+            "id": "689c8060b631be3c",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Cards/Stefko ready to sent Stefko.md",
+                "mode": "source",
+                "source": false,
+                "backlinks": true,
+                "backlinkOpts": {
+                  "collapseAll": false,
+                  "extraContext": false,
+                  "sortOrder": "alphabetical",
+                  "showSearch": false,
+                  "searchQuery": "",
+                  "backlinkCollapsed": false,
+                  "unlinkedCollapsed": true
+                }
+              },
+              "icon": "lucide-file",
+              "title": "Stefko ready to sent Stefko"
+            }
+          },
+          {
+            "id": "5c7f36a4032a53bd",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Cards/Everything Here Here.md",
+                "mode": "source",
+                "source": false,
+                "backlinks": true,
+                "backlinkOpts": {
+                  "collapseAll": false,
+                  "extraContext": false,
+                  "sortOrder": "alphabetical",
+                  "showSearch": false,
+                  "searchQuery": "",
+                  "backlinkCollapsed": false,
+                  "unlinkedCollapsed": true
+                }
+              },
+              "icon": "lucide-file",
+              "title": "Everything Here Here"
+            }
+          },
+          {
+            "id": "c4286c12efac6548",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Cards/Rozmýšlaš Vyzeráš Hostiteľ.md",
+                "mode": "preview",
+                "source": false,
+                "backlinks": true,
+                "backlinkOpts": {
+                  "collapseAll": false,
+                  "extraContext": false,
+                  "sortOrder": "alphabetical",
+                  "showSearch": false,
+                  "searchQuery": "",
+                  "backlinkCollapsed": false,
+                  "unlinkedCollapsed": true
+                }
+              },
+              "icon": "lucide-file",
+              "title": "Rozmýšlaš Vyzeráš Hostiteľ"
+            }
+          },
+          {
+            "id": "92ce7e381f0e2edd",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Cards/Copyright Infringement.md",
+                "mode": "source",
+                "source": false,
+                "backlinks": true,
+                "backlinkOpts": {
+                  "collapseAll": false,
+                  "extraContext": false,
+                  "sortOrder": "alphabetical",
+                  "showSearch": false,
+                  "searchQuery": "",
+                  "backlinkCollapsed": false,
+                  "unlinkedCollapsed": true
+                }
+              },
+              "icon": "lucide-file",
+              "title": "Copyright Infringement"
+            }
+          },
+          {
+            "id": "c21993e4b221a546",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Cards/Copyright Enforcment Unit.md",
+                "mode": "source",
+                "source": false,
+                "backlinks": true,
+                "backlinkOpts": {
+                  "collapseAll": false,
+                  "extraContext": false,
+                  "sortOrder": "alphabetical",
+                  "showSearch": false,
+                  "searchQuery": "",
+                  "backlinkCollapsed": false,
+                  "unlinkedCollapsed": true
+                }
+              },
+              "icon": "lucide-file",
+              "title": "Copyright Enforcment Unit"
             }
           }
-        ]
+        ],
+        "currentTab": 2
       }
     ],
     "direction": "vertical"
@@ -28,7 +164,7 @@
       {
         "id": "52376dbd15560a93",
         "type": "tabs",
-        "dimension": 50.05417118093173,
+        "dimension": 63.48862405200434,
         "children": [
           {
             "id": "998c4dd7100fc29c",
@@ -48,7 +184,7 @@
       {
         "id": "c1201116308dcf33",
         "type": "tabs",
-        "dimension": 49.94582881906827,
+        "dimension": 36.51137594799567,
         "children": [
           {
             "id": "f3e49e0f77a747cd",
@@ -71,7 +207,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "",
+                "query": "deal",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -87,7 +223,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 200
+    "width": 200,
+    "collapsed": true
   },
   "right": {
     "id": "e4f6f62a97dd0d19",
@@ -103,9 +240,11 @@
             "type": "leaf",
             "state": {
               "type": "file-properties",
-              "state": {},
+              "state": {
+                "file": "Cards/Everything Here Here.md"
+              },
               "icon": "lucide-info",
-              "title": "File properties"
+              "title": "File properties for Everything Here Here"
             }
           },
           {
@@ -194,47 +333,47 @@
       "obsidian-excalidraw-plugin:New drawing": false
     }
   },
-  "active": "f0499141c69b53cc",
+  "active": "5c7f36a4032a53bd",
   "lastOpenFiles": [
+    "Cards/Copyright Enforcment Unit.md",
+    "Cards/Copyright Infringement.md",
+    "Cards/Rozmýšlaš Vyzeráš Hostiteľ.md",
+    "Stas.md",
+    "Cards/Sir Render.md",
+    "Deck Builder.base",
+    "Cards/Everything Here Here.md",
+    "Cards/Stefko ready to sent Stefko.md",
+    "Misc/Card Template.md",
+    "board.md",
+    "Cards/Artworks/Pasted Image 20260303122336_325.png",
+    "Cards/Damina.md",
+    "Cards/MozgováBúrka.md",
+    "Cards/—.md",
+    "Cards/Tuleň Tím Šesť.md",
+    "thumbnails/resized/79c504d3b4416972867d063bf1f9c7e3_86cf658e.webp",
+    "Cards/HHMDS.md",
+    "Cards/Artworks/HHMDS.png",
+    "thumbnails/resized/c635da22a040b2bda1d60cf8d8e79543_86cf658e.webp",
+    "Systems/Rulebook.md",
+    "The Board.canvas",
+    "Cards/8km away.md",
+    "Cards/The Lion Does Not Care.md",
+    "Cards/Walk the Plank.md",
+    "Cards/Sham BOO!.md",
     "Systems/Keywords.md",
     "Cards/I ran.md",
     "Systems/Categories.md",
     "deleete me.md",
-    "Cards/—.md",
     "Cards/CruiseChip.md",
     "Cards/Economic Fury.md",
     "Systems/Statuses.md",
-    "Deck Builder.base",
-    "Cards/Damina.md",
-    "Cards/Individual Sailor.md",
-    "Cards/Discard This-Card.md",
-    "Cards/Google Balls.md",
-    "Cards/Som Puclovaný.md",
-    "Cards/Nigative.md",
     "thumbnails/resized/95074d6f47147b0a923f1ad49a46515a_86cf658e.webp",
     "Cards/Artworks/Pasted image 20260206134822.png",
     "thumbnails/resized/46f7b22003b20dbd116e5bec39d269b5_86cf658e.webp",
     "Cards/Artworks/Pasted image 20260206133753.png",
     "thumbnails/resized/cde8b5c394a97ce23c12c6a36268148d_86cf658e.webp",
     "Cards/Artworks/Pasted image 20260206131613.png",
-    "Cards/Mr. Horny.md",
-    "Helper.md",
-    "Cards/Mr. Ruler.md",
-    "Cards/Trembling Lips.md",
-    "Cards/Mr. Hornier.md",
-    "Cards/Inverter.md",
-    "Cards/The Wither.md",
-    "Cards/Lynn & Mlynn.md",
-    "Cards/Endest Pearl Incident.md",
-    "Cards/Is real.md",
-    "Cards/Talking to my friend.md",
-    "Cards/I Will Erase You Now.md",
-    "thumbnails/resized/047536cd4e2180f0c6bb946258b52fdf_86cf658e.webp",
-    "Cards/Artworks/Pasted image 20260129122837.png",
-    "thumbnails/resized/194fe0d97ac0a4743946eb9bf39dbed4_86cf658e.webp",
-    "Cards/Artworks/Pasted image 20260129110648.png",
     "Cards/untitled folder",
-    "The Board.canvas",
     "thumbnails/resized",
     "thumbnails",
     "Artworks",

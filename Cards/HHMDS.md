@@ -12,11 +12,11 @@ Card Faction:
 Card Category:
   - Math
 Ability: true
-feature: Cards/Artworks/Pasted image 20260126124129.png
-thumbnail: thumbnails/resized/41bbb4b01ff9da15562f6a4f980b936d_86cf658e.webp
+feature: Cards/Artworks/HHMDS.png
+thumbnail: thumbnails/resized/c635da22a040b2bda1d60cf8d8e79543_86cf658e.webp
 ---
 ## Ability
 Heal your hero by 2 and profit 2. 
 You may play 1 more card for this turn.
 
-![[Pasted image 20260126124129.png]]
+![[HHMDS.png]]

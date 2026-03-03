@@ -1,6 +1,6 @@
 {
   "command_timeout": 5,
-  "templates_folder": ".Template",
+  "templates_folder": "Misc",
   "templates_pairs": [
     [
       "",
@@ -16,7 +16,7 @@
   "folder_templates": [
     {
       "folder": "Cards",
-      "template": ".Template/Card Template.md"
+      "template": "Misc/Card Template.md"
     }
   ],
   "enable_file_templates": false,

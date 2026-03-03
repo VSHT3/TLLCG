@@ -3,15 +3,11 @@ tags:
   - TLLCG
   - Card
 Card Type:
-  - Spell
 Card Rarity:
-  - Rare
 Card Faction:
-  - Neutral
+  - The Plague
 Card Category:
-  - Copyright
-Card Power:
-Ability: false
+Card Power: 
+Ability: 
 ---
 
-## Ability

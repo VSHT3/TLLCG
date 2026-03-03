@@ -5,11 +5,15 @@ tags:
 Card Type:
   - Unit
 Card Rarity:
+  - Rare
 Card Faction:
   - A.I. Gods
 Card Category:
-Card Power: 0
+Card Power: 2
 Ability: false
 ---
 
 ## Ability
+Deploy —> Deal 1 damage to a hero, and heal 1 your hero.  
+At the end of turn —> —> Deal 1 damage to a hero, and heal 1 your hero.  
+Your Hero reaches full health --> destroy self and heal all Enemy Heroes
