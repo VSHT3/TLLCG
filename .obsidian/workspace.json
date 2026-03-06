@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Stas.md",
+                "file": "Stats.md",
                 "mode": "preview",
                 "source": false,
                 "backlinks": true,
@@ -28,16 +28,29 @@
                 }
               },
               "icon": "lucide-file",
-              "title": "Stas"
+              "title": "Stats"
             }
           },
           {
-            "id": "689c8060b631be3c",
+            "id": "882d201d24ae0360",
+            "type": "leaf",
+            "state": {
+              "type": "bases",
+              "state": {
+                "file": "Deck Builder.base",
+                "viewName": "Sir Can!"
+              },
+              "icon": "lucide-layout-grid",
+              "title": "Deck Builder"
+            }
+          },
+          {
+            "id": "15e04d96cac5da94",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Cards/Stefko ready to sent Stefko.md",
+                "file": "Cards/Sir Con.md",
                 "mode": "source",
                 "source": false,
                 "backlinks": true,
@@ -52,16 +65,16 @@
                 }
               },
               "icon": "lucide-file",
-              "title": "Stefko ready to sent Stefko"
+              "title": "Sir Con"
             }
           },
           {
-            "id": "5c7f36a4032a53bd",
+            "id": "ecde6757f22d9c09",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Cards/Everything Here Here.md",
+                "file": "Systems/Keywords.md",
                 "mode": "source",
                 "source": false,
                 "backlinks": true,
@@ -76,79 +89,7 @@
                 }
               },
               "icon": "lucide-file",
-              "title": "Everything Here Here"
-            }
-          },
-          {
-            "id": "c4286c12efac6548",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Cards/Rozmýšlaš Vyzeráš Hostiteľ.md",
-                "mode": "preview",
-                "source": false,
-                "backlinks": true,
-                "backlinkOpts": {
-                  "collapseAll": false,
-                  "extraContext": false,
-                  "sortOrder": "alphabetical",
-                  "showSearch": false,
-                  "searchQuery": "",
-                  "backlinkCollapsed": false,
-                  "unlinkedCollapsed": true
-                }
-              },
-              "icon": "lucide-file",
-              "title": "Rozmýšlaš Vyzeráš Hostiteľ"
-            }
-          },
-          {
-            "id": "92ce7e381f0e2edd",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Cards/Copyright Infringement.md",
-                "mode": "source",
-                "source": false,
-                "backlinks": true,
-                "backlinkOpts": {
-                  "collapseAll": false,
-                  "extraContext": false,
-                  "sortOrder": "alphabetical",
-                  "showSearch": false,
-                  "searchQuery": "",
-                  "backlinkCollapsed": false,
-                  "unlinkedCollapsed": true
-                }
-              },
-              "icon": "lucide-file",
-              "title": "Copyright Infringement"
-            }
-          },
-          {
-            "id": "c21993e4b221a546",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Cards/Copyright Enforcment Unit.md",
-                "mode": "source",
-                "source": false,
-                "backlinks": true,
-                "backlinkOpts": {
-                  "collapseAll": false,
-                  "extraContext": false,
-                  "sortOrder": "alphabetical",
-                  "showSearch": false,
-                  "searchQuery": "",
-                  "backlinkCollapsed": false,
-                  "unlinkedCollapsed": true
-                }
-              },
-              "icon": "lucide-file",
-              "title": "Copyright Enforcment Unit"
+              "title": "Keywords"
             }
           }
         ],
@@ -164,7 +105,7 @@
       {
         "id": "52376dbd15560a93",
         "type": "tabs",
-        "dimension": 63.48862405200434,
+        "dimension": 46.80390032502709,
         "children": [
           {
             "id": "998c4dd7100fc29c",
@@ -184,7 +125,7 @@
       {
         "id": "c1201116308dcf33",
         "type": "tabs",
-        "dimension": 36.51137594799567,
+        "dimension": 53.19609967497292,
         "children": [
           {
             "id": "f3e49e0f77a747cd",
@@ -207,10 +148,10 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "deal",
+                "query": "cleanse",
                 "matchingCase": false,
-                "explainSearch": false,
-                "collapseAll": false,
+                "explainSearch": true,
+                "collapseAll": true,
                 "extraContext": false,
                 "sortOrder": "alphabetical"
               },
@@ -223,7 +164,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 200,
+    "width": 235.5,
     "collapsed": true
   },
   "right": {
@@ -241,10 +182,10 @@
             "state": {
               "type": "file-properties",
               "state": {
-                "file": "Cards/Everything Here Here.md"
+                "file": "Cards/Sir Con.md"
               },
               "icon": "lucide-info",
-              "title": "File properties for Everything Here Here"
+              "title": "File properties for Sir Con"
             }
           },
           {
@@ -333,46 +274,45 @@
       "obsidian-excalidraw-plugin:New drawing": false
     }
   },
-  "active": "5c7f36a4032a53bd",
+  "active": "15e04d96cac5da94",
   "lastOpenFiles": [
-    "Cards/Copyright Enforcment Unit.md",
-    "Cards/Copyright Infringement.md",
-    "Cards/Rozmýšlaš Vyzeráš Hostiteľ.md",
-    "Stas.md",
-    "Cards/Sir Render.md",
+    "Systems/Keywords.md",
+    "Cards/Sir Con.md",
     "Deck Builder.base",
+    "Stats.md",
+    "Systems/Rulebook.md",
+    "Board Scetch.md",
+    "Cards/Sir Mony.md",
+    "Cards/Sir Can.md",
+    "Cards/Rag Pull.md",
+    "Cards/Sir Plus.md",
+    "Cards/Stastistics.md",
+    "Cards/Catch-up.md",
+    "Cards/CLass.md",
+    "Cards/vysávač duší alebo dušo cucač.md",
+    "Cards/Discard This-Card.md",
+    "Systems/Statuses.md",
+    "Cards/Statues.md",
+    "Cards/Sir Veillance.md",
+    "Cards/Sir Umm....md",
+    "Cards/Data Rage.md",
+    "Cards/Sir Vey.md",
     "Cards/Everything Here Here.md",
-    "Cards/Stefko ready to sent Stefko.md",
-    "Misc/Card Template.md",
-    "board.md",
+    "Helper.md",
+    "Cards/Accountant Pro Max.md",
+    "Cards/Šibal.md",
+    "Cards/Šibal so sledovaním lúčov.md",
+    "thumbnails/resized/d69eedb50dbe4c8efdadc89795005560_86cf658e.webp",
+    "Cards/Artworks/Pasted image 20260305143706.png",
+    "thumbnails/resized/9a3a55e173b4e362f8a9a0e609ec5dba_86cf658e.webp",
+    "Cards/Artworks/Pasted image 20260305143411.png",
+    "The Board.canvas",
     "Cards/Artworks/Pasted Image 20260303122336_325.png",
-    "Cards/Damina.md",
-    "Cards/MozgováBúrka.md",
-    "Cards/—.md",
-    "Cards/Tuleň Tím Šesť.md",
     "thumbnails/resized/79c504d3b4416972867d063bf1f9c7e3_86cf658e.webp",
-    "Cards/HHMDS.md",
     "Cards/Artworks/HHMDS.png",
     "thumbnails/resized/c635da22a040b2bda1d60cf8d8e79543_86cf658e.webp",
-    "Systems/Rulebook.md",
-    "The Board.canvas",
-    "Cards/8km away.md",
-    "Cards/The Lion Does Not Care.md",
-    "Cards/Walk the Plank.md",
-    "Cards/Sham BOO!.md",
-    "Systems/Keywords.md",
-    "Cards/I ran.md",
-    "Systems/Categories.md",
-    "deleete me.md",
-    "Cards/CruiseChip.md",
-    "Cards/Economic Fury.md",
-    "Systems/Statuses.md",
     "thumbnails/resized/95074d6f47147b0a923f1ad49a46515a_86cf658e.webp",
     "Cards/Artworks/Pasted image 20260206134822.png",
-    "thumbnails/resized/46f7b22003b20dbd116e5bec39d269b5_86cf658e.webp",
-    "Cards/Artworks/Pasted image 20260206133753.png",
-    "thumbnails/resized/cde8b5c394a97ce23c12c6a36268148d_86cf658e.webp",
-    "Cards/Artworks/Pasted image 20260206131613.png",
     "Cards/untitled folder",
     "thumbnails/resized",
     "thumbnails",

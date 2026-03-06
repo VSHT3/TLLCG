@@ -62,7 +62,8 @@
         }
       ],
       "enabled": true,
-      "icon": "🔥"
+      "icon": "🔥",
+      "color": "gray"
     },
     {
       "id": "tKMvx",
@@ -93,6 +94,21 @@
       "enabled": true,
       "icon": "lucide-book-open",
       "color": "purple"
+    },
+    {
+      "id": "9gBjQ",
+      "name": "unit",
+      "match": "all",
+      "conditions": [
+        {
+          "source": "property:Card Type",
+          "operator": "allContain",
+          "value": "Unit"
+        }
+      ],
+      "enabled": true,
+      "icon": "lucide-sword",
+      "color": "red"
     }
   ],
   "folderRules": []

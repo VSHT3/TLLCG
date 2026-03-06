@@ -17,7 +17,7 @@ Ability: true
 
 ## Ability
 [[Keywords#^hoard|Hoard]] 2 —> At the end of your turn, **[[Keywords#^prof|profit]]** 2.
-[[Keywords#^hoard|Hoard]]6 —> At the end of your turn, **[[Keywords#^prof|profit]]** 3 instead.
+[[Keywords#^hoard|Hoard]] 6 —> At the end of your turn, **[[Keywords#^prof|profit]]** 3 instead.
 [[Keywords#^hoard|Hoard]] 8 —> At the end of your turn, **[[Keywords#^prof|profit]]** 4 and boost self by 1 instead.
 
 ![[Pasted image 20251225011938.png]]

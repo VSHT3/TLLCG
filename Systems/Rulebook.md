@@ -1,13 +1,8 @@
 ---
 tags:
-  - TLLCG
-  - Card
 Card Type:
 Card Rarity:
 Card Faction:
-Card Category:
-Card Power: 0
-Ability: false
 ---
 # General stuff
 - if there are no units on an enemy baord, a card with “target non-hero unit” may target a hero unit
@@ -34,4 +29,7 @@ Ability: false
 4. you can discard up to as many cards as you want
 5. you can draw as many cards as you want
 6. cards with *at the end of your turn…* abilities trigger
-7. next player starts their turn
+7. statuses trigger, unless stated otherwise
+8. statuses diminish
+9. next player starts their turn
+

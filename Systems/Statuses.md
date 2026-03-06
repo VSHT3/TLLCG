@@ -31,3 +31,4 @@ One stack dissapates in 4 turns. ^drunk
 
 **Protector**
 
+**Poison**

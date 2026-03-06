@@ -67,10 +67,14 @@ Trigger the ability upon destroying a unit. ^deathblow
 **Cleanse**
 Remove all status effects. 
 
+**Discard**
+Move to graveyard. 
+
 **Permanent {status}**
 The status does not diminish, and cannot be cleansed by any means.
 
-
+**Block**
+Reduce incoming damage by 1. Statuses bypass this.
 
 # Keyword linker
 ```bash

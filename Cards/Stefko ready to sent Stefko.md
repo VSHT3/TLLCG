@@ -10,10 +10,10 @@ Card Faction:
   - A.I. Gods
 Card Category:
 Card Power: 2
-Ability: false
+Ability: true
 ---
 
 ## Ability
+Pay 3 —> destroy self. 
 Deploy —> Deal 1 damage to a hero, and heal 1 your hero.  
-At the end of turn —> —> Deal 1 damage to a hero, and heal 1 your hero.  
-Your Hero reaches full health --> destroy self and heal all Enemy Heroes
+At the end of turn —> Deal 1 damage to a hero, and heal 1 your hero. If your hero reaches full health, destroy self and heal 5 all enemy heroes. 

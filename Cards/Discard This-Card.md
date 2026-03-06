@@ -15,6 +15,6 @@ Ability: true
 ---
 
 ## Ability
-Let an opponent shuffle his hand, then manually pick a card and move it to the graveyard.
+Let an opponent shuffle their hand, then discard one of their cards..
 
 ![[Pasted image 20260104232916.png]]
