@@ -5,7 +5,9 @@ tags:
 Card Type:
   - Spell
 Card Rarity:
+  - Common
 Card Faction:
+  - Neutral
 Card Category:
 Card Power:
 Ability: true

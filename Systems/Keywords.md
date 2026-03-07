@@ -73,9 +73,11 @@ Move to graveyard.
 **Permanent {status}**
 The status does not diminish, and cannot be cleansed by any means.
 
-**Block**
-Reduce incoming damage by 1. Statuses bypass this.
+**Block $X$**
+Reduce incoming damage by $X$. Statuses bypass this.
 
+**Seize $X$**
+Deduct $X$ sellary from {specified}, then profit $X$.
 # Keyword linker
 ```bash
 cd "/run/media/vsht/External SS/Citadel/Personal/TLLCG — Think Look Like Card Game/"

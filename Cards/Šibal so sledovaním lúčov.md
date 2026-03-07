@@ -7,6 +7,7 @@ Card Type:
 Card Rarity:
   - Epic
 Card Faction:
+  - Neutral
 Card Category:
 Card Power:
 feature: Cards/Artworks/Pasted image 20260305143706.png

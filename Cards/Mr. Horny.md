@@ -10,6 +10,7 @@ tags:
   - TLLCG
   - Card
 Card Faction:
+  - Neutral
 feature: Artworks/Pasted image 20260104233004.png
 thumbnail: Personal/Miscellaneous/Attatchments/resized/534afdf8ebc9ad252a701bc35400e2b0_86cf658e.webp
 Ability: true

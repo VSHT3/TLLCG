@@ -8,6 +8,7 @@ tags:
   - TLLCG
   - Card
 Card Faction:
+  - Neutral
 Card Category:
 Ability: true
 ---

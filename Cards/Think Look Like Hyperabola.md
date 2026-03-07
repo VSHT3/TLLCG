@@ -5,7 +5,9 @@ tags:
 Card Type:
   - Artifact
 Card Rarity:
+  - Rare
 Card Faction:
+  - Neutral
 Card Category:
 Card Power:
 feature: Artworks/hyperabola2.png

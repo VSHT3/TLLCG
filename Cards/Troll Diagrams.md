@@ -17,7 +17,10 @@ Ability: true
 
 ## Ability
 Spy.
-At the end of your turn, if you gained more than 5 sellary, your opponent has profit 2.
+Counter 0.
+Each time you profit, increase counter by the profit gained. 
+
+At the end of your turn, if you counter is greater than 5, your opponent profits 2. Set counter to 0. 
 Pay 8 —> banish self.
 
 

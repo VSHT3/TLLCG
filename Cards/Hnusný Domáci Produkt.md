@@ -7,9 +7,10 @@ Card Type:
 Card Rarity:
   - Rare
 Card Faction:
+  - Neutral
 Card Category:
 Card Power:
-Ability: false
+Ability: true
 ---
 
 ## Ability

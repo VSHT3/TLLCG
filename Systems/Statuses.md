@@ -32,3 +32,8 @@ One stack dissapates in 4 turns. ^drunk
 **Protector**
 
 **Poison**
+At the end of your turn, damage self by 1. Cannot kill the unit. 
+One stack dissepates per turn.
+
+**Burn**
+At the end of your turn, damage self by 1. 

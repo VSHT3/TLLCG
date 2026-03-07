@@ -6,6 +6,7 @@
       {
         "id": "0c0836ed84513bb3",
         "type": "tabs",
+        "dimension": 74.89858012170384,
         "children": [
           {
             "id": "0c5539cd67f35d47",
@@ -32,25 +33,12 @@
             }
           },
           {
-            "id": "882d201d24ae0360",
-            "type": "leaf",
-            "state": {
-              "type": "bases",
-              "state": {
-                "file": "Deck Builder.base",
-                "viewName": "Sir Can!"
-              },
-              "icon": "lucide-layout-grid",
-              "title": "Deck Builder"
-            }
-          },
-          {
-            "id": "15e04d96cac5da94",
+            "id": "c30cb33f509f2b88",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Cards/Sir Con.md",
+                "file": "Cards/Miss Spell.md",
                 "mode": "source",
                 "source": false,
                 "backlinks": true,
@@ -65,16 +53,16 @@
                 }
               },
               "icon": "lucide-file",
-              "title": "Sir Con"
+              "title": "Miss Spell"
             }
           },
           {
-            "id": "45a3f1e2645977fc",
+            "id": "f23938aa697d5b67",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Cards/Obratnosť Rúk.md",
+                "file": "Cards/Sir Aphim.md",
                 "mode": "source",
                 "source": false,
                 "backlinks": true,
@@ -89,11 +77,19 @@
                 }
               },
               "icon": "lucide-file",
-              "title": "Obratnosť Rúk"
+              "title": "Sir Aphim"
             }
-          },
+          }
+        ],
+        "currentTab": 2
+      },
+      {
+        "id": "15486e7fb3b0997c",
+        "type": "tabs",
+        "dimension": 25.101419878296145,
+        "children": [
           {
-            "id": "ecde6757f22d9c09",
+            "id": "8fef7129b75a8820",
             "type": "leaf",
             "state": {
               "type": "markdown",
@@ -115,18 +111,8 @@
               "icon": "lucide-file",
               "title": "Keywords"
             }
-          },
-          {
-            "id": "f1bdb066d2932274",
-            "type": "leaf",
-            "state": {
-              "type": "beautitab-react-view",
-              "state": {},
-              "title": "New tab"
-            }
           }
-        ],
-        "currentTab": 5
+        ]
       }
     ],
     "direction": "vertical"
@@ -181,7 +167,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "",
+                "query": "dice",
                 "matchingCase": false,
                 "explainSearch": true,
                 "collapseAll": true,
@@ -213,9 +199,11 @@
             "type": "leaf",
             "state": {
               "type": "file-properties",
-              "state": {},
+              "state": {
+                "file": "Cards/Sir Aphim.md"
+              },
               "icon": "lucide-info",
-              "title": "File properties"
+              "title": "File properties for Sir Aphim"
             }
           },
           {
@@ -286,7 +274,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 245.5
+    "width": 223.5
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -304,46 +292,45 @@
       "obsidian-excalidraw-plugin:New drawing": false
     }
   },
-  "active": "f1bdb066d2932274",
+  "active": "f23938aa697d5b67",
   "lastOpenFiles": [
-    "Cards/Obratnosť Rúk.md",
-    "Systems/Keywords.md",
-    "Helper.md",
-    "Stats.md",
-    "Cards/Sir Con.md",
+    "Cards/Papač Hrobov.md",
+    "Cards/Miss Spell.md",
+    "Cards/Miss Fortune.md",
+    "Cards/Sir Render.md",
+    "Cards/Troll Diagrams.md",
     "Deck Builder.base",
-    "Systems/Rulebook.md",
-    "Board Scetch.md",
-    "Cards/Sir Mony.md",
-    "Cards/Sir Can.md",
-    "Cards/Rag Pull.md",
-    "Cards/Sir Plus.md",
-    "Cards/Stastistics.md",
-    "Cards/Catch-up.md",
-    "Cards/CLass.md",
-    "Cards/vysávač duší alebo dušo cucač.md",
-    "Cards/Discard This-Card.md",
+    "Stats.md",
+    "Cards/Sir Aphim.md",
+    "thumbnails/resized/0a4e3266db6d92e962b9efa27dd01030_86cf658e.webp",
+    "Cards/Artworks/Pasted image 20260307201715.png",
     "Systems/Statuses.md",
-    "Cards/Statues.md",
-    "Cards/Sir Veillance.md",
-    "Cards/Sir Umm....md",
-    "Cards/Data Rage.md",
-    "Cards/Sir Vey.md",
-    "Cards/Everything Here Here.md",
-    "Cards/Accountant Pro Max.md",
-    "Cards/Šibal.md",
+    "Cards/I'm Sandevastated.md",
+    "Cards/EX-cited.md",
+    "Cards/EGGxited.md",
+    "Cards/Egg.md",
+    "Cards/Mr. Horny.md",
+    "Cards/Think Look Like Hyperabola.md",
+    "Cards/Discard This-Card.md",
+    "Cards/nakŕmiťchrbát.md",
     "Cards/Šibal so sledovaním lúčov.md",
+    "thumbnails/resized/ba3f5593efc880da9a28d01339499bb4_86cf658e.webp",
+    "Cards/Artworks/Pasted image 20260307194348.png",
+    "Cards/Veľké Jazykové Monštrum.md",
+    "Cards/Arr... Son.md",
+    "Cards/Veľký Jazykový Model.md",
+    "Helper.md",
+    "Cards/Is real.md",
+    "Cards/Sir Umm....md",
+    "Cards/Sir Vant.md",
+    "Cards/Sir Can.md",
+    "thumbnails/resized/dc8e1aca2f8dd18143e125783b7f1d59_86cf658e.webp",
+    "Cards/Artworks/Pasted image 20260307184518.png",
     "thumbnails/resized/d69eedb50dbe4c8efdadc89795005560_86cf658e.webp",
     "Cards/Artworks/Pasted image 20260305143706.png",
     "thumbnails/resized/9a3a55e173b4e362f8a9a0e609ec5dba_86cf658e.webp",
     "Cards/Artworks/Pasted image 20260305143411.png",
     "The Board.canvas",
-    "Cards/Artworks/Pasted Image 20260303122336_325.png",
-    "thumbnails/resized/79c504d3b4416972867d063bf1f9c7e3_86cf658e.webp",
-    "Cards/Artworks/HHMDS.png",
-    "thumbnails/resized/c635da22a040b2bda1d60cf8d8e79543_86cf658e.webp",
-    "thumbnails/resized/95074d6f47147b0a923f1ad49a46515a_86cf658e.webp",
-    "Cards/Artworks/Pasted image 20260206134822.png",
     "Cards/untitled folder",
     "thumbnails/resized",
     "thumbnails",
