@@ -16,7 +16,7 @@ thumbnail: thumbnails/resized/047536cd4e2180f0c6bb946258b52fdf_86cf658e.webp
 ---
 
 ## Ability
-This card can
+This card can’t be boosted over base health.
 Block 1. 
 At the start of your turn, deal 1 damage to an enemy unit. 
 

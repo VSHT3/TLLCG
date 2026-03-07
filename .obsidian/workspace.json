@@ -69,6 +69,30 @@
             }
           },
           {
+            "id": "45a3f1e2645977fc",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Cards/Obratnosť Rúk.md",
+                "mode": "source",
+                "source": false,
+                "backlinks": true,
+                "backlinkOpts": {
+                  "collapseAll": false,
+                  "extraContext": false,
+                  "sortOrder": "alphabetical",
+                  "showSearch": false,
+                  "searchQuery": "",
+                  "backlinkCollapsed": false,
+                  "unlinkedCollapsed": true
+                }
+              },
+              "icon": "lucide-file",
+              "title": "Obratnosť Rúk"
+            }
+          },
+          {
             "id": "ecde6757f22d9c09",
             "type": "leaf",
             "state": {
@@ -91,9 +115,18 @@
               "icon": "lucide-file",
               "title": "Keywords"
             }
+          },
+          {
+            "id": "f1bdb066d2932274",
+            "type": "leaf",
+            "state": {
+              "type": "beautitab-react-view",
+              "state": {},
+              "title": "New tab"
+            }
           }
         ],
-        "currentTab": 2
+        "currentTab": 5
       }
     ],
     "direction": "vertical"
@@ -148,7 +181,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "cleanse",
+                "query": "",
                 "matchingCase": false,
                 "explainSearch": true,
                 "collapseAll": true,
@@ -164,8 +197,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 235.5,
-    "collapsed": true
+    "width": 235.5
   },
   "right": {
     "id": "e4f6f62a97dd0d19",
@@ -181,11 +213,9 @@
             "type": "leaf",
             "state": {
               "type": "file-properties",
-              "state": {
-                "file": "Cards/Sir Con.md"
-              },
+              "state": {},
               "icon": "lucide-info",
-              "title": "File properties for Sir Con"
+              "title": "File properties"
             }
           },
           {
@@ -274,12 +304,14 @@
       "obsidian-excalidraw-plugin:New drawing": false
     }
   },
-  "active": "15e04d96cac5da94",
+  "active": "f1bdb066d2932274",
   "lastOpenFiles": [
+    "Cards/Obratnosť Rúk.md",
     "Systems/Keywords.md",
+    "Helper.md",
+    "Stats.md",
     "Cards/Sir Con.md",
     "Deck Builder.base",
-    "Stats.md",
     "Systems/Rulebook.md",
     "Board Scetch.md",
     "Cards/Sir Mony.md",
@@ -298,7 +330,6 @@
     "Cards/Data Rage.md",
     "Cards/Sir Vey.md",
     "Cards/Everything Here Here.md",
-    "Helper.md",
     "Cards/Accountant Pro Max.md",
     "Cards/Šibal.md",
     "Cards/Šibal so sledovaním lúčov.md",
