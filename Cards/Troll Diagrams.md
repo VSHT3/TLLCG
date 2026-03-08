@@ -20,7 +20,7 @@ Spy.
 Counter 0.
 Each time you profit, increase counter by the profit gained. 
 
-At the end of your turn, if you counter is greater than 5, your opponent profits 2. Set counter to 0. 
+At the end of your turn, if your counter is greater than 5, your opponent profits 2. Set counter to 0. 
 Pay 8 —> banish self.
 
 

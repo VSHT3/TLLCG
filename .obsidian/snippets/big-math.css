@@ -34,3 +34,19 @@
   font-size: 3em !important;
   line-height: 1.6;
 }
+
+/* For notes with `cssclass: wide-note` */
+.wide-note .markdown-source-view,
+.wide-note .markdown-source-view .cm-content,
+.wide-note .markdown-reading-view,
+.wide-note .markdown-reading-view .markdown-preview-sizer,
+.wide-note .markdown-preview-view,
+.wide-note .markdown-preview-view .markdown-preview-sizer {
+  max-width: 100% !important;
+}
+
+/* In some themes the container uses this class */
+.wide-note .markdown-preview-sizer,
+.wide-note .cm-contentContainer {
+  max-width: 100% !important;
+}

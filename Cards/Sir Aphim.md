@@ -8,6 +8,7 @@ tags:
   - TLLCG
   - Card
 Card Faction:
+  - Sir Can
 Card Category:
 Ability: false
 feature: Cards/Artworks/Pasted image 20260307201715.png

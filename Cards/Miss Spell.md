@@ -10,7 +10,7 @@ tags:
 Card Faction:
   - Neutral
 Card Category:
-Ability: false
+Ability: true
 ---
 
 ## Ability

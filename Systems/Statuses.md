@@ -1,7 +1,6 @@
 ---
 tags:
   - TLLCG
-Ability: false
 ---
 **Cursed**
 This card is [[Keywords#^banish|banished]] after it’s [[Keywords#^destroy|destroyed]]. ^cursed
@@ -37,3 +36,7 @@ One stack dissepates per turn.
 
 **Burn**
 At the end of your turn, damage self by 1. 
+
+**Wither**
+At the end of your turn: deal 1 damage for every stack and remove all stacks 
+Can kill Unit

@@ -16,7 +16,7 @@ Ability: true
 ---
 
 ## Ability
-Charge: 1
+Charge 1
 Order —> For each A.I. Gods card under your control of the same rarity as this card or higher, profit 1, then destroy self. 
 At the end of your turn, lower the rarity of self. 
 

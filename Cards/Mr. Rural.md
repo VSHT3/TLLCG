@@ -16,7 +16,7 @@ Ability: true
 ---
 
 ## Ability
-Command —> upkeep 1 —> at the start of your turn damage a unit by the amount of eggs in your hand. 
-Pay 1 —> both players draw an egg.
+At the start of your turn, upkeep 1 —> damage a non-unit by the amount of eggs in your hand. 
+Pay 1 —> both players draw an egg. (max 3 during a turn)
 
 ![[Pasted image 20260104232716.png]]

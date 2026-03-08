@@ -16,7 +16,7 @@ Ability: true
 ---
 
 ## Ability
-Charge: 1 (max 1)
+Charge 1 (max 1)
 At the start of your turn, gain 1 charge. 
 Order —> Apply invisible to self, and vulnerable to a unit.
 Pay 1 —> Deal 1 damage to a hero, then apply invisible to self and deduct 1 charge. 

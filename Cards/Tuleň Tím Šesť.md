@@ -17,8 +17,8 @@ Ability: true
 ---
 
 ## Ability
-[[Keywords#^charge|Charge]] 5 (max 20).
-[[Keywords#^order|Order]] —> Deal 1 damage to a non-hxero unit.
+[[Keywords#^charge|Charge]] 2 (max 20).
+[[Keywords#^order|Order]] —> Deal 1 damage to a non-hero unit.
 [[Keywords#^upk|Upkeep]] 2 —> gain 3 [[Keywords#^charge|charge]]s.
 
 *Light ‘em up boys!*
