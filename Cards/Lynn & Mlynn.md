@@ -11,6 +11,8 @@ Card Faction:
   - Neutral
 Card Category:
 Ability: true
+feature: Cards/Artworks/Pasted image 20260312114424.png
+thumbnail: thumbnails/resized/dbe9a79bf3de27d35c5d4ba8b320ae9b_86cf658e.webp
 ---
 
 ## Ability
@@ -22,3 +24,5 @@ If you have 3 or more health, Mlynn is active. Otherwise, Lynn is active.
 - Lynn:  
 	- At the end of your, deal 1 damage to a unit on the opposite row. 
 	- Deathblow —> draw a card from the neutral deck.  
+
+![[Pasted image 20260312114424.png]]

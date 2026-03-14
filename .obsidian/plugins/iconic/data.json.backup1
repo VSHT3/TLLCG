@@ -30,6 +30,9 @@
   "appIcons": {},
   "tabIcons": {},
   "fileIcons": {
+    "Cards/Sir Umm....md": {
+      "color": "yellow"
+    },
     "Cards/Walk the Plank.md": {
       "color": "red"
     }

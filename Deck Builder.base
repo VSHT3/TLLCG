@@ -431,3 +431,26 @@ views:
     cardSize: 130
     imageAspectRatio: 1.5
     image: note.feature
+  - type: cards
+    name: Able but sad
+    filters:
+      and:
+        - Ability == true
+        - thumbnail.isEmpty()
+    order:
+      - file.name
+      - Card Rarity
+      - Card Type
+      - Card Power
+    sort:
+      - property: feature
+        direction: ASC
+      - property: Card Type
+        direction: DESC
+      - property: Card Category
+        direction: DESC
+      - property: Card Power
+        direction: ASC
+    cardSize: 130
+    imageAspectRatio: 1.5
+    image: note.feature

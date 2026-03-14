@@ -41,7 +41,7 @@ var import_obsidian12 = require("obsidian");
 
 // src/views/CssEditorView.ts
 var import_obsidian8 = require("obsidian");
-var import_view9 = require("@codemirror/view");
+var import_view10 = require("@codemirror/view");
 
 // node_modules/@replit/codemirror-vim/dist/index.js
 var import_state = require("@codemirror/state");
@@ -12886,6 +12886,7 @@ async function deleteSnippet(app, file) {
 }
 
 // src/components/Search.ts
+var import_view9 = require("@codemirror/view");
 var import_search3 = require("@codemirror/search");
 var import_obsidian7 = require("obsidian");
 var Search = class {
@@ -13017,10 +13018,12 @@ var Search = class {
         to: this.cursor.value.to
       };
       this.editor.dispatch({
-        effects: highlightEffect.of([
-          highlightDecoration.range(this.match.from, this.match.to)
-        ]),
-        scrollIntoView: true
+        effects: [
+          highlightEffect.of([
+            highlightDecoration.range(this.match.from, this.match.to)
+          ]),
+          import_view9.EditorView.scrollIntoView(this.match.from)
+        ]
       });
     }
     this.collectMatches();
@@ -13096,12 +13099,12 @@ var CssEditorView = class extends import_obsidian8.ItemView {
     this.requestSave = (0, import_obsidian8.debounce)(this.save.bind(this), 1e3);
     this.plugin = plugin;
     this.navigation = true;
-    this.editor = new import_view9.EditorView({
+    this.editor = new import_view10.EditorView({
       parent: this.contentEl,
       extensions: [
         basicExtensions,
         lineWrap.of(
-          this.plugin.settings.lineWrap ? import_view9.EditorView.lineWrapping : []
+          this.plugin.settings.lineWrap ? import_view10.EditorView.lineWrapping : []
         ),
         indentSize.of(
           import_language9.indentUnit.of("".padEnd(this.plugin.settings.indentSize))
@@ -13109,12 +13112,12 @@ var CssEditorView = class extends import_obsidian8.ItemView {
         historyCompartment.of((0, import_commands3.history)()),
         colorPickerPlugin,
         relativeLineNumberGutter.of(
-          (0, import_view9.lineNumbers)({
+          (0, import_view10.lineNumbers)({
             formatNumber: this.plugin.settings.relativeLineNumbers ? relativeLineNumbersFormatter : absoluteLineNumbers
           })
         ),
         ((_b = (_a = this.app.vault).getConfig) == null ? void 0 : _b.call(_a, "vimMode")) ? vim() : [],
-        import_view9.EditorView.updateListener.of((update) => {
+        import_view10.EditorView.updateListener.of((update) => {
           if (update.docChanged) {
             this.isEditorDirty = true;
             this.requestSave(update.state.doc.toString());
@@ -13716,7 +13719,7 @@ var CssSnippetCreateModal = class extends import_obsidian10.Modal {
 
 // src/settings/CssEditorSettingTab.ts
 var import_language10 = require("@codemirror/language");
-var import_view10 = require("@codemirror/view");
+var import_view11 = require("@codemirror/view");
 var import_obsidian11 = require("obsidian");
 
 // src/settings/settings.ts
@@ -13752,7 +13755,7 @@ var CSSEditorSettingTab = class extends import_obsidian11.PluginSettingTab {
           await this.plugin.saveSettings();
           updateCSSEditorView(this.app, {
             effects: lineWrap.reconfigure(
-              val ? import_view10.EditorView.lineWrapping : []
+              val ? import_view11.EditorView.lineWrapping : []
             )
           });
         });
@@ -13790,7 +13793,7 @@ var CSSEditorSettingTab = class extends import_obsidian11.PluginSettingTab {
           await this.plugin.saveSettings();
           updateCSSEditorView(this.app, {
             effects: relativeLineNumberGutter.reconfigure(
-              (0, import_view10.lineNumbers)({
+              (0, import_view11.lineNumbers)({
                 formatNumber: val ? relativeLineNumbersFormatter : absoluteLineNumbers
               })
             )

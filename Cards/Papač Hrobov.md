@@ -5,6 +5,7 @@ tags:
 Card Type:
   - Unit
 Card Rarity:
+  - Epic
 Card Faction:
   - The Plague
 Card Category:
