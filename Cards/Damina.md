@@ -17,9 +17,9 @@ Ability: true
 
 ## Ability
 Deploy —> Play [[Trembling Lips|trembling lips]] from the deck or the graveyard, if it’s already on the board, boost self by 1 instead. 
-Counter 3. 
+Counter 4. 
 At the start of your turn, decrease counter by 1. 
-Counter 0 —> order —> damage a hero by 7.
+Counter 0 —> order —> damage a hero by 5.
 
 
 

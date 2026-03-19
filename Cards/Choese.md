@@ -14,6 +14,11 @@ Ability: false
 
 
 ## Ability
+- Choose one: 
+	1. Deal 2 damage to a unit. 
+	2. Heal a unit by 2. 
+	3. Profit 2. 
 
+*The cheese of choice. Or the choice of cheese?*
 
 ![[Pasted image 20251225014016.png]]

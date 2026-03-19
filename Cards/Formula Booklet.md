@@ -17,6 +17,6 @@ Ability: false
 ## Ability
 
 
-
+*Contains all the answers. If only you knew the questions.*
 
 ![[Pasted image 20260108114723.png]]

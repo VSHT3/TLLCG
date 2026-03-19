@@ -78,6 +78,9 @@ Reduce incoming damage by $X$. Statuses bypass this.
 
 **Seize $X$**
 Deduct $X$ sellary from {specified}, then profit $X$.
+
+**Area**
+includes area, adjacent up-down, left-right, and diagonals. 
 # Keyword linker
 ```bash
 cd "/run/media/vsht/External SS/Citadel/Personal/TLLCG — Think Look Like Card Game/"

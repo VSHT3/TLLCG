@@ -13,4 +13,3 @@ type: clock
 tag:#beta
 ```
 
-“Draw” a card

@@ -5,7 +5,6 @@ tags:
 Card Type:
   - Spell
 Card Rarity:
-  - Epic
   - Legendary
 Card Faction:
   - Neutral
@@ -17,6 +16,8 @@ Ability: false
 ---
 
 ## Ability
-
+Cursed. 
+Deal 10 damage split randomly among all enemy units and the enemy hero. 
+Profit 3. 
 
 ![[Pasted image 20260108135739.png]]

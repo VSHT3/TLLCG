@@ -16,5 +16,6 @@ Ability: false
 ---
 
 ## Ability
+While The Captain is alive, all allied Pirate units gain +1 power. Order → Apply Drunk 1 to an enemy unit. If The Ship is on the board, gain Block 1.
 
 ![[Pasted image 20251222181425.png]]

@@ -4,20 +4,16 @@
     "type": "split",
     "children": [
       {
-        "id": "01982535fd69370c",
+        "id": "16a06356b2f7b83a",
         "type": "tabs",
         "children": [
           {
-            "id": "234b7bca36a1d127",
+            "id": "3e2dfc8182e5cc9e",
             "type": "leaf",
             "state": {
-              "type": "bases",
-              "state": {
-                "file": "Deck Builder.base",
-                "viewName": "Whole"
-              },
-              "icon": "lucide-layout-grid",
-              "title": "Deck Builder"
+              "type": "beautitab-react-view",
+              "state": {},
+              "title": "New tab"
             }
           }
         ]
@@ -75,7 +71,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "cleanse",
+                "query": "",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": true,
@@ -91,7 +87,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 235.5
+    "width": 235.5,
+    "collapsed": true
   },
   "right": {
     "id": "e4f6f62a97dd0d19",
@@ -107,11 +104,9 @@
             "type": "leaf",
             "state": {
               "type": "file-properties",
-              "state": {
-                "file": "Deck Builder.base"
-              },
+              "state": {},
               "icon": "lucide-info",
-              "title": "File properties for Deck Builder"
+              "title": "File properties"
             }
           },
           {
@@ -201,45 +196,45 @@
       "omnisearch:Omnisearch": false
     }
   },
-  "active": "234b7bca36a1d127",
+  "active": "3e2dfc8182e5cc9e",
   "lastOpenFiles": [
-    "Systems/Keywords.md",
+    "Cards/A Salt.md",
+    "Cards/Fúkacia Prácička.md",
+    "Cards/Kožný Kráčač.md",
     "Cards/Deadass.md",
-    "Cards/Tie Fighters.md",
-    "Cards/CLass.md",
-    "Cards/67.md",
-    "Cards/Ox-y-gene.md",
+    "Cards/Ján Bravčový.md",
+    "Systems/Keywords.md",
+    "Cards/ATM star.md",
+    "Cards/Exploding ATM star.md",
+    "Cards/The Why Axes.md",
+    "Cards/john.md",
+    "Cards/Vysávač Duší.md",
+    "Cards/Inverter.md",
+    "Cards/Sisyphus.md",
+    "Cards/Polar Bear.md",
+    "Cards/Is real.md",
+    "Cards/Dr. Glass Cannon Chasuble.md",
+    "Cards/Fun Guy.md",
+    "Cards/Formula Booklet.md",
+    "Deck Builder.base",
+    "Cards/Dumbass.md",
+    "Cards/Eggsplaining.md",
+    "Cards/MäsovýŠtít.md",
+    "Cards/Choese.md",
+    "Cards/Box and Whisker.md",
+    "Cards/Adam Ničiteľ.md",
+    "Cards/8km away.md",
+    "Cards/The Captain.md",
+    "thumbnails/resized/ccf276598056afde119b725e7ee7758c_86cf658e.webp",
+    "Cards/Artworks/Pasted image 20260317223448.png",
+    "thumbnails/resized/9824338a57ad03fc4f77052648c329ed_86cf658e.webp",
+    "Cards/Artworks/Pasted image 20260317145431.png",
+    "thumbnails/resized/939fb74f58b51bf14a8fc1383d278896_86cf658e.webp",
+    "Cards/Artworks/Pasted image 20260316132833.png",
+    "thumbnails/resized/d27ca677758a305f623c8798ca6839b3_86cf658e.webp",
     "thumbnails/resized/3c1f6310381644e2493147b3d1f14e9a_86cf658e.webp",
     "Cards/Artworks/Pasted image 20260313131342.png",
-    "Deck Builder.base",
-    "Cards/Dr. Glass Cannon Chasuble.md",
-    "Cards/Tiresome.md",
-    "Cards/Dumbass.md",
     "thumbnails/resized/b85a3506e156635ab7da96e0d0e9d5a4_86cf658e.webp",
-    "Cards/Artworks/Pasted image 20260313130913.png",
-    "Cards/Sir Ten.md",
-    "thumbnails/resized/7e18f7921a7a7d5da6eb869d1cad55c4_86cf658e.webp",
-    "Cards/Sir Tainly.md",
-    "Cards/Artworks/Pasted image 20260313124203.png",
-    "Cards/Sir Cadian.md",
-    "Cards/Sir Tificate.md",
-    "thumbnails/resized/6e059d873d741a7df6caff39ca7e81e6_86cf658e.webp",
-    "Cards/Artworks/Pasted image 20260313123326.png",
-    "Cards/Sham BOO!.md",
-    "Cards/nakŕmiťchrbát.md",
-    "Cards/Mush room.md",
-    "Cards/The Speakening.md",
-    "Cards/Vysávač Duší.md",
-    "Cards/CensorShip.md",
-    "Cards/I'm Sandevastated.md",
-    "Cards/Statues.md",
-    "Cards/Som Puclovaný.md",
-    "Cards/The Board.md",
-    "Cards/Nigative.md",
-    "Cards/Everything Here Here.md",
-    "Cards/Think Look Like Sun.md",
-    "thumbnails/resized/e9b80196e8b607bdd4419ee456980595_86cf658e.webp",
-    "Cards/Artworks/censorship.png",
     "The Board.canvas",
     "Cards/untitled folder",
     "thumbnails/resized",

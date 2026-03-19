@@ -29,7 +29,14 @@
   },
   "appIcons": {},
   "tabIcons": {},
-  "fileIcons": {},
+  "fileIcons": {
+    "Cards/Sir Umm....md": {
+      "color": "yellow"
+    },
+    "Cards/Walk the Plank.md": {
+      "color": "red"
+    }
+  },
   "bookmarkIcons": {},
   "tagIcons": {},
   "propertyIcons": {},

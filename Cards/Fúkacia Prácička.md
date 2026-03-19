@@ -14,6 +14,7 @@ Ability: true
 ---
 
 ## Ability
-All players roll `dice: d20|render`. Your score gets advantage 1. Whoever gets the highest score siezes 4 from all players. 
+Heal and cleanse a non-hero unit. 
 
 
+*Fuuuu*
