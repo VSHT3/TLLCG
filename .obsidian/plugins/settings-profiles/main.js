@@ -53,8 +53,7 @@ var require_strip_filename_increment = __commonJS({
       REGEX_SOURCE: " \\((?:(another|[0-9]+(th|st|nd|rd)) )?copy\\)|copy( [0-9]+)?|\\.\\(incomplete\\)| \\([0-9]+\\)|[- ]+"
     };
     var strip = (file, options) => {
-      if (!file)
-        return file;
+      if (!file) return file;
       if (isObject(file) && file.path) {
         return strip.file(file, options);
       }
@@ -90,26 +89,16 @@ var require_strip_filename_increment = __commonJS({
       return path.join(dirname2, stem + extname);
     };
     strip.file = (file, options = {}) => {
-      if (!isObject(file))
-        return file;
-      if (!file.path)
-        return file;
-      if (file.dirname && !file.dir)
-        file.dir = file.dirname;
-      if (file.basename && !file.base)
-        file.base = file.basename;
-      if (file.extname && !file.ext)
-        file.ext = file.extname;
-      if (file.stem && !file.name)
-        file.name = file.stem;
-      if (file.dir === void 0)
-        file.dir = path.dirname(file.path);
-      if (file.ext === void 0)
-        file.ext = path.extname(file.path);
-      if (file.base === void 0)
-        file.base = path.basename(file.path);
-      if (file.name === void 0)
-        file.name = path.basename(file.path, file.ext);
+      if (!isObject(file)) return file;
+      if (!file.path) return file;
+      if (file.dirname && !file.dir) file.dir = file.dirname;
+      if (file.basename && !file.base) file.base = file.basename;
+      if (file.extname && !file.ext) file.ext = file.extname;
+      if (file.stem && !file.name) file.name = file.stem;
+      if (file.dir === void 0) file.dir = path.dirname(file.path);
+      if (file.ext === void 0) file.ext = path.extname(file.path);
+      if (file.base === void 0) file.base = path.basename(file.path);
+      if (file.name === void 0) file.name = path.basename(file.path, file.ext);
       file.name = strip.increment(file.name, options);
       file.dir = strip.increment(file.dir, options);
       file.base = file.name + file.ext;
@@ -139,22 +128,17 @@ var require_add_filename_increment = __commonJS({
     };
     var format = {
       darwin(stem, n) {
-        if (n === 1)
-          return `${stem} copy`;
-        if (n > 1)
-          return `${stem} copy ${n}`;
+        if (n === 1) return `${stem} copy`;
+        if (n > 1) return `${stem} copy ${n}`;
         return stem;
       },
       default: (stem, n) => n > 1 ? `${stem} (${n})` : stem,
       win32: (stem, n) => n > 1 ? `${stem} (${n})` : stem,
       windows: (stem, n) => format.win32(stem, n),
       linux(stem, n) {
-        if (n === 0)
-          return stem;
-        if (n === 1)
-          return `${stem} (copy)`;
-        if (n === 2)
-          return `${stem} (another copy)`;
+        if (n === 0) return stem;
+        if (n === 1) return `${stem} (copy)`;
+        if (n === 2) return `${stem} (another copy)`;
         return `${stem} (${toOrdinal(n)} copy)`;
       }
     };
@@ -176,14 +160,10 @@ var require_add_filename_increment = __commonJS({
         file = path.parse(file.path);
         file.path = temp;
       }
-      if (file.dirname && !file.dir)
-        file.dir = file.dirname;
-      if (file.basename && !file.base)
-        file.base = file.basename;
-      if (file.extname && !file.ext)
-        file.ext = file.extname;
-      if (file.stem && !file.name)
-        file.name = file.stem;
+      if (file.dirname && !file.dir) file.dir = file.dirname;
+      if (file.basename && !file.base) file.base = file.basename;
+      if (file.extname && !file.ext) file.ext = file.extname;
+      if (file.stem && !file.name) file.name = file.stem;
       let { start = 1, platform = process.platform } = options;
       let fn = options.increment || format[platform] || format.default;
       if (start === 1 && (platform === "win32" || platform === "windows")) {
@@ -270,13 +250,11 @@ var require_write = __commonJS({
       return fs.createWriteStream(destpath, opts);
     };
     var incrementName = (destpath, options = {}) => {
-      if (options.increment === true)
-        options.increment = void 0;
+      if (options.increment === true) options.increment = void 0;
       return increment(destpath, options);
     };
     var ensureNewline = (data, options) => {
-      if (!options || options.newline !== true)
-        return data;
+      if (!options || options.newline !== true) return data;
       if (typeof data !== "string" && !isBuffer(data)) {
         return data;
       }
@@ -544,10 +522,8 @@ var require_utils = __commonJS({
     };
     exports.escapeLast = (input, char, lastIdx) => {
       const idx = input.lastIndexOf(char, lastIdx);
-      if (idx === -1)
-        return input;
-      if (input[idx - 1] === "\\")
-        return exports.escapeLast(input, char, idx - 1);
+      if (idx === -1) return input;
+      if (input[idx - 1] === "\\") return exports.escapeLast(input, char, idx - 1);
       return `${input.slice(0, idx)}\\${input.slice(idx)}`;
     };
     exports.removePrefix = (input, state = {}) => {
@@ -706,8 +682,7 @@ var require_scan = __commonJS({
           slashes.push(index);
           tokens.push(token);
           token = { value: "", depth: 0, isGlob: false };
-          if (finished === true)
-            continue;
+          if (finished === true) continue;
           if (prev === CHAR_DOT && index === start + 1) {
             start += 2;
             continue;
@@ -743,8 +718,7 @@ var require_scan = __commonJS({
           }
         }
         if (code === CHAR_ASTERISK) {
-          if (prev === CHAR_ASTERISK)
-            isGlobstar = token.isGlobstar = true;
+          if (prev === CHAR_ASTERISK) isGlobstar = token.isGlobstar = true;
           isGlob = token.isGlob = true;
           finished = true;
           if (scanToEnd === true) {
@@ -837,8 +811,7 @@ var require_scan = __commonJS({
         }
       }
       if (opts.unescape === true) {
-        if (glob)
-          glob = utils.removeBackslashes(glob);
+        if (glob) glob = utils.removeBackslashes(glob);
         if (base && backslashes === true) {
           base = utils.removeBackslashes(base);
         }
@@ -1048,8 +1021,7 @@ var require_parse = __commonJS({
         if (extglobs.length && tok.type !== "paren") {
           extglobs[extglobs.length - 1].inner += tok.value;
         }
-        if (tok.value || tok.output)
-          append(tok);
+        if (tok.value || tok.output) append(tok);
         if (prev && prev.type === "text" && tok.type === "text") {
           prev.value += tok.value;
           prev.output = (prev.output || "") + tok.value;
@@ -1364,8 +1336,7 @@ var require_parse = __commonJS({
         }
         if (value === ".") {
           if (state.braces > 0 && prev.type === "dot") {
-            if (prev.value === ".")
-              prev.output = DOT_LITERAL;
+            if (prev.value === ".") prev.output = DOT_LITERAL;
             const brace = braces[braces.length - 1];
             prev.type = "dots";
             prev.output += value;
@@ -1580,20 +1551,17 @@ var require_parse = __commonJS({
         push(token);
       }
       while (state.brackets > 0) {
-        if (opts.strictBrackets === true)
-          throw new SyntaxError(syntaxError("closing", "]"));
+        if (opts.strictBrackets === true) throw new SyntaxError(syntaxError("closing", "]"));
         state.output = utils.escapeLast(state.output, "[");
         decrement("brackets");
       }
       while (state.parens > 0) {
-        if (opts.strictBrackets === true)
-          throw new SyntaxError(syntaxError("closing", ")"));
+        if (opts.strictBrackets === true) throw new SyntaxError(syntaxError("closing", ")"));
         state.output = utils.escapeLast(state.output, "(");
         decrement("parens");
       }
       while (state.braces > 0) {
-        if (opts.strictBrackets === true)
-          throw new SyntaxError(syntaxError("closing", "}"));
+        if (opts.strictBrackets === true) throw new SyntaxError(syntaxError("closing", "}"));
         state.output = utils.escapeLast(state.output, "{");
         decrement("braces");
       }
@@ -1640,8 +1608,7 @@ var require_parse = __commonJS({
         star = `(${star})`;
       }
       const globstar = (opts2) => {
-        if (opts2.noglobstar === true)
-          return star;
+        if (opts2.noglobstar === true) return star;
         return `(${capture}(?:(?!${START_ANCHOR}${opts2.dot ? DOTS_SLASH : DOT_LITERAL}).)*?)`;
       };
       const create = (str) => {
@@ -1664,11 +1631,9 @@ var require_parse = __commonJS({
             return `(?:${nodot}${globstar(opts)}${SLASH_LITERAL})?${DOT_LITERAL}${ONE_CHAR}${star}`;
           default: {
             const match = /^(.*?)\.(\w+)$/.exec(str);
-            if (!match)
-              return;
+            if (!match) return;
             const source2 = create(match[1]);
-            if (!source2)
-              return;
+            if (!source2) return;
             return source2 + DOT_LITERAL + match[2];
           }
         }
@@ -1700,8 +1665,7 @@ var require_picomatch = __commonJS({
         const arrayMatcher = (str) => {
           for (const isMatch of fns) {
             const state2 = isMatch(str);
-            if (state2)
-              return state2;
+            if (state2) return state2;
           }
           return false;
         };
@@ -1778,8 +1742,7 @@ var require_picomatch = __commonJS({
     };
     picomatch.isMatch = (str, patterns, options) => picomatch(patterns, options)(str);
     picomatch.parse = (pattern, options) => {
-      if (Array.isArray(pattern))
-        return pattern.map((p) => picomatch.parse(p, options));
+      if (Array.isArray(pattern)) return pattern.map((p) => picomatch.parse(p, options));
       return parse2(pattern, { ...options, fastpaths: false });
     };
     picomatch.scan = (input, options) => scan(input, options);
@@ -1818,8 +1781,7 @@ var require_picomatch = __commonJS({
         const opts = options || {};
         return new RegExp(source, opts.flags || (opts.nocase ? "i" : ""));
       } catch (err) {
-        if (options && options.debug === true)
-          throw err;
+        if (options && options.debug === true) throw err;
         return /$^/;
       }
     };
@@ -2131,9 +2093,9 @@ var require_parser = __commonJS({
         }, peg$c72 = ":", peg$c73 = { type: "literal", value: ":", description: '":"' }, peg$c74 = function(time) {
           return time.join("");
         }, peg$c75 = "T", peg$c76 = { type: "literal", value: "T", description: '"T"' }, peg$c77 = "Z", peg$c78 = { type: "literal", value: "Z", description: '"Z"' }, peg$c79 = function(date, time) {
-          return node("Date", new Date(date + "T" + time + "Z"), line, column);
+          return node("Date", /* @__PURE__ */ new Date(date + "T" + time + "Z"), line, column);
         }, peg$c80 = function(date, time) {
-          return node("Date", new Date(date + "T" + time), line, column);
+          return node("Date", /* @__PURE__ */ new Date(date + "T" + time), line, column);
         }, peg$c81 = /^[ \t]/, peg$c82 = { type: "class", value: "[ \\t]", description: "[ \\t]" }, peg$c83 = "\n", peg$c84 = { type: "literal", value: "\n", description: '"\\n"' }, peg$c85 = "\r", peg$c86 = { type: "literal", value: "\r", description: '"\\r"' }, peg$c87 = /^[0-9a-f]/i, peg$c88 = { type: "class", value: "[0-9a-f]i", description: "[0-9a-f]i" }, peg$c89 = /^[0-9]/, peg$c90 = { type: "class", value: "[0-9]", description: "[0-9]" }, peg$c91 = "_", peg$c92 = { type: "literal", value: "_", description: '"_"' }, peg$c93 = function() {
           return "";
         }, peg$c94 = /^[A-Za-z0-9_\-]/, peg$c95 = { type: "class", value: "[A-Za-z0-9_\\-]", description: "[A-Za-z0-9_\\-]" }, peg$c96 = function(d) {
@@ -5554,8 +5516,7 @@ var require_parser = __commonJS({
         }
         function node(type, value, line2, column2, key) {
           var obj = { type, value, line: line2(), column: column2() };
-          if (key)
-            obj.key = key;
+          if (key) obj.key = key;
           return obj;
         }
         function convertCodePoint(str, line2, col) {
@@ -6006,15 +5967,15 @@ var init_directives = __esm({
       "}": "%7D"
     };
     escapeTagName = (tn) => tn.replace(/[!,[\]{}]/g, (ch) => escapeChars[ch]);
-    Directives = class {
+    Directives = class _Directives {
       constructor(yaml, tags) {
         this.docStart = null;
         this.docEnd = false;
-        this.yaml = Object.assign({}, Directives.defaultYaml, yaml);
-        this.tags = Object.assign({}, Directives.defaultTags, tags);
+        this.yaml = Object.assign({}, _Directives.defaultYaml, yaml);
+        this.tags = Object.assign({}, _Directives.defaultTags, tags);
       }
       clone() {
-        const copy = new Directives(this.yaml, this.tags);
+        const copy = new _Directives(this.yaml, this.tags);
         copy.docStart = this.docStart;
         return copy;
       }
@@ -6023,7 +5984,7 @@ var init_directives = __esm({
        * update the stream state according to the current version's spec.
        */
       atDocument() {
-        const res = new Directives(this.yaml, this.tags);
+        const res = new _Directives(this.yaml, this.tags);
         switch (this.yaml.version) {
           case "1.1":
             this.atNextDocument = true;
@@ -6031,10 +5992,10 @@ var init_directives = __esm({
           case "1.2":
             this.atNextDocument = false;
             this.yaml = {
-              explicit: Directives.defaultYaml.explicit,
+              explicit: _Directives.defaultYaml.explicit,
               version: "1.2"
             };
-            this.tags = Object.assign({}, Directives.defaultTags);
+            this.tags = Object.assign({}, _Directives.defaultTags);
             break;
         }
         return res;
@@ -6045,8 +6006,8 @@ var init_directives = __esm({
        */
       add(line, onError) {
         if (this.atNextDocument) {
-          this.yaml = { explicit: Directives.defaultYaml.explicit, version: "1.1" };
-          this.tags = Object.assign({}, Directives.defaultTags);
+          this.yaml = { explicit: _Directives.defaultYaml.explicit, version: "1.1" };
+          this.tags = Object.assign({}, _Directives.defaultTags);
           this.atNextDocument = false;
         }
         const parts = line.trim().split(/[ \t]+/);
@@ -7486,7 +7447,7 @@ var init_Pair = __esm({
     init_stringifyPair();
     init_addPairToJSMap();
     init_identity();
-    Pair = class {
+    Pair = class _Pair {
       constructor(key, value = null) {
         Object.defineProperty(this, NODE_TYPE, { value: PAIR });
         this.key = key;
@@ -7498,7 +7459,7 @@ var init_Pair = __esm({
           key = key.clone(schema4);
         if (isNode(value))
           value = value.clone(schema4);
-        return new Pair(key, value);
+        return new _Pair(key, value);
       }
       toJSON(_, ctx) {
         const pair = (ctx == null ? void 0 : ctx.mapAsMap) ? /* @__PURE__ */ new Map() : {};
@@ -8364,7 +8325,7 @@ var init_omap = __esm({
     init_YAMLMap();
     init_YAMLSeq();
     init_pairs();
-    YAMLOMap = class extends YAMLSeq {
+    YAMLOMap = class _YAMLOMap extends YAMLSeq {
       constructor() {
         super();
         this.add = YAMLMap.prototype.add.bind(this);
@@ -8372,7 +8333,7 @@ var init_omap = __esm({
         this.get = YAMLMap.prototype.get.bind(this);
         this.has = YAMLMap.prototype.has.bind(this);
         this.set = YAMLMap.prototype.set.bind(this);
-        this.tag = YAMLOMap.tag;
+        this.tag = _YAMLOMap.tag;
       }
       /**
        * If `ctx` is given, the return type is actually `Map<unknown, unknown>`,
@@ -8589,10 +8550,10 @@ var init_set = __esm({
     init_identity();
     init_Pair();
     init_YAMLMap();
-    YAMLSet = class extends YAMLMap {
+    YAMLSet = class _YAMLSet extends YAMLMap {
       constructor(schema4) {
         super(schema4);
-        this.tag = YAMLSet.tag;
+        this.tag = _YAMLSet.tag;
       }
       add(key) {
         let pair;
@@ -8886,7 +8847,7 @@ var init_Schema = __esm({
     init_string();
     init_tags();
     sortMapEntriesByKey = (a, b) => a.key < b.key ? -1 : a.key > b.key ? 1 : 0;
-    Schema = class {
+    Schema = class _Schema {
       constructor({ compat, customTags, merge, resolveKnownTags, schema: schema4, sortMapEntries, toStringDefaults }) {
         this.compat = Array.isArray(compat) ? getTags(compat, "compat") : compat ? getTags(null, compat) : null;
         this.merge = !!merge;
@@ -8900,7 +8861,7 @@ var init_Schema = __esm({
         this.sortMapEntries = typeof sortMapEntries === "function" ? sortMapEntries : sortMapEntries === true ? sortMapEntriesByKey : null;
       }
       clone() {
-        const copy = Object.create(Schema.prototype, Object.getOwnPropertyDescriptors(this));
+        const copy = Object.create(_Schema.prototype, Object.getOwnPropertyDescriptors(this));
         copy.tags = this.tags.slice();
         return copy;
       }
@@ -9007,7 +8968,7 @@ var init_Document = __esm({
     init_applyReviver();
     init_createNode();
     init_directives();
-    Document = class {
+    Document = class _Document {
       constructor(value, replacer, options) {
         this.commentBefore = null;
         this.comment = null;
@@ -9047,7 +9008,7 @@ var init_Document = __esm({
        * Custom Node values that inherit from `Object` still refer to their original instances.
        */
       clone() {
-        const copy = Object.create(Document.prototype, {
+        const copy = Object.create(_Document.prototype, {
           [NODE_TYPE]: { value: DOC }
         });
         copy.commentBefore = this.commentBefore;
@@ -9449,6 +9410,7 @@ function resolveProps(tokens, { flow, indicator, next, offset, onError, startOnN
           hasSpace = false;
           break;
         }
+      // else fallthrough
       default:
         onError(token, "UNEXPECTED_TOKEN", `Unexpected ${token.type} token`);
         atNewline = false;
@@ -9793,19 +9755,18 @@ function resolveFlowCollection({ composeNode: composeNode2, composeEmptyNode: co
         onError(props.start, "MISSING_CHAR", `Missing , between ${fcName} items`);
       if (props.comment) {
         let prevItemComment = "";
-        loop:
-          for (const st of start) {
-            switch (st.type) {
-              case "comma":
-              case "space":
-                break;
-              case "comment":
-                prevItemComment = st.source.substring(1);
-                break loop;
-              default:
-                break loop;
-            }
+        loop: for (const st of start) {
+          switch (st.type) {
+            case "comma":
+            case "space":
+              break;
+            case "comment":
+              prevItemComment = st.source.substring(1);
+              break loop;
+            default:
+              break loop;
           }
+        }
         if (prevItemComment) {
           let prev = coll.items[coll.items.length - 1];
           if (isPair(prev))
@@ -10114,6 +10075,7 @@ function parseBlockScalarHeader({ offset, props }, strict, onError) {
     switch (token.type) {
       case "space":
         hasSpace = true;
+      // fallthrough
       case "newline":
         length += token.source.length;
         break;
@@ -10129,6 +10091,7 @@ function parseBlockScalarHeader({ offset, props }, strict, onError) {
         onError(token, "UNEXPECTED_TOKEN", token.message);
         length += token.source.length;
         break;
+      /* istanbul ignore next should not happen */
       default: {
         const message = `Unexpected token in block scalar header: ${token.type}`;
         onError(token, "UNEXPECTED_TOKEN", message);
@@ -10175,6 +10138,7 @@ function resolveFlowScalar(scalar, strict, onError) {
       _type = Scalar.QUOTE_DOUBLE;
       value = doubleQuotedValue(source, _onError);
       break;
+    /* istanbul ignore next should not happen */
     default:
       onError(scalar, "UNEXPECTED_TOKEN", `Expected a flow scalar value, but found: ${type}`);
       return {
@@ -10196,6 +10160,7 @@ function resolveFlowScalar(scalar, strict, onError) {
 function plainValue(source, onError) {
   let badChar = "";
   switch (source[0]) {
+    /* istanbul ignore next should not happen */
     case "	":
       badChar = "a tab character";
       break;
@@ -11437,6 +11402,7 @@ var init_lexer = __esm({
         switch (line[n]) {
           case "#":
             yield* this.pushCount(line.length - n);
+          // fallthrough
           case void 0:
             yield* this.pushNewline();
             return yield* this.parseLineStart();
@@ -11532,6 +11498,7 @@ var init_lexer = __esm({
               return "flow";
             }
           }
+          // fallthrough
           default:
             this.flowKey = false;
             return yield* this.parsePlainScalar();
@@ -11593,27 +11560,27 @@ var init_lexer = __esm({
         let nl = this.pos - 1;
         let indent = 0;
         let ch;
-        loop:
-          for (let i = this.pos; ch = this.buffer[i]; ++i) {
-            switch (ch) {
-              case " ":
-                indent += 1;
+        loop: for (let i = this.pos; ch = this.buffer[i]; ++i) {
+          switch (ch) {
+            case " ":
+              indent += 1;
+              break;
+            case "\n":
+              nl = i;
+              indent = 0;
+              break;
+            case "\r": {
+              const next = this.buffer[i + 1];
+              if (!next && !this.atEnd)
+                return this.setNext("block-scalar");
+              if (next === "\n")
                 break;
-              case "\n":
-                nl = i;
-                indent = 0;
-                break;
-              case "\r": {
-                const next = this.buffer[i + 1];
-                if (!next && !this.atEnd)
-                  return this.setNext("block-scalar");
-                if (next === "\n")
-                  break;
-              }
-              default:
-                break loop;
             }
+            // fallthrough
+            default:
+              break loop;
           }
+        }
         if (!ch && !this.atEnd)
           return this.setNext("block-scalar");
         if (indent >= this.indentNext) {
@@ -11718,7 +11685,9 @@ var init_lexer = __esm({
           case "&":
             return (yield* this.pushUntil(isNotAnchorChar)) + (yield* this.pushSpaces(true)) + (yield* this.pushIndicators());
           case "-":
+          // this is an error
           case "?":
+          // this is an error outside flow collections
           case ":": {
             const inFlow = this.flowLevel > 0;
             const ch1 = this.charAt(1);
@@ -11860,6 +11829,7 @@ function getPrevProps(parent) {
     }
     case "block-seq":
       return parent.items[parent.items.length - 1].start;
+    /* istanbul ignore next should not happen */
     default:
       return [];
   }
@@ -11869,17 +11839,16 @@ function getFirstKeyStartProps(prev) {
   if (prev.length === 0)
     return [];
   let i = prev.length;
-  loop:
-    while (--i >= 0) {
-      switch (prev[i].type) {
-        case "doc-start":
-        case "explicit-key-ind":
-        case "map-value-ind":
-        case "seq-item-ind":
-        case "newline":
-          break loop;
-      }
+  loop: while (--i >= 0) {
+    switch (prev[i].type) {
+      case "doc-start":
+      case "explicit-key-ind":
+      case "map-value-ind":
+      case "seq-item-ind":
+      case "newline":
+        break loop;
     }
+  }
   while (((_a = prev[++i]) == null ? void 0 : _a.type) === "space") {
   }
   return prev.splice(i, prev.length);
@@ -12098,6 +12067,7 @@ var init_parser = __esm({
                 Object.assign(it, { key: token, sep: [] });
               return;
             }
+            /* istanbul ignore next should not happen */
             default:
               yield* this.pop();
               yield* this.pop(token);
@@ -12219,6 +12189,7 @@ var init_parser = __esm({
             }
             yield* this.pop();
             break;
+          /* istanbul ignore next should not happen */
           default:
             yield* this.pop();
             yield* this.step();
@@ -12653,6 +12624,7 @@ var init_parser = __esm({
             break;
           case "newline":
             this.onKeyLine = false;
+          // fallthrough
           case "space":
           case "comment":
           default:
@@ -12932,8 +12904,7 @@ var require_utils2 = __commonJS({
       }
     };
     var parseIni = (input = "") => {
-      if (!input)
-        return {};
+      if (!input) return {};
       const lines = input.split(NEWLINE_REGEX);
       const config = {};
       for (const line of lines) {
@@ -13415,8 +13386,7 @@ var require_dist = __commonJS({
     }(exports, function(t, n) {
       return function(t2) {
         function n2(e) {
-          if (r[e])
-            return r[e].exports;
+          if (r[e]) return r[e].exports;
           var o = r[e] = { exports: {}, id: e, loaded: false };
           return t2[e].call(o.exports, o, o.exports, n2), o.loaded = true, o.exports;
         }
@@ -13435,8 +13405,7 @@ var require_dist = __commonJS({
       }, function(t2, n2, r) {
         var e = r(9);
         t2.exports = function(t3) {
-          if (!e(t3))
-            throw TypeError(t3 + " is not an object!");
+          if (!e(t3)) throw TypeError(t3 + " is not an object!");
           return t3;
         };
       }, function(t2, n2, r) {
@@ -13458,8 +13427,7 @@ var require_dist = __commonJS({
       }, function(t2, n2, r) {
         var e = r(14);
         t2.exports = function(t3, n3, r2) {
-          if (e(t3), void 0 === n3)
-            return t3;
+          if (e(t3), void 0 === n3) return t3;
           switch (r2) {
             case 1:
               return function(r3) {
@@ -13497,13 +13465,11 @@ var require_dist = __commonJS({
       }, function(t2, n2, r) {
         var e = r(3), o = r(26), i = r(32), c = Object.defineProperty;
         n2.f = r(4) ? Object.defineProperty : function(t3, n3, r2) {
-          if (e(t3), n3 = i(n3, true), e(r2), o)
-            try {
-              return c(t3, n3, r2);
-            } catch (t4) {
-            }
-          if ("get" in r2 || "set" in r2)
-            throw TypeError("Accessors not supported!");
+          if (e(t3), n3 = i(n3, true), e(r2), o) try {
+            return c(t3, n3, r2);
+          } catch (t4) {
+          }
+          if ("get" in r2 || "set" in r2) throw TypeError("Accessors not supported!");
           return "value" in r2 && (t3[n3] = r2.value), t3;
         };
       }, function(t2, n2, r) {
@@ -13513,14 +13479,12 @@ var require_dist = __commonJS({
         };
       }, function(t2, n2) {
         t2.exports = function(t3) {
-          if ("function" != typeof t3)
-            throw TypeError(t3 + " is not a function!");
+          if ("function" != typeof t3) throw TypeError(t3 + " is not a function!");
           return t3;
         };
       }, function(t2, n2) {
         t2.exports = function(t3) {
-          if (void 0 == t3)
-            throw TypeError("Can't call method on  " + t3);
+          if (void 0 == t3) throw TypeError("Can't call method on  " + t3);
           return t3;
         };
       }, function(t2, n2, r) {
@@ -13548,7 +13512,7 @@ var require_dist = __commonJS({
           return isNaN(t3 = +t3) ? 0 : (t3 > 0 ? e : r)(t3);
         };
       }, function(t2, n2, r) {
-        var e = r(11), o = r(1)("toStringTag"), i = "Arguments" == e(function() {
+        var e = r(11), o = r(1)("toStringTag"), i = "Arguments" == e(/* @__PURE__ */ function() {
           return arguments;
         }()), c = function(t3, n3) {
           try {
@@ -13566,24 +13530,23 @@ var require_dist = __commonJS({
         var e = r(2), o = r(6), i = r(7), c = r(5), u = "prototype", s = function(t3, n3, r2) {
           var f, a, p, l = t3 & s.F, v = t3 & s.G, h = t3 & s.S, d = t3 & s.P, y = t3 & s.B, _ = t3 & s.W, x = v ? o : o[n3] || (o[n3] = {}), m = x[u], w = v ? e : h ? e[n3] : (e[n3] || {})[u];
           v && (r2 = n3);
-          for (f in r2)
-            a = !l && w && void 0 !== w[f], a && f in x || (p = a ? w[f] : r2[f], x[f] = v && "function" != typeof w[f] ? r2[f] : y && a ? i(p, e) : _ && w[f] == p ? function(t4) {
-              var n4 = function(n5, r3, e2) {
-                if (this instanceof t4) {
-                  switch (arguments.length) {
-                    case 0:
-                      return new t4();
-                    case 1:
-                      return new t4(n5);
-                    case 2:
-                      return new t4(n5, r3);
-                  }
-                  return new t4(n5, r3, e2);
+          for (f in r2) a = !l && w && void 0 !== w[f], a && f in x || (p = a ? w[f] : r2[f], x[f] = v && "function" != typeof w[f] ? r2[f] : y && a ? i(p, e) : _ && w[f] == p ? function(t4) {
+            var n4 = function(n5, r3, e2) {
+              if (this instanceof t4) {
+                switch (arguments.length) {
+                  case 0:
+                    return new t4();
+                  case 1:
+                    return new t4(n5);
+                  case 2:
+                    return new t4(n5, r3);
                 }
-                return t4.apply(this, arguments);
-              };
-              return n4[u] = t4[u], n4;
-            }(p) : d && "function" == typeof p ? i(Function.call, p) : p, d && ((x.virtual || (x.virtual = {}))[f] = p, t3 & s.R && m && !m[f] && c(m, f, p)));
+                return new t4(n5, r3, e2);
+              }
+              return t4.apply(this, arguments);
+            };
+            return n4[u] = t4[u], n4;
+          }(p) : d && "function" == typeof p ? i(Function.call, p) : p, d && ((x.virtual || (x.virtual = {}))[f] = p, t3 & s.R && m && !m[f] && c(m, f, p)));
         };
         s.F = 1, s.G = 2, s.S = 4, s.P = 8, s.B = 16, s.W = 32, s.U = 64, s.R = 128, t2.exports = s;
       }, function(t2, n2) {
@@ -13610,8 +13573,7 @@ var require_dist = __commonJS({
         t2.exports = function(t3, n3, r2, x, m, w, g) {
           f(r2, n3, x);
           var b, O, j, S = function(t4) {
-            if (!v && t4 in T)
-              return T[t4];
+            if (!v && t4 in T) return T[t4];
             switch (t4) {
               case d:
                 return function() {
@@ -13628,12 +13590,8 @@ var require_dist = __commonJS({
           }, E = n3 + " Iterator", P = m == y, M = false, T = t3.prototype, A = T[l] || T[h] || m && T[m], k = A || S(m), C = m ? P ? S("entries") : k : void 0, I = "Array" == n3 ? T.entries || A : A;
           if (I && (j = p(I.call(new t3())), j !== Object.prototype && (a(j, E, true), e || u(j, l) || c(j, l, _))), P && A && A.name !== y && (M = true, k = function() {
             return A.call(this);
-          }), e && !g || !v && !M && T[l] || c(T, l, k), s[n3] = k, s[E] = _, m)
-            if (b = { values: P ? k : S(y), keys: w ? k : S(d), entries: C }, g)
-              for (O in b)
-                O in T || i(T, O, b[O]);
-            else
-              o(o.P + o.F * (v || M), n3, b);
+          }), e && !g || !v && !M && T[l] || c(T, l, k), s[n3] = k, s[E] = _, m) if (b = { values: P ? k : S(y), keys: w ? k : S(d), entries: C }, g) for (O in b) O in T || i(T, O, b[O]);
+          else o(o.P + o.F * (v || M), n3, b);
           return b;
         };
       }, function(t2, n2) {
@@ -13654,8 +13612,7 @@ var require_dist = __commonJS({
           x.call(t3.data);
         };
         l && v || (l = function(t3) {
-          for (var n3 = [], r2 = 1; arguments.length > r2; )
-            n3.push(arguments[r2++]);
+          for (var n3 = [], r2 = 1; arguments.length > r2; ) n3.push(arguments[r2++]);
           return y[++d] = function() {
             u("function" == typeof t3 ? t3 : Function(t3), n3);
           }, e(d), d;
@@ -13680,15 +13637,11 @@ var require_dist = __commonJS({
       }, function(t2, n2, r) {
         var e = r(9);
         t2.exports = function(t3, n3) {
-          if (!e(t3))
-            return t3;
+          if (!e(t3)) return t3;
           var r2, o;
-          if (n3 && "function" == typeof (r2 = t3.toString) && !e(o = r2.call(t3)))
-            return o;
-          if ("function" == typeof (r2 = t3.valueOf) && !e(o = r2.call(t3)))
-            return o;
-          if (!n3 && "function" == typeof (r2 = t3.toString) && !e(o = r2.call(t3)))
-            return o;
+          if (n3 && "function" == typeof (r2 = t3.toString) && !e(o = r2.call(t3))) return o;
+          if ("function" == typeof (r2 = t3.valueOf) && !e(o = r2.call(t3))) return o;
+          if (!n3 && "function" == typeof (r2 = t3.toString) && !e(o = r2.call(t3))) return o;
           throw TypeError("Can't convert object to primitive value");
         };
       }, function(t2, n2) {
@@ -13728,8 +13681,7 @@ var require_dist = __commonJS({
         function s(t3) {
           return new a.default(function(n3, r2) {
             return (0, p.exec)(y[h], {}, function(e2, o2, u2) {
-              if (e2)
-                return r2(new Error("Error while obtaining machine id: " + e2.stack));
+              if (e2) return r2(new Error("Error while obtaining machine id: " + e2.stack));
               var s2 = c(o2.toString());
               return n3(t3 ? s2 : i(s2));
             });
@@ -13748,8 +13700,7 @@ var require_dist = __commonJS({
         };
       }, function(t2, n2) {
         t2.exports = function(t3, n3, r, e) {
-          if (!(t3 instanceof n3) || void 0 !== e && e in t3)
-            throw TypeError(r + ": incorrect invocation!");
+          if (!(t3 instanceof n3) || void 0 !== e && e in t3) throw TypeError(r + ": incorrect invocation!");
           return t3;
         };
       }, function(t2, n2, r) {
@@ -13758,13 +13709,8 @@ var require_dist = __commonJS({
           return function(n3, r2, c) {
             var u, s = e(n3), f = o(s.length), a = i(c, f);
             if (t3 && r2 != r2) {
-              for (; f > a; )
-                if (u = s[a++], u != u)
-                  return true;
-            } else
-              for (; f > a; a++)
-                if ((t3 || a in s) && s[a] === r2)
-                  return t3 || a || 0;
+              for (; f > a; ) if (u = s[a++], u != u) return true;
+            } else for (; f > a; a++) if ((t3 || a in s) && s[a] === r2) return t3 || a || 0;
             return !t3 && -1;
           };
         };
@@ -13773,16 +13719,10 @@ var require_dist = __commonJS({
           var v, h, d, y, _ = l ? function() {
             return t3;
           } : s(t3), x = e(r2, p, n3 ? 2 : 1), m = 0;
-          if ("function" != typeof _)
-            throw TypeError(t3 + " is not iterable!");
+          if ("function" != typeof _) throw TypeError(t3 + " is not iterable!");
           if (i(_)) {
-            for (v = u(t3.length); v > m; m++)
-              if (y = n3 ? x(c(h = t3[m])[0], h[1]) : x(t3[m]), y === f || y === a)
-                return y;
-          } else
-            for (d = _.call(t3); !(h = d.next()).done; )
-              if (y = o(d, x, h.value, n3), y === f || y === a)
-                return y;
+            for (v = u(t3.length); v > m; m++) if (y = n3 ? x(c(h = t3[m])[0], h[1]) : x(t3[m]), y === f || y === a) return y;
+          } else for (d = _.call(t3); !(h = d.next()).done; ) if (y = o(d, x, h.value, n3), y === f || y === a) return y;
         };
         n2.BREAK = f, n2.RETURN = a;
       }, function(t2, n2) {
@@ -13842,8 +13782,7 @@ var require_dist = __commonJS({
         } catch (t3) {
         }
         t2.exports = function(t3, n3) {
-          if (!n3 && !o)
-            return false;
+          if (!n3 && !o) return false;
           var r2 = false;
           try {
             var i2 = [7], c = i2[e]();
@@ -13875,10 +13814,9 @@ var require_dist = __commonJS({
             }
             n3 = void 0, e2 && e2.enter();
           };
-          if (s)
-            r2 = function() {
-              c.nextTick(f);
-            };
+          if (s) r2 = function() {
+            c.nextTick(f);
+          };
           else if (i) {
             var a = true, p = document.createTextNode("");
             new i(f).observe(p, { characterData: true }), r2 = function() {
@@ -13889,10 +13827,9 @@ var require_dist = __commonJS({
             r2 = function() {
               l.then(f);
             };
-          } else
-            r2 = function() {
-              o.call(e, f);
-            };
+          } else r2 = function() {
+            o.call(e, f);
+          };
           return function(e2) {
             var o2 = { fn: e2, next: void 0 };
             n3 && (n3.next = o2), t3 || (t3 = o2, r2()), n3 = o2;
@@ -13902,8 +13839,7 @@ var require_dist = __commonJS({
         var e = r(3), o = r(50), i = r(22), c = r(19)("IE_PROTO"), u = function() {
         }, s = "prototype", f = function() {
           var t3, n3 = r(16)("iframe"), e2 = i.length, o2 = ">";
-          for (n3.style.display = "none", r(25).appendChild(n3), n3.src = "javascript:", t3 = n3.contentWindow.document, t3.open(), t3.write("<script>document.F=Object<\/script" + o2), t3.close(), f = t3.F; e2--; )
-            delete f[s][i[e2]];
+          for (n3.style.display = "none", r(25).appendChild(n3), n3.src = "javascript:", t3 = n3.contentWindow.document, t3.open(), t3.write("<script>document.F=Object<\/script" + o2), t3.close(), f = t3.F; e2--; ) delete f[s][i[e2]];
           return f();
         };
         t2.exports = Object.create || function(t3, n3) {
@@ -13914,20 +13850,17 @@ var require_dist = __commonJS({
         var e = r(12), o = r(3), i = r(54);
         t2.exports = r(4) ? Object.defineProperties : function(t3, n3) {
           o(t3);
-          for (var r2, c = i(n3), u = c.length, s = 0; u > s; )
-            e.f(t3, r2 = c[s++], n3[r2]);
+          for (var r2, c = i(n3), u = c.length, s = 0; u > s; ) e.f(t3, r2 = c[s++], n3[r2]);
           return t3;
         };
       }, function(t2, n2, r) {
         var e = r(55), o = r(17), i = r(13), c = r(32), u = r(8), s = r(26), f = Object.getOwnPropertyDescriptor;
         n2.f = r(4) ? f : function(t3, n3) {
-          if (t3 = i(t3), n3 = c(n3, true), s)
-            try {
-              return f(t3, n3);
-            } catch (t4) {
-            }
-          if (u(t3, n3))
-            return o(!e.f.call(t3, n3), t3[n3]);
+          if (t3 = i(t3), n3 = c(n3, true), s) try {
+            return f(t3, n3);
+          } catch (t4) {
+          }
+          if (u(t3, n3)) return o(!e.f.call(t3, n3), t3[n3]);
         };
       }, function(t2, n2, r) {
         var e = r(8), o = r(63), i = r(19)("IE_PROTO"), c = Object.prototype;
@@ -13938,10 +13871,8 @@ var require_dist = __commonJS({
         var e = r(8), o = r(13), i = r(39)(false), c = r(19)("IE_PROTO");
         t2.exports = function(t3, n3) {
           var r2, u = o(t3), s = 0, f = [];
-          for (r2 in u)
-            r2 != c && e(u, r2) && f.push(r2);
-          for (; n3.length > s; )
-            e(u, r2 = n3[s++]) && (~i(f, r2) || f.push(r2));
+          for (r2 in u) r2 != c && e(u, r2) && f.push(r2);
+          for (; n3.length > s; ) e(u, r2 = n3[s++]) && (~i(f, r2) || f.push(r2));
           return f;
         };
       }, function(t2, n2, r) {
@@ -13954,16 +13885,14 @@ var require_dist = __commonJS({
       }, function(t2, n2, r) {
         var e = r(5);
         t2.exports = function(t3, n3, r2) {
-          for (var o in n3)
-            r2 && t3[o] ? t3[o] = n3[o] : e(t3, o, n3[o]);
+          for (var o in n3) r2 && t3[o] ? t3[o] = n3[o] : e(t3, o, n3[o]);
           return t3;
         };
       }, function(t2, n2, r) {
         t2.exports = r(5);
       }, function(t2, n2, r) {
         var e = r(9), o = r(3), i = function(t3, n3) {
-          if (o(t3), !e(n3) && null !== n3)
-            throw TypeError(n3 + ": can't set as prototype!");
+          if (o(t3), !e(n3) && null !== n3) throw TypeError(n3 + ": can't set as prototype!");
         };
         t2.exports = { set: Object.setPrototypeOf || ("__proto__" in {} ? function(t3, n3, e2) {
           try {
@@ -14011,8 +13940,7 @@ var require_dist = __commonJS({
       }, function(t2, n2, r) {
         var e = r(21), o = r(1)("iterator"), i = r(10);
         t2.exports = r(6).getIteratorMethod = function(t3) {
-          if (void 0 != t3)
-            return t3[o] || t3["@@iterator"] || i[e(t3)];
+          if (void 0 != t3) return t3[o] || t3["@@iterator"] || i[e(t3)];
         };
       }, function(t2, n2, r) {
         "use strict";
@@ -14045,8 +13973,7 @@ var require_dist = __commonJS({
         }, M = o = function(t3) {
           var n3, r2;
           this.promise = new t3(function(t4, e2) {
-            if (void 0 !== n3 || void 0 !== r2)
-              throw m("Bad Promise constructor");
+            if (void 0 !== n3 || void 0 !== r2) throw m("Bad Promise constructor");
             n3 = t4, r2 = e2;
           }), this.resolve = l(n3), this.reject = l(r2);
         }, T = function(t3) {
@@ -14067,8 +13994,7 @@ var require_dist = __commonJS({
                 } catch (t4) {
                   s2(t4);
                 }
-              }; r2.length > i2; )
-                c2(r2[i2++]);
+              }; r2.length > i2; ) c2(r2[i2++]);
               t3._c = [], t3._n = false, n3 && !t3._h && k(t3);
             });
           }
@@ -14077,15 +14003,11 @@ var require_dist = __commonJS({
             var n3, r2, e2, o2 = t3._v;
             if (C(t3) && (n3 = T(function() {
               b ? w.emit("unhandledRejection", o2, t3) : (r2 = u.onunhandledrejection) ? r2({ promise: t3, reason: o2 }) : (e2 = u.console) && e2.error && e2.error("Unhandled promise rejection", o2);
-            }), t3._h = b || C(t3) ? 2 : 1), t3._a = void 0, n3)
-              throw n3.error;
+            }), t3._h = b || C(t3) ? 2 : 1), t3._a = void 0, n3) throw n3.error;
           });
         }, C = function(t3) {
-          if (1 == t3._h)
-            return false;
-          for (var n3, r2 = t3._a || t3._c, e2 = 0; r2.length > e2; )
-            if (n3 = r2[e2++], n3.fail || !C(n3.promise))
-              return false;
+          if (1 == t3._h) return false;
+          for (var n3, r2 = t3._a || t3._c, e2 = 0; r2.length > e2; ) if (n3 = r2[e2++], n3.fail || !C(n3.promise)) return false;
           return true;
         }, I = function(t3) {
           y.call(u, function() {
@@ -14100,8 +14022,7 @@ var require_dist = __commonJS({
           if (!r2._d) {
             r2._d = true, r2 = r2._w || r2;
             try {
-              if (r2 === t3)
-                throw m("Promise can't be resolved itself");
+              if (r2 === t3) throw m("Promise can't be resolved itself");
               (n3 = E(t3)) ? _(function() {
                 var e2 = { _w: r2, _d: false };
                 try {
@@ -14136,8 +14057,7 @@ var require_dist = __commonJS({
           var n3 = P(this), r2 = n3.reject;
           return r2(t3), n3.promise;
         } }), a(a.S + a.F * (c || !j), x, { resolve: function(t3) {
-          if (t3 instanceof g && S(t3.constructor, this))
-            return t3;
+          if (t3 instanceof g && S(t3.constructor, this)) return t3;
           var n3 = P(this), r2 = n3.resolve;
           return r2(t3), n3.promise;
         } }), a(a.S + a.F * !(j && r(46)(function(t3) {
@@ -14235,7 +14155,7 @@ var DEFAULT_PROFILE_OPTIONS = {
   corePlugins: true,
   graph: true,
   hotkeys: true,
-  modifiedAt: new Date()
+  modifiedAt: /* @__PURE__ */ new Date()
 };
 var PROFILE_OPTIONS_MAP = {
   name: {
@@ -14267,11 +14187,13 @@ var PROFILE_OPTIONS_MAP = {
     file: ["community-plugins.json", `plugins${import_path.sep}*${import_path.sep}*`],
     ignore: `plugins${import_path.sep}settings-profiles${import_path.sep}data.json`
   },
-  // communityPluginsAdvanced: {
-  // 	name: 'Community plugins advanced',
-  // 	description: 'Advanced settings for the community plugins.',
-  // 	advanced: 'communityPlugins'
-  // },
+  /*
+   * communityPluginsAdvanced: {
+   * 	name: 'Community plugins advanced',
+   * 	description: 'Advanced settings for the community plugins.',
+   * 	advanced: 'communityPlugins'
+   * },
+   */
   corePlugins: {
     name: "Core plugins",
     description: "Says whether the obsidian core plugin settings will sync.",
@@ -14305,9 +14227,9 @@ var ProfileOptionsModal = class extends import_obsidian.Modal {
   }
   onOpen() {
     const { contentEl } = this;
-    contentEl.createEl("h1", { text: `Profile options` });
+    contentEl.createEl("h1", { text: "Profile options" });
     for (const key in this.profile) {
-      if (this.profile.hasOwnProperty(key)) {
+      if (Object.prototype.hasOwnProperty.call(this.profile, key)) {
         const value = this.profile[key];
         if (key === "modifiedAt") {
           break;
@@ -14412,78 +14334,66 @@ var import_stream = require("stream");
 function getAllFiles(path) {
   let pathSections = [];
   let files = [];
-  try {
-    if ((0, import_path2.join)(...path).includes(`${import_path2.sep}*${import_path2.sep}`)) {
-      pathSections = (0, import_path2.join)(...path).split(`${import_path2.sep}*${import_path2.sep}`);
-      if (pathSections.length > 0) {
-        if (!(0, import_fs.existsSync)(pathSections[0])) {
-          console.debug(`The path section does not exist! PathSections: ${pathSections[0]}`);
-          return files;
-        }
-        if (!(0, import_fs.statSync)(pathSections[0]).isDirectory()) {
-          console.debug(`The path section is a file and is not inserted, does not match the pattern (/*/)! PathSections: ${pathSections[0]}`);
-          return files;
-        }
-        let pathContent = (0, import_fs.readdirSync)(pathSections[0]);
-        pathContent.forEach((value) => {
-          const joinedPath = (0, import_path2.join)(pathSections[0], value, ...pathSections.filter((value2, index) => index > 0));
-          files = files.concat(getAllFiles([joinedPath]));
-        });
+  if ((0, import_path2.join)(...path).includes(`${import_path2.sep}*${import_path2.sep}`)) {
+    pathSections = (0, import_path2.join)(...path).split(`${import_path2.sep}*${import_path2.sep}`);
+    if (pathSections.length > 0) {
+      if (!(0, import_fs.existsSync)(pathSections[0])) {
+        console.warn(`The path section does not exist! PathSections: ${pathSections[0]}`);
+        return files;
       }
-    } else if ((0, import_path2.join)(...path).endsWith(`${import_path2.sep}*`)) {
-      pathSections = (0, import_path2.join)(...path).split(`${import_path2.sep}*`);
-      if (pathSections.length > 0) {
-        if (!(0, import_fs.existsSync)(pathSections[0])) {
-          console.debug(`The path section does not exist! PathSections: ${pathSections[0]}`);
-          return files;
-        }
-        if (!(0, import_fs.statSync)(pathSections[0]).isDirectory()) {
-          console.debug(`The path section is a file and is not inserted, does not match the pattern (/*)! PathSections: ${pathSections[0]}`);
-          return files;
-        }
-        let pathContent = (0, import_fs.readdirSync)(pathSections[0]).map((value) => (0, import_path2.join)(pathSections[0], value));
-        files = files.concat(...pathContent.filter((value) => {
-          return (0, import_fs.statSync)(value).isFile() && !FILE_IGNORE_LIST.contains((0, import_path2.basename)(value));
-        }));
+      if (!(0, import_fs.statSync)(pathSections[0]).isDirectory()) {
+        console.warn(`The path section is a file and is not inserted, does not match the pattern (/*/)! PathSections: ${pathSections[0]}`);
+        return files;
       }
-    } else if ((0, import_fs.existsSync)((0, import_path2.join)(...path)) && (0, import_fs.statSync)((0, import_path2.join)(...path)).isFile()) {
-      if (!FILE_IGNORE_LIST.contains((0, import_path2.basename)((0, import_path2.join)(...path)))) {
-        files.push(...path);
-      }
+      const pathContent = (0, import_fs.readdirSync)(pathSections[0]);
+      pathContent.forEach((value) => {
+        const joinedPath = (0, import_path2.join)(pathSections[0], value, ...pathSections.filter((value2, index) => index > 0));
+        files = files.concat(getAllFiles([joinedPath]));
+      });
     }
-    return files;
-  } catch (e) {
-    throw e;
+  } else if ((0, import_path2.join)(...path).endsWith(`${import_path2.sep}*`)) {
+    pathSections = (0, import_path2.join)(...path).split(`${import_path2.sep}*`);
+    if (pathSections.length > 0) {
+      if (!(0, import_fs.existsSync)(pathSections[0])) {
+        console.warn(`The path section does not exist! PathSections: ${pathSections[0]}`);
+        return files;
+      }
+      if (!(0, import_fs.statSync)(pathSections[0]).isDirectory()) {
+        console.warn(`The path section is a file and is not inserted, does not match the pattern (/*)! PathSections: ${pathSections[0]}`);
+        return files;
+      }
+      const pathContent = (0, import_fs.readdirSync)(pathSections[0]).map((value) => (0, import_path2.join)(pathSections[0], value));
+      files = files.concat(...pathContent.filter((value) => {
+        return (0, import_fs.statSync)(value).isFile() && !FILE_IGNORE_LIST.contains((0, import_path2.basename)(value));
+      }));
+    }
+  } else if ((0, import_fs.existsSync)((0, import_path2.join)(...path)) && (0, import_fs.statSync)((0, import_path2.join)(...path)).isFile()) {
+    if (!FILE_IGNORE_LIST.contains((0, import_path2.basename)((0, import_path2.join)(...path)))) {
+      files.push(...path);
+    }
   }
+  return files;
 }
 function copyFile(sourcePath, targetPath) {
-  try {
-    const sourceFile = (0, import_path2.normalize)((0, import_path2.join)(...sourcePath));
-    const targetFile = (0, import_path2.normalize)((0, import_path2.join)(...targetPath));
-    if (!isValidPath([sourceFile]) || !(0, import_fs.existsSync)(sourceFile)) {
-      throw Error(`Source file does not exist! SourceFile: ${sourceFile}`);
-    }
-    isValidPath([...targetPath]);
-    ensurePathExist([targetFile.slice(0, targetFile.lastIndexOf(import_path2.sep))]);
-    if (FILE_IGNORE_LIST.contains((0, import_path2.basename)(sourceFile))) {
-      console.warn(`An attempt was made to copy a file that is on the ignore list. File: ${sourceFile}`);
-      return;
-    }
-    (0, import_fs.copyFileSync)(sourceFile, targetFile);
-  } catch (e) {
-    throw e;
+  const sourceFile = (0, import_path2.normalize)((0, import_path2.join)(...sourcePath));
+  const targetFile = (0, import_path2.normalize)((0, import_path2.join)(...targetPath));
+  if (!isValidPath([sourceFile]) || !(0, import_fs.existsSync)(sourceFile)) {
+    throw Error(`Source file does not exist! SourceFile: ${sourceFile}`);
   }
+  isValidPath([...targetPath]);
+  ensurePathExist([targetFile.slice(0, targetFile.lastIndexOf(import_path2.sep))]);
+  if (FILE_IGNORE_LIST.contains((0, import_path2.basename)(sourceFile))) {
+    console.warn(`An attempt was made to copy a file that is on the ignore list. File: ${sourceFile}`);
+    return;
+  }
+  (0, import_fs.copyFileSync)(sourceFile, targetFile);
 }
 function ensurePathExist(path, recursive = true) {
-  try {
+  if (!(0, import_fs.existsSync)((0, import_path2.join)(...path))) {
+    (0, import_fs.mkdirSync)((0, import_path2.join)(...path), { recursive });
     if (!(0, import_fs.existsSync)((0, import_path2.join)(...path))) {
-      (0, import_fs.mkdirSync)((0, import_path2.join)(...path), { recursive });
-      if (!(0, import_fs.existsSync)((0, import_path2.join)(...path))) {
-        throw Error(`Could not create path! Path: ${path}`);
-      }
+      throw Error(`Could not create path! Path: ${path}`);
     }
-  } catch (e) {
-    throw e;
   }
 }
 function isValidPath(path) {
@@ -14493,25 +14403,21 @@ function isValidPath(path) {
   return true;
 }
 function removeDirectoryRecursiveSync(path) {
-  try {
-    const pathS = (0, import_path2.join)(...path);
-    if ((0, import_fs.existsSync)(pathS)) {
-      if ((0, import_fs.statSync)(pathS).isDirectory()) {
-        (0, import_fs.readdirSync)(pathS).forEach((file) => {
-          const filePath = (0, import_path2.join)(pathS, file);
-          if ((0, import_fs.statSync)(filePath).isDirectory()) {
-            removeDirectoryRecursiveSync([filePath]);
-          } else {
-            (0, import_fs.unlinkSync)(filePath);
-          }
-        });
-        (0, import_fs.rmdirSync)(pathS);
-      } else {
-        (0, import_fs.rmSync)(pathS);
-      }
+  const pathS = (0, import_path2.join)(...path);
+  if ((0, import_fs.existsSync)(pathS)) {
+    if ((0, import_fs.statSync)(pathS).isDirectory()) {
+      (0, import_fs.readdirSync)(pathS).forEach((file) => {
+        const filePath = (0, import_path2.join)(pathS, file);
+        if ((0, import_fs.statSync)(filePath).isDirectory()) {
+          removeDirectoryRecursiveSync([filePath]);
+        } else {
+          (0, import_fs.unlinkSync)(filePath);
+        }
+      });
+      (0, import_fs.rmdirSync)(pathS);
+    } else {
+      (0, import_fs.rmSync)(pathS);
     }
-  } catch (e) {
-    throw e;
   }
 }
 function getVaultPath() {
@@ -14528,8 +14434,8 @@ function filesEqual(file1, file2) {
   const stream1 = (0, import_fs.createReadStream)(file1);
   const stream2 = (0, import_fs.createReadStream)(file2);
   return new Promise((resolve, reject) => {
-    let readStream1 = stream1.pipe(new import_stream.PassThrough({ objectMode: true }));
-    let readStream2 = stream2.pipe(new import_stream.PassThrough({ objectMode: true }));
+    const readStream1 = stream1.pipe(new import_stream.PassThrough({ objectMode: true }));
+    const readStream2 = stream2.pipe(new import_stream.PassThrough({ objectMode: true }));
     const cleanup = (equal) => {
       stream1.removeListener("error", reject);
       readStream1.removeListener("end", onend1);
@@ -14587,10 +14493,10 @@ function createOnRead(streamState1, streamState2, resolve) {
       if (!streamState2.data) {
         return resolve(false);
       }
-      let minLength = Math.min(data.length, streamState2.data.length);
-      let streamData = data.slice(0, minLength);
+      const minLength = Math.min(data.length, streamState2.data.length);
+      const streamData = data.slice(0, minLength);
       streamState1.data = data.slice(minLength);
-      let otherStreamData = streamState2.data.slice(0, minLength);
+      const otherStreamData = streamState2.data.slice(0, minLength);
       streamState2.data = streamState2.data.slice(minLength);
       for (let i = 0; i < minLength; i++) {
         if (streamData[i] !== otherStreamData[i]) {
@@ -14659,11 +14565,9 @@ var SettingsProfilesSettingTab = class extends import_obsidian4.PluginSettingTab
         try {
           if (value2 !== this.plugin.getProfilesPath()) {
             if (value2 === "" || value2.trim() === "") {
-              console.debug("Text box is empty!");
               text.inputEl.addClass("mod-bad-input");
               return;
             } else if (!isValidPath([value2])) {
-              console.debug("Entry is not a valid path!");
               text.inputEl.addClass("mod-bad-input");
               return;
             }
@@ -14682,7 +14586,7 @@ var SettingsProfilesSettingTab = class extends import_obsidian4.PluginSettingTab
       }, 500, true).call(this, value);
     }).inputEl.id = "profile-path");
     new import_obsidian4.Setting(containerEl).setName("UI update").setDesc(createFragment((fragment) => {
-      fragment.append(fragment.createEl("div", { text: "Controls UI update, when disabled, fewer file reads are performed. The status bar icon is deactivated." }), fragment.createEl("div", { text: "Requieres reload for changes to take effect!", cls: "mod-warning" }));
+      fragment.append(fragment.createEl("div", { text: "Controls UI update, when disabled, fewer file reads are performed. The status bar icon is deactivated." }), fragment.createEl("div", { text: "Requires reload for changes to take effect!", cls: "mod-warning" }));
     })).addToggle((toggle) => toggle.setValue(this.plugin.getUiUpdate()).onChange((value) => {
       try {
         if (value !== this.plugin.getUiUpdate()) {
@@ -14698,7 +14602,7 @@ var SettingsProfilesSettingTab = class extends import_obsidian4.PluginSettingTab
     }).toggleEl.setAttr("id", "ui-update"));
     if (this.plugin.getUiUpdate()) {
       new import_obsidian4.Setting(containerEl).setName("UI update interval").setDesc(createFragment((fragment) => {
-        fragment.append(fragment.createEl("div", { text: "The time in ms in which ui is updated" }), fragment.createEl("div", { text: "Requieres reload for changes to take effect!", cls: "mod-warning" }));
+        fragment.append(fragment.createEl("div", { text: "The time in ms in which ui is updated" }), fragment.createEl("div", { text: "Requires reload for changes to take effect!", cls: "mod-warning" }));
       })).addExtraButton((button) => button.setIcon(ICON_RESET).setTooltip("Reset").onClick(() => {
         try {
           const sliderEl = this.containerEl.querySelector("#ui-interval");
@@ -14731,7 +14635,7 @@ var SettingsProfilesSettingTab = class extends import_obsidian4.PluginSettingTab
       }).sliderEl.setAttr("id", "ui-interval"));
     }
     new import_obsidian4.Setting(containerEl).setName("Profile update").setDesc(createFragment((fragment) => {
-      fragment.append(fragment.createEl("div", { text: "Controls profile update, when disabled, fewer file reads/writes are performed. Changed settings are not saved automatically." }), fragment.createEl("div", { text: "Requieres reload for changes to take effect!", cls: "mod-warning" }));
+      fragment.append(fragment.createEl("div", { text: "Controls profile update, when disabled, fewer file reads/writes are performed. Changed settings are not saved automatically." }), fragment.createEl("div", { text: "Requires reload for changes to take effect!", cls: "mod-warning" }));
     })).addToggle((toggle) => toggle.setValue(this.plugin.getProfileUpdate()).onChange((value) => {
       try {
         if (value !== this.plugin.getProfileUpdate()) {
@@ -14747,7 +14651,7 @@ var SettingsProfilesSettingTab = class extends import_obsidian4.PluginSettingTab
     }).toggleEl.setAttr("id", "profile-update"));
     if (this.plugin.getProfileUpdate()) {
       new import_obsidian4.Setting(containerEl).setName("Profile update delay").setDesc(createFragment((fragment) => {
-        fragment.append(fragment.createEl("div", { text: "The time in ms that must pass before the profile can be updated again" }), fragment.createEl("div", { text: "Requieres reload for changes to take effect!", cls: "mod-warning" }));
+        fragment.append(fragment.createEl("div", { text: "The time in ms that must pass before the profile can be updated again" }), fragment.createEl("div", { text: "Requires reload for changes to take effect!", cls: "mod-warning" }));
       })).addExtraButton((button) => button.setIcon(ICON_RESET).setTooltip("Reset").onClick(() => {
         try {
           const sliderEl = this.containerEl.querySelector("#update-delay");
@@ -14915,12 +14819,13 @@ var ProfileSwitcherModal = class extends import_obsidian5.SuggestModal {
   }
   // Perform action on the selected suggestion.
   onChooseSuggestion(suggestion, evt) {
-    let { state, ...rest } = suggestion;
+    const { state, ...rest } = suggestion;
     const profile = { ...rest };
+    let chosenState = state;
     if (evt.shiftKey && state !== 0 /* EXIST */ && state !== 1 /* CURRENT */) {
-      state = 3 /* NEW_OPTIONS */;
+      chosenState = 3 /* NEW_OPTIONS */;
     }
-    switch (state) {
+    switch (chosenState) {
       case 2 /* NEW */:
         this.plugin.createProfile(profile).then(() => {
           this.plugin.switchProfile(profile.name);
@@ -14977,7 +14882,7 @@ function loadProfileOptions(profile, profilesPath) {
     const data = (0, import_fs2.readFileSync)(file, "utf-8");
     profileData = JSON.parse(data);
     if (!profileData) {
-      throw Error(`Failed to read profile from file!`);
+      throw Error("Failed to read profile from file!");
     }
     profileData.modifiedAt = new Date(profileData.modifiedAt);
     return profileData;
@@ -14989,7 +14894,7 @@ function loadProfileOptions(profile, profilesPath) {
 function loadProfilesOptions(profilesPath) {
   try {
     const files = getAllFiles([profilesPath, `${import_path3.sep}*${import_path3.sep}profile.json`]);
-    let profilesList = [];
+    const profilesList = [];
     files.forEach((file) => {
       if (!(0, import_fs2.existsSync)(file)) {
         throw Error(`Path does not exist! Path: ${file}`);
@@ -14998,9 +14903,9 @@ function loadProfilesOptions(profilesPath) {
         throw Error(`The path does not point to a file. Path: ${file}`);
       }
       const data = (0, import_fs2.readFileSync)(file, "utf-8");
-      let profileData = JSON.parse(data);
+      const profileData = JSON.parse(data);
       if (!profileData) {
-        throw Error(`Failed to read profile from file!`);
+        throw Error("Failed to read profile from file!");
       }
       profileData.modifiedAt = new Date(profileData.modifiedAt);
       profilesList.push(profileData);
@@ -15015,7 +14920,7 @@ function getConfigFilesList(profile) {
   var _a;
   const files = [];
   for (const key in profile) {
-    if (profile.hasOwnProperty(key)) {
+    if (Object.prototype.hasOwnProperty.call(profile, key)) {
       const value = profile[key];
       if (typeof value === "boolean" && key !== "enabled" && value) {
         const file = (_a = PROFILE_OPTIONS_MAP[key]) == null ? void 0 : _a.file;
@@ -15049,7 +14954,7 @@ function getIgnoreFilesList(profile) {
   var _a;
   const files = [];
   for (const key in profile) {
-    if (profile.hasOwnProperty(key)) {
+    if (Object.prototype.hasOwnProperty.call(profile, key)) {
       const value = profile[key];
       if (value && typeof value === "boolean") {
         const file = (_a = PROFILE_OPTIONS_MAP[key]) == null ? void 0 : _a.ignore;
@@ -15154,7 +15059,7 @@ var PluginExtended = class extends import_obsidian6.Plugin {
       }
       (0, import_obsidian6.setIcon)(iconWrapper, icon);
     } else {
-      let iconWrapper = item.getElementsByClassName("status-bar-item-icon")[0];
+      const iconWrapper = item.getElementsByClassName("status-bar-item-icon")[0];
       if (iconWrapper) {
         iconWrapper.remove();
       }
@@ -15166,7 +15071,7 @@ var PluginExtended = class extends import_obsidian6.Plugin {
       }
       labelEl.setText(label);
     } else {
-      let labelEl = item.getElementsByClassName("status-bar-item-label")[0];
+      const labelEl = item.getElementsByClassName("status-bar-item-label")[0];
       if (labelEl) {
         labelEl.remove();
       }
@@ -15188,14 +15093,13 @@ var SettingsProfilesPlugin = class extends PluginExtended {
     this.addSettingTab(new SettingsProfilesSettingTab(this.app, this));
     if (this.getProfileUpdate()) {
       this.settingsListener = (0, import_fs3.watch)((0, import_path4.join)(getVaultPath(), this.app.vault.configDir), { recursive: true }, (0, import_obsidian7.debounce)((eventType, filename) => {
-        if (eventType !== "change" || !filename)
-          return;
+        if (eventType !== "change" || !filename) return;
         const profile = this.getCurrentProfile();
         if (profile) {
           if (profile.autoSync) {
             this.updateProfile();
           } else if (!getIgnoreFilesList(profile).contains(filename)) {
-            profile.modifiedAt = new Date();
+            profile.modifiedAt = /* @__PURE__ */ new Date();
             this.updateCurrentProfile(profile);
           }
         }
@@ -15292,7 +15196,7 @@ var SettingsProfilesPlugin = class extends PluginExtended {
    * Update status bar
    */
   updateUI() {
-    let profile = this.getCurrentProfile();
+    const profile = this.getCurrentProfile();
     let icon = ICON_NO_CURRENT_PROFILE;
     let label = "Switch profile";
     try {
@@ -15359,7 +15263,7 @@ var SettingsProfilesPlugin = class extends PluginExtended {
           } else if (modifiers === 0 && click_action == "switch" || ev.ctrlKey && ctrl_action == "switch" || ev.shiftKey && shift_action == "switch" || ev.altKey && alt_action == "switch") {
             new ProfileSwitcherModal(this.app, this).open();
           } else if (modifiers === 0 && click_action == "none" || ev.ctrlKey && ctrl_action == "none" || ev.shiftKey && shift_action == "none" || ev.altKey && alt_action == "none") {
-            new import_obsidian7.Notice(`This setting is disabled! Go to 'Settings profiles>Statusbar Interaction' to change this.`, 3e3);
+            new import_obsidian7.Notice("This setting is disabled! Go to 'Settings profiles>Statusbar Interaction' to change this.", 3e3);
             return;
           } else if (!profile2) {
             throw Error("No current profile! But is required for save or load.");
@@ -15397,7 +15301,7 @@ var SettingsProfilesPlugin = class extends PluginExtended {
   async saveSettings() {
     try {
       for (const key in this.vaultSettings) {
-        if (!DEFAULT_VAULT_SETTINGS.hasOwnProperty(key)) {
+        if (!Object.prototype.hasOwnProperty.call(DEFAULT_VAULT_SETTINGS, key)) {
           delete this.vaultSettings[key];
         }
       }
@@ -15410,12 +15314,12 @@ var SettingsProfilesPlugin = class extends PluginExtended {
   /**
    * Check relevant files for profile are changed
    * @param profile The profile to check
-   * @returns `ture` if at least one file has changed and is newer than the saved profile
+   * @returns `true` if at least one file has changed and is newer than the saved profile
    */
   areSettingsChanged(profile) {
     try {
       const sourcePath = [getVaultPath(), this.app.vault.configDir];
-      const targetPath = [this.getAbsolutProfilesPath(), profile.name];
+      const targetPath = [this.getAbsoluteProfilesPath(), profile.name];
       if (!(0, import_fs3.existsSync)((0, import_path4.join)(...sourcePath))) {
         throw Error(`Source path do not exist! SourcePath: ${(0, import_path4.join)(...sourcePath)}`);
       }
@@ -15435,12 +15339,12 @@ var SettingsProfilesPlugin = class extends PluginExtended {
   /**
    * Check relevant files for profile are saved
    * @param profile The profile to check
-   * @returns `ture` if at no file has changed or all are older than the saved profile
+   * @returns `true` if at no file has changed or all are older than the saved profile
    */
   areSettingsSaved(profile) {
     try {
       const sourcePath = [getVaultPath(), this.app.vault.configDir];
-      const targetPath = [this.getAbsolutProfilesPath(), profile.name];
+      const targetPath = [this.getAbsoluteProfilesPath(), profile.name];
       if (!(0, import_fs3.existsSync)((0, import_path4.join)(...sourcePath))) {
         throw Error(`Source path do not exist! SourcePath: ${(0, import_path4.join)(...sourcePath)}`);
       }
@@ -15459,14 +15363,14 @@ var SettingsProfilesPlugin = class extends PluginExtended {
   }
   /**
    * Load settings and data for the given profile
-   * @param profile The profile 
+   * @param profile The profile
    */
   async loadProfileSettings(profile) {
     try {
       await this.loadProfile(profile.name);
       this.getProfilesList().forEach((value, index, array) => {
         if (value.name === profile.name) {
-          array[index] = loadProfileOptions(profile, this.getAbsolutProfilesPath()) || value;
+          array[index] = loadProfileOptions(profile, this.getAbsoluteProfilesPath()) || value;
         }
       });
       return this.getProfile(profile.name);
@@ -15477,12 +15381,12 @@ var SettingsProfilesPlugin = class extends PluginExtended {
   }
   /**
    * Save settings and data for the given profile
-   * @param profile The profile 
+   * @param profile The profile
    */
   async saveProfileSettings(profile) {
     try {
       await this.saveProfile(profile.name);
-      await saveProfileOptions(profile, this.getAbsolutProfilesPath());
+      await saveProfileOptions(profile, this.getAbsoluteProfilesPath());
       this.refreshProfilesList();
       return this.getProfile(profile.name);
     } catch (e) {
@@ -15500,7 +15404,7 @@ var SettingsProfilesPlugin = class extends PluginExtended {
       const currentProfile = this.getCurrentProfile();
       if (profileName === "") {
         if (currentProfile) {
-          new DialogModal(this.app, "Save befor deselect profile?", "Otherwise, unsaved changes will be lost.", async () => {
+          new DialogModal(this.app, "Save before deselect profile?", "Otherwise, unsaved changes will be lost.", async () => {
             await this.saveProfileSettings(currentProfile);
           }, async () => {
           }, "Save", false, "Do not Save").open();
@@ -15514,7 +15418,7 @@ var SettingsProfilesPlugin = class extends PluginExtended {
         throw Error(`Target profile does not exist! TargetProfile: ${JSON.stringify(targetProfile)}`);
       }
       if ((currentProfile == null ? void 0 : currentProfile.name) === targetProfile.name) {
-        new import_obsidian7.Notice("Allready current profile!");
+        new import_obsidian7.Notice("Already current profile!");
         return;
       }
       if (currentProfile == null ? void 0 : currentProfile.autoSync) {
@@ -15539,7 +15443,7 @@ var SettingsProfilesPlugin = class extends PluginExtended {
     }
   }
   /**
-   * Create a new profile with the current settings 
+   * Create a new profile with the current settings
    * @param profile The profile options the profile should be created with
    */
   async createProfile(profile) {
@@ -15600,7 +15504,7 @@ var SettingsProfilesPlugin = class extends PluginExtended {
       if (this.isEnabled(profile)) {
         this.updateCurrentProfile(void 0);
       }
-      removeDirectoryRecursiveSync([this.getAbsolutProfilesPath(), profileName]);
+      removeDirectoryRecursiveSync([this.getAbsoluteProfilesPath(), profileName]);
       this.refreshProfilesList();
       await this.saveSettings();
     } catch (e) {
@@ -15612,13 +15516,13 @@ var SettingsProfilesPlugin = class extends PluginExtended {
   /**
    * Save the profile settings
    * @param profileName The name of the profile to load.
-   * @todo Update profile data/settings only when changed 
+   * @todo Update profile data/settings only when changed
    */
   async saveProfile(profileName) {
     try {
-      let profile = this.getProfile(profileName);
+      const profile = this.getProfile(profileName);
       const sourcePath = [getVaultPath(), this.app.vault.configDir];
-      const targetPath = [this.getAbsolutProfilesPath(), profileName];
+      const targetPath = [this.getAbsoluteProfilesPath(), profileName];
       let changed = false;
       ensurePathExist([...targetPath]);
       let filesList = getConfigFilesList(profile);
@@ -15633,7 +15537,7 @@ var SettingsProfilesPlugin = class extends PluginExtended {
         }
       });
       if (changed) {
-        profile.modifiedAt = new Date();
+        profile.modifiedAt = /* @__PURE__ */ new Date();
       }
       if (this.isEnabled(profile)) {
         this.updateCurrentProfile(profile);
@@ -15651,7 +15555,7 @@ var SettingsProfilesPlugin = class extends PluginExtended {
   async loadProfile(profileName) {
     try {
       const profile = this.getProfile(profileName);
-      const sourcePath = [this.getAbsolutProfilesPath(), profileName];
+      const sourcePath = [this.getAbsoluteProfilesPath(), profileName];
       const targetPath = [getVaultPath(), this.app.vault.configDir];
       if (!(0, import_fs3.existsSync)((0, import_path4.join)(...sourcePath))) {
         throw Error(`Source path do not exist! SourcePath: ${(0, import_path4.join)(...sourcePath)}`);
@@ -15675,11 +15579,11 @@ var SettingsProfilesPlugin = class extends PluginExtended {
   }
   /**
    * Retrieves the profile path for the current device.
-   * 
-   * This function uses the machine ID to look up the associated profile path from the vault settings. 
+   *
+   * This function uses the machine ID to look up the associated profile path from the vault settings.
    * If the profile path is missing, it attempts to use a deprecated path and updates the vault settings accordingly.
    * If neither the current nor deprecated paths are available, it creates a entry for current device with default profiles path.
-   * 
+   *
    * @returns {string} The normalized profile path for the current device.
    * @throws {Error} If the device ID cannot be determined.
    */
@@ -15706,16 +15610,16 @@ var SettingsProfilesPlugin = class extends PluginExtended {
   }
   /**
    * Retrieves the absolute profile path for the current device.
-   * 
-   * This function ensures that the profile path returned is an absolute path. 
-   * If the path is relative, it joins it with the vault path to convert it into an absolute path. 
-   * It validates the resulting path is an valid path. 
-   * 
+   *
+   * This function ensures that the profile path returned is an absolute path.
+   * If the path is relative, it joins it with the vault path to convert it into an absolute path.
+   * It validates the resulting path is an valid path.
+   *
    * @returns {string} The normalized absolute profile path for the current device.
    * @throws {Error} If the device ID cannot be determined.
    * @throws {Error} If no valid profiles path can be found.
    */
-  getAbsolutProfilesPath() {
+  getAbsoluteProfilesPath() {
     const relativePath = this.getProfilesPath();
     let path = relativePath;
     if (!(0, import_path4.isAbsolute)(path)) {
@@ -15728,13 +15632,13 @@ var SettingsProfilesPlugin = class extends PluginExtended {
   }
   /**
    * Sets the profile path in the vault settings for the current device ID.
-   * 
-   * This function retrieves the device ID and updates its associated profile 
-   * path in the vault settings. If the provided path is invalid (empty after normalization), 
+   *
+   * This function retrieves the device ID and updates its associated profile
+   * path in the vault settings. If the provided path is invalid (empty after normalization),
    * an error is thrown, and the path is not updated.
-   * 
+   *
    * @param {string} path - The new profile path to be set for the current device.
-   * 
+   *
    * @throws {Error} If the device ID cannot be determined.
    * @throws {Error} If the provided path is invalid (empty after normalization).
    */
@@ -15755,7 +15659,7 @@ var SettingsProfilesPlugin = class extends PluginExtended {
    */
   refreshProfilesList() {
     try {
-      this.globalSettings.profilesList = loadProfilesOptions(this.getAbsolutProfilesPath());
+      this.globalSettings.profilesList = loadProfilesOptions(this.getAbsoluteProfilesPath());
       return;
     } catch (e) {
       console.warn(`Refresh profiles list failed with stored values because of: ${e.message}`);
@@ -15797,7 +15701,7 @@ var SettingsProfilesPlugin = class extends PluginExtended {
   }
   /**
    * Returns the refresh interval currently in the settings
-   * @returns 
+   * @returns
    */
   getUiRefreshInterval() {
     if (!this.vaultSettings.uiUpdateInterval || this.vaultSettings.uiUpdateInterval <= 0 || this.vaultSettings.uiUpdateInterval >= 9e5) {
@@ -15807,7 +15711,7 @@ var SettingsProfilesPlugin = class extends PluginExtended {
   }
   /**
    * Set the refresh interval in current settings
-   * @param interval To what the invervall should be set to
+   * @param interval To what the interval should be set to
    */
   setUiRefreshInterval(interval) {
     if (interval > 0 && interval < 9e5) {
@@ -15858,7 +15762,7 @@ var SettingsProfilesPlugin = class extends PluginExtended {
   }
   /**
    * Returns the delay time for profile update currently in the settings
-   * @returns 
+   * @returns
    */
   getProfileUpdateDelay() {
     if (!this.vaultSettings.profileUpdateDelay || this.vaultSettings.profileUpdateDelay <= 0 || this.vaultSettings.profileUpdateDelay >= 9e5) {
@@ -15868,7 +15772,7 @@ var SettingsProfilesPlugin = class extends PluginExtended {
   }
   /**
    * Set the delay time for profile update in current settings
-   * @param delay To what the invervall should be set to
+   * @param delay To what the interval should be set to
    */
   setProfileUpdateDelay(delay) {
     if (delay > 100 && delay < 9e5) {
@@ -15891,7 +15795,7 @@ var SettingsProfilesPlugin = class extends PluginExtended {
     return profile;
   }
   /**
-   * Gets the currently enabeled profile.
+   * Gets the currently enabled profile.
    * @returns The ProfileSetting object. Or undefined if not found.
    */
   getCurrentProfile() {
@@ -15915,7 +15819,7 @@ var SettingsProfilesPlugin = class extends PluginExtended {
   }
   /**
    * Updates the current profile to passed profile
-   * @param profile The profile to update to 
+   * @param profile The profile to update to
    */
   updateCurrentProfile(profile) {
     if (!profile) {
@@ -15926,7 +15830,7 @@ var SettingsProfilesPlugin = class extends PluginExtended {
   }
   /**
    * Checks the profile is currently enabled
-   * @param profile The profile to check 
+   * @param profile The profile to check
    * @returns Is enabled profile
    */
   isEnabled(profile) {
@@ -15934,14 +15838,14 @@ var SettingsProfilesPlugin = class extends PluginExtended {
     return ((_a = this.vaultSettings.activeProfile) == null ? void 0 : _a.name) === profile.name;
   }
   /**
-   * Checks profile contains all requiered properties
+   * Checks profile contains all required properties
    * @param profile The profile to check
-   * @returns True if profile contains all requiered properties
+   * @returns True if profile contains all required properties
    */
   isValidProfile(profile) {
     let result = true;
     for (const key in DEFAULT_PROFILE_OPTIONS) {
-      if (!profile.hasOwnProperty(key)) {
+      if (!Object.prototype.hasOwnProperty.call(profile, key)) {
         console.warn(`Missing property in profile! Property: ${key} Profile: ${JSON.stringify(profile)}`);
         result = false;
         break;
@@ -15959,11 +15863,11 @@ var SettingsProfilesPlugin = class extends PluginExtended {
   }
   /**
    * Checks the profile is up to date to the saved profile
-   * @param profile The profile to check 
+   * @param profile The profile to check
    * @returns Is loaded profile newer/equal than saved profile
    */
   isProfileUpToDate(profile) {
-    const profileOptions = loadProfileOptions(profile, this.getAbsolutProfilesPath());
+    const profileOptions = loadProfileOptions(profile, this.getAbsoluteProfilesPath());
     if (!profileOptions || !profileOptions.modifiedAt) {
       return true;
     }
@@ -15973,12 +15877,12 @@ var SettingsProfilesPlugin = class extends PluginExtended {
     return !this.areSettingsChanged(profile);
   }
   /**
-   * Check the profile settings are saved 
-   * @param profile The profile to check 
+   * Check the profile settings are saved
+   * @param profile The profile to check
    * @returns Is saved profile newer/equal than saved profile
    */
   isProfileSaved(profile) {
-    const profileOptions = loadProfileOptions(profile, this.getAbsolutProfilesPath());
+    const profileOptions = loadProfileOptions(profile, this.getAbsoluteProfilesPath());
     if (!profileOptions || !profileOptions.modifiedAt) {
       return false;
     }

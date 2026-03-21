@@ -4,11 +4,48 @@
     "type": "split",
     "children": [
       {
-        "id": "16a06356b2f7b83a",
+        "id": "e438e5d9d94903b3",
         "type": "tabs",
         "children": [
           {
-            "id": "3e2dfc8182e5cc9e",
+            "id": "ba6b3f485b01b8a3",
+            "type": "leaf",
+            "state": {
+              "type": "bases",
+              "state": {
+                "file": "Deck Builder.base",
+                "viewName": "Whole"
+              },
+              "icon": "lucide-layout-grid",
+              "title": "Deck Builder"
+            }
+          },
+          {
+            "id": "6d43e19b78722615",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Cards/Byť Odpántovaný.md",
+                "mode": "preview",
+                "source": false,
+                "backlinks": true,
+                "backlinkOpts": {
+                  "collapseAll": false,
+                  "extraContext": false,
+                  "sortOrder": "alphabetical",
+                  "showSearch": false,
+                  "searchQuery": "",
+                  "backlinkCollapsed": false,
+                  "unlinkedCollapsed": true
+                }
+              },
+              "icon": "lucide-file",
+              "title": "Byť Odpántovaný"
+            }
+          },
+          {
+            "id": "14867c46b1a5a840",
             "type": "leaf",
             "state": {
               "type": "beautitab-react-view",
@@ -87,8 +124,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 235.5,
-    "collapsed": true
+    "width": 235.5
   },
   "right": {
     "id": "e4f6f62a97dd0d19",
@@ -104,9 +140,11 @@
             "type": "leaf",
             "state": {
               "type": "file-properties",
-              "state": {},
+              "state": {
+                "file": "Deck Builder.base"
+              },
               "icon": "lucide-info",
-              "title": "File properties"
+              "title": "File properties for Deck Builder"
             }
           },
           {
@@ -177,7 +215,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 223.5
+    "width": 223.5,
+    "collapsed": true
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -196,14 +235,24 @@
       "omnisearch:Omnisearch": false
     }
   },
-  "active": "3e2dfc8182e5cc9e",
+  "active": "ba6b3f485b01b8a3",
   "lastOpenFiles": [
+    "Cards/Byť Odpántovaný.md",
+    "Cards/Tuleň Tím Šesť.md",
+    "Deck Builder.base",
+    "Cards/Vyfarbi ma prekvapený.md",
+    "Systems/Keywords.md",
+    "thumbnails/resized/e6ec118ce960e1b8e30675bdd23af2f0_86cf658e.webp",
+    "Cards/Artworks/Pasted image 20260320120643.png",
+    "Cards/Two Dies.md",
+    "Cards/Not Bed At All.md",
+    "thumbnails/resized/5682644eecd9b71913cc74f1a6ced38f_86cf658e.webp",
+    "Cards/Artworks/Pasted image 20260320112334.png",
     "Cards/A Salt.md",
     "Cards/Fúkacia Prácička.md",
     "Cards/Kožný Kráčač.md",
     "Cards/Deadass.md",
     "Cards/Ján Bravčový.md",
-    "Systems/Keywords.md",
     "Cards/ATM star.md",
     "Cards/Exploding ATM star.md",
     "Cards/The Why Axes.md",
@@ -216,25 +265,15 @@
     "Cards/Dr. Glass Cannon Chasuble.md",
     "Cards/Fun Guy.md",
     "Cards/Formula Booklet.md",
-    "Deck Builder.base",
     "Cards/Dumbass.md",
     "Cards/Eggsplaining.md",
     "Cards/MäsovýŠtít.md",
-    "Cards/Choese.md",
-    "Cards/Box and Whisker.md",
-    "Cards/Adam Ničiteľ.md",
-    "Cards/8km away.md",
-    "Cards/The Captain.md",
     "thumbnails/resized/ccf276598056afde119b725e7ee7758c_86cf658e.webp",
     "Cards/Artworks/Pasted image 20260317223448.png",
     "thumbnails/resized/9824338a57ad03fc4f77052648c329ed_86cf658e.webp",
     "Cards/Artworks/Pasted image 20260317145431.png",
     "thumbnails/resized/939fb74f58b51bf14a8fc1383d278896_86cf658e.webp",
     "Cards/Artworks/Pasted image 20260316132833.png",
-    "thumbnails/resized/d27ca677758a305f623c8798ca6839b3_86cf658e.webp",
-    "thumbnails/resized/3c1f6310381644e2493147b3d1f14e9a_86cf658e.webp",
-    "Cards/Artworks/Pasted image 20260313131342.png",
-    "thumbnails/resized/b85a3506e156635ab7da96e0d0e9d5a4_86cf658e.webp",
     "The Board.canvas",
     "Cards/untitled folder",
     "thumbnails/resized",
