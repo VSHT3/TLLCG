@@ -1,0 +1,31 @@
+{
+  "hero_base_hp": 30,
+  "base_sellary_per_turn": 5,
+  "max_cards_per_turn": 2,
+  "max_hand_size": 10,
+  "neutral_draw_base_cost": 3,
+  "neutral_draw_extra_cost": 1,
+  "faction_draw_base_cost": 4,
+  "faction_draw_extra_cost": 1,
+  "row_capacities": [
+    5,
+    5,
+    3
+  ],
+  "row_names": [
+    "melee",
+    "ranged",
+    "artillery"
+  ],
+  "turn_phases": [
+    "sellary",
+    "start_of_turn_abilities",
+    "play_cards",
+    "discard_cards",
+    "draw_cards",
+    "end_of_turn_abilities",
+    "status_trigger",
+    "status_diminish"
+  ],
+  "activation_order": "melee_to_artillery_left_to_right"
+}

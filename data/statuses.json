@@ -1,0 +1,82 @@
+[
+  {
+    "id": "cursed",
+    "name": "Cursed",
+    "description": "This card is banished after it’s destroyed.",
+    "stackable": false,
+    "diminishes": false,
+    "damages_self": false
+  },
+  {
+    "id": "vulnerable",
+    "name": "Vulnerable",
+    "description": "If this unit gets damaged during this turn, at the end of it damage self by 1 per stack. \nOne stack dissepates per turn.",
+    "stackable": true,
+    "diminishes": true,
+    "damages_self": true
+  },
+  {
+    "id": "perplexed",
+    "name": "Perplexed",
+    "description": "On attack, this unit has a 1/2 chance to attack own hero instead.",
+    "stackable": false,
+    "diminishes": false,
+    "damages_self": false
+  },
+  {
+    "id": "invisible",
+    "name": "Invisible",
+    "description": "This unit can not be targeted manually.",
+    "stackable": false,
+    "diminishes": false,
+    "damages_self": false
+  },
+  {
+    "id": "cancerous",
+    "name": "Cancerous",
+    "description": "**Economic Fury**\nDouble each profit you gain.\nOne stack dissepates per turn.",
+    "stackable": true,
+    "diminishes": true,
+    "damages_self": false
+  },
+  {
+    "id": "drunk",
+    "name": "Drunk",
+    "description": "On attack, this unit has a chance to miss (1/4 per stack).676776\nIf the unit is of the Abeer Dawood Salman faction, gain 1/4  chance to crit per stack. \nOne stack dissapates in 4 turns.",
+    "stackable": true,
+    "diminishes": true,
+    "damages_self": false
+  },
+  {
+    "id": "defender",
+    "name": "Defender",
+    "description": "**Protector**",
+    "stackable": false,
+    "diminishes": false,
+    "damages_self": false
+  },
+  {
+    "id": "poison",
+    "name": "Poison",
+    "description": "At the end of your turn, damage self by 1. Cannot kill the unit. \nOne stack dissepates per turn.",
+    "stackable": true,
+    "diminishes": true,
+    "damages_self": true
+  },
+  {
+    "id": "burn",
+    "name": "Burn",
+    "description": "At the end of your turn, damage self by 1.",
+    "stackable": false,
+    "diminishes": false,
+    "damages_self": true
+  },
+  {
+    "id": "wither",
+    "name": "Wither",
+    "description": "At the end of your turn: deal 1 damage for every stack and remove all stacks \nCan kill Unit",
+    "stackable": true,
+    "diminishes": false,
+    "damages_self": true
+  }
+]
