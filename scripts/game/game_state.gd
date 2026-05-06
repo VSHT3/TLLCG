@@ -17,23 +17,24 @@ var winner_id: int = -1
 
 # ── Setup ────────────────────────────────────────────────────────────────────
 
-func setup_game(faction_choices: Array[String]) -> void:
-	"""Initialize the game with chosen factions. faction_choices[i] = faction for player i."""
-	# Build neutral deck
+func setup_game(faction_choices: Array[String], first_player_id: int = 0) -> void:
+	"""Initialize the game. faction_choices[i] = faction for player i. first_player_id goes first."""
 	_build_neutral_deck()
-	
-	# Create players
+
 	for i in range(faction_choices.size()):
 		var ps: PlayerState = PlayerState.create(i, faction_choices[i])
 		players.append(ps)
-	
-	# Initial draw: 5 neutral + 3 faction per player (reverse order of first pick)
-	for i in range(players.size() - 1, -1, -1):
+
+	# Rulebook: initial draw in reverse order of first pick
+	var draw_order: Array[int] = []
+	for i in range(players.size()):
+		draw_order.append((first_player_id + 1 + i) % players.size())
+	for i in draw_order:
 		_draw_neutral_cards(i, 5)
 		_draw_faction_cards(i, 3)
-	
+
 	turn_number = 1
-	current_player_idx = 0
+	current_player_idx = first_player_id
 	EventBus.game_started.emit(_get_player_ids())
 
 
@@ -41,9 +42,10 @@ func _build_neutral_deck() -> void:
 	var neutral_cards: Array[CardData] = CardDatabase.get_neutral_cards()
 	for card_data in neutral_cards:
 		if card_data.type == "Hero":
-			continue  # Skip neutral heroes if any
-		# Create one instance of each neutral card
-		var inst: CardInstance = CardInstance.create(card_data, -1)  # -1 = no owner yet
+			continue
+		if not card_data.has_ability:
+			continue
+		var inst: CardInstance = CardInstance.create(card_data, -1)
 		neutral_deck.append(inst)
 	neutral_deck.shuffle()
 
@@ -138,17 +140,27 @@ func _advance_turn() -> void:
 
 func can_play_card(player: PlayerState, _card: CardInstance) -> bool:
 	"""Check if a player can play a card from hand."""
-	if player.cards_played_this_turn >= GameConstants.MAX_CARDS_PER_TURN:
+	var limit: int = GameConstants.MAX_CARDS_PER_TURN + player.extra_card_plays
+	if player.cards_played_this_turn >= limit:
 		return false
 	if current_phase != GameConstants.TurnPhase.PLAY_CARDS:
 		return false
 	return true
 
 
-func play_card(player: PlayerState, card: CardInstance, row_idx: int = -1) -> bool:
-	"""Play a card from hand. row_idx needed for Units. Returns success."""
+func play_card(player: PlayerState, card: CardInstance, row_idx: int = -1, col_idx: int = -1) -> bool:
+	"""Play a card from hand. row_idx + col_idx needed for Units. Returns success."""
 	if not can_play_card(player, card):
 		return false
+	if not (card in player.hand):
+		return false
+	if card.data.type == "Unit" or card.data.type == "Artifact":
+		if row_idx < 0 or col_idx < 0:
+			return false
+		if row_idx >= GameConstants.ROW_CAPACITIES.size():
+			return false
+		if not player.is_board_full() and player.is_slot_occupied(row_idx, col_idx):
+			return false
 	
 	# Remove from hand
 	if not player.remove_from_hand(card):
@@ -156,20 +168,19 @@ func play_card(player: PlayerState, card: CardInstance, row_idx: int = -1) -> bo
 	
 	player.cards_played_this_turn += 1
 	
+	print("[DEBUG] play_card: type=%s row=%d col=%d" % [card.data.type, row_idx, col_idx])
+	EventBus.message_shown.emit("PLAY: %s r%d c%d" % [card.data.name, row_idx, col_idx])
 	match card.data.type:
 		"Unit":
-			if row_idx < 0:
-				return false
 			if player.is_board_full():
-				# Goes to graveyard if board is full
 				card.move_to_zone("graveyard")
 				player.graveyard.append(card)
 				EventBus.card_discarded.emit(card, player.player_id)
 				return true
-			if not player.place_on_board(card, row_idx):
+			if not player.place_on_board(card, row_idx, col_idx):
+				print("[DEBUG] place_on_board failed")
 				return false
-			EventBus.card_placed_on_board.emit(card, row_idx, player.board[row_idx].size() - 1)
-			# Trigger Deploy
+			EventBus.card_placed_on_board.emit(card, row_idx, col_idx)
 			_trigger_deploy(card)
 		
 		"Spell":
@@ -179,18 +190,11 @@ func play_card(player: PlayerState, card: CardInstance, row_idx: int = -1) -> bo
 			player.graveyard.append(card)
 		
 		"Artifact":
-			# Artifacts go to a special zone (we put them on board row 2 / artillery)
-			if not player.place_on_board(card, 2):
-				# If artillery row full, try other rows
-				var placed: bool = false
-				for r in range(GameConstants.ROW_CAPACITIES.size()):
-					if player.place_on_board(card, r):
-						placed = true
-						break
-				if not placed:
-					card.move_to_zone("graveyard")
-					player.graveyard.append(card)
-					return true
+			if row_idx < 0 or col_idx < 0:
+				return false
+			if not player.place_on_board(card, row_idx, col_idx):
+				return false
+			EventBus.card_placed_on_board.emit(card, row_idx, col_idx)
 			_trigger_deploy(card)
 	
 	EventBus.card_played.emit(card, player.player_id)
@@ -249,8 +253,11 @@ func _draw_faction_cards(player_idx: int, count: int) -> void:
 # ── Ability Triggers ─────────────────────────────────────────────────────────
 
 func _trigger_deploy(card: CardInstance) -> void:
+	print("[DEBUG] _trigger_deploy: %s has %d effects" % [card.data.name, card.data.effects.size()])
 	for effect in card.data.effects:
+		print("[DEBUG] effect trigger=%s type=%s" % [effect.trigger, effect.type])
 		if effect.trigger == "deploy":
+			print("[DEBUG] emitting ability_triggered for deploy effect")
 			EventBus.deploy_triggered.emit(card)
 			EventBus.ability_triggered.emit(card, effect)
 
@@ -291,6 +298,8 @@ func _trigger_statuses(player: PlayerState) -> void:
 	"""Process status effects at end of turn."""
 	var units: Array[CardInstance] = player.get_all_board_units()
 	for card in units:
+		if card.data.type == "Artifact":
+			continue
 		# Poison: 1 damage per stack, cannot kill
 		if card.has_status("Poison"):
 			var stacks: int = card.get_status_stacks("Poison")

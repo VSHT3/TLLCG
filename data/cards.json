@@ -202,7 +202,8 @@
         "trigger": "turn_end",
         "raw_text": "Hoard 2 —> At the end of your turn, **profit** 2.\nHoard 6 —> At the end of your turn, **profit** 3 instead.\nHoard 8 —> At the end of your turn, **profit** 4 and boost self by 1 instead."
       }
-    ]
+    ],
+    "implemented": true
   },
   {
     "id": "accountant",
@@ -522,10 +523,19 @@
     "effects": [
       {
         "type": "complex",
-        "trigger": "passive",
+        "trigger": "deploy",
+        "value": 0,
+        "status": "",
+        "stacks": 0,
+        "timer_value": 0,
+        "upkeep_cost": 0,
+        "tribute_cost": 0,
+        "hoard_threshold": 0,
+        "charges": 0,
         "raw_text": "You may play 2 more cards during this turn."
       }
-    ]
+    ],
+    "implemented": true
   },
   {
     "id": "catch_up",
@@ -543,10 +553,19 @@
     "effects": [
       {
         "type": "complex",
-        "trigger": "passive",
+        "trigger": "deploy",
+        "value": 0,
+        "status": "",
+        "stacks": 0,
+        "timer_value": 0,
+        "upkeep_cost": 0,
+        "tribute_cost": 0,
+        "hoard_threshold": 0,
+        "charges": 0,
         "raw_text": "Set your sellary equal to your opponent."
       }
-    ]
+    ],
+    "implemented": true
   },
   {
     "id": "celery_in_slovakia",
@@ -874,7 +893,8 @@
         "value": 3,
         "trigger": "passive"
       }
-    ]
+    ],
+    "implemented": true
   },
   {
     "id": "ex_cited",
@@ -1166,11 +1186,46 @@
     "artwork": "Cards/HHMDS.png",
     "effects": [
       {
-        "type": "profit",
+        "type": "heal",
+        "trigger": "passive",
         "value": 2,
-        "trigger": "passive"
+        "status": "",
+        "stacks": 0,
+        "timer_value": 0,
+        "upkeep_cost": 0,
+        "tribute_cost": 0,
+        "hoard_threshold": 0,
+        "charges": 0,
+        "raw_text": "Heal your hero by 2."
+      },
+      {
+        "type": "profit",
+        "trigger": "passive",
+        "value": 2,
+        "status": "",
+        "stacks": 0,
+        "timer_value": 0,
+        "upkeep_cost": 0,
+        "tribute_cost": 0,
+        "hoard_threshold": 0,
+        "charges": 0,
+        "raw_text": "Profit 2."
+      },
+      {
+        "type": "complex",
+        "trigger": "passive",
+        "value": 0,
+        "status": "",
+        "stacks": 0,
+        "timer_value": 0,
+        "upkeep_cost": 0,
+        "tribute_cost": 0,
+        "hoard_threshold": 0,
+        "charges": 0,
+        "raw_text": "You may play 1 more card for this turn."
       }
-    ]
+    ],
+    "implemented": true
   },
   {
     "id": "hnusny_domaci_produkt",
@@ -1379,7 +1434,8 @@
         "trigger": "turn_end",
         "raw_text": "At the end of your turn, boost a unit on the right by 1. \nIf this unit is alone in a row, instead at the end of your turn, damage an enemy hero by 3 and boost self by 1."
       }
-    ]
+    ],
+    "implemented": true
   },
   {
     "id": "inflation",
@@ -2606,10 +2662,32 @@
     "effects": [
       {
         "type": "complex",
+        "trigger": "turn_end",
+        "value": 0,
+        "status": "",
+        "stacks": 0,
+        "timer_value": 0,
+        "upkeep_cost": 0,
+        "tribute_cost": 0,
+        "hoard_threshold": 0,
+        "charges": 0,
+        "raw_text": "At the end of your turn, you may pay 2 to heal your hero by 1."
+      },
+      {
+        "type": "complex",
         "trigger": "last_word",
-        "raw_text": "At the end of your turn, you may pay 2 —> heal your hero by 1. \nLast word —> heal all Sir Can units which you control by 2, then boost them by 1."
+        "value": 0,
+        "status": "",
+        "stacks": 0,
+        "timer_value": 0,
+        "upkeep_cost": 0,
+        "tribute_cost": 0,
+        "hoard_threshold": 0,
+        "charges": 0,
+        "raw_text": "Last word: heal all Sir Can units by 2, then boost them by 1."
       }
-    ]
+    ],
+    "implemented": true
   },
   {
     "id": "sir_veil",
@@ -2844,7 +2922,8 @@
         "trigger": "passive",
         "raw_text": "Shuffle two cards from your hand into your faction deck, then draw two faction cards."
       }
-    ]
+    ],
+    "implemented": true
   },
   {
     "id": "talking_to_my_friend",

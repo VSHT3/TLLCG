@@ -1,191 +1,191 @@
 [
   {
-    "id": "deploy",
-    "name": "Deploy",
-    "description": "Trigger the ability upon placing the card on the board.",
-    "has_value": false,
-    "has_status_param": false
+	"id": "deploy",
+	"name": "Deploy",
+	"description": "Trigger the ability upon placing the card on the board.",
+	"has_value": false,
+	"has_status_param": false
   },
   {
-    "id": "banish",
-    "name": "Banish",
-    "description": "Removes a card from the game. Does not trigger Last Word.",
-    "has_value": false,
-    "has_status_param": false
+	"id": "banish",
+	"name": "Banish",
+	"description": "Removes a card from the game. Does not trigger Last Word.",
+	"has_value": false,
+	"has_status_param": false
   },
   {
-    "id": "devour",
-    "name": "Devour",
-    "description": "Target an allied unit, destroy it, then boost self by it’s power.",
-    "has_value": false,
-    "has_status_param": false
+	"id": "devour",
+	"name": "Devour",
+	"description": "Target an allied unit, destroy it, then boost self by it’s power.",
+	"has_value": false,
+	"has_status_param": false
   },
   {
-    "id": "hoard_x",
-    "name": "Hoard $X$",
-    "description": "Trigger the ability if you have X or more sellary.",
-    "has_value": true,
-    "has_status_param": false
+	"id": "hoard_x",
+	"name": "Hoard $X$",
+	"description": "Trigger the ability if you have X or more sellary.",
+	"has_value": true,
+	"has_status_param": false
   },
   {
-    "id": "destroy",
-    "name": "Destroy",
-    "description": "Reduce health to 0.",
-    "has_value": false,
-    "has_status_param": false
+	"id": "destroy",
+	"name": "Destroy",
+	"description": "Reduce health to 0.",
+	"has_value": false,
+	"has_status_param": false
   },
   {
-    "id": "last_word",
-    "name": "Last Word",
-    "description": "Trigger the ability upon the destruction of the card.",
-    "has_value": false,
-    "has_status_param": false
+	"id": "last_word",
+	"name": "Last Word",
+	"description": "Trigger the ability upon the destruction of the card.",
+	"has_value": false,
+	"has_status_param": false
   },
   {
-    "id": "tribute_x",
-    "name": "Tribute $X$",
-    "description": "Upon playing a card, you may pay X sellary to trigger the ability.",
-    "has_value": true,
-    "has_status_param": false
+	"id": "tribute_x",
+	"name": "Tribute $X$",
+	"description": "Upon playing a card, you may pay X sellary to trigger the ability.",
+	"has_value": true,
+	"has_status_param": false
   },
   {
-    "id": "upkeep_x",
-    "name": "Upkeep $X$",
-    "description": "Deduct X sellary. If this condition is not met, the ability is not triggered.",
-    "has_value": true,
-    "has_status_param": false
+	"id": "upkeep_x",
+	"name": "Upkeep $X$",
+	"description": "Deduct X sellary. If this condition is not met, the ability is not triggered.",
+	"has_value": true,
+	"has_status_param": false
   },
   {
-    "id": "income_x",
-    "name": "Income $X$",
-    "description": "Profit X at the start of your turn.",
-    "has_value": false,
-    "has_status_param": false
+	"id": "income_x",
+	"name": "Income $X$",
+	"description": "Profit X at the start of your turn.",
+	"has_value": false,
+	"has_status_param": false
   },
   {
-    "id": "profit_x",
-    "name": "Profit $X$",
-    "description": "Gain X sellary.",
-    "has_value": true,
-    "has_status_param": false
+	"id": "profit_x",
+	"name": "Profit $X$",
+	"description": "Gain X sellary.",
+	"has_value": true,
+	"has_status_param": false
   },
   {
-    "id": "timer_x",
-    "name": "Timer $X$",
-    "description": "At the end of your turn, reduce timer by 1. Once the timer reaches 0, trigger the ability.",
-    "has_value": false,
-    "has_status_param": false
+	"id": "timer_x",
+	"name": "Timer $X$",
+	"description": "At the end of your turn, reduce timer by 1. Once the timer reaches 0, trigger the ability.",
+	"has_value": false,
+	"has_status_param": false
   },
   {
-    "id": "counter_x_a_numerical_value_count_control",
-    "name": "Counter** $X$\nA numerical value. ^count\n\n**Control",
-    "description": "To control a card means to have it placed on your side of the board.",
-    "has_value": false,
-    "has_status_param": false
+	"id": "counter_x_a_numerical_value_count_control",
+	"name": "Counter** $X$\nA numerical value. ^count\n\n**Control",
+	"description": "To control a card means to have it placed on your side of the board.",
+	"has_value": false,
+	"has_status_param": false
   },
   {
-    "id": "crit",
-    "name": "Crit",
-    "description": "Deal double damage instead.",
-    "has_value": false,
-    "has_status_param": false
+	"id": "crit",
+	"name": "Crit",
+	"description": "Deal double damage instead.",
+	"has_value": false,
+	"has_status_param": false
   },
   {
-    "id": "spy",
-    "name": "Spy",
-    "description": "Place the card on opponent’s board.",
-    "has_value": false,
-    "has_status_param": false
+	"id": "spy",
+	"name": "Spy",
+	"description": "Place the card on opponent’s board.",
+	"has_value": false,
+	"has_status_param": false
   },
   {
-    "id": "charge_x",
-    "name": "Charge $X$",
-    "description": "",
-    "has_value": false,
-    "has_status_param": false
+	"id": "charge_x",
+	"name": "Charge $X$",
+	"description": "",
+	"has_value": false,
+	"has_status_param": false
   },
   {
-    "id": "pay_x",
-    "name": "Pay $X$",
-    "description": "Spend X sellary to trigger the abiliity.",
-    "has_value": true,
-    "has_status_param": false
+	"id": "pay_x",
+	"name": "Pay $X$",
+	"description": "Spend X sellary to trigger the abiliity.",
+	"has_value": true,
+	"has_status_param": false
   },
   {
-    "id": "order_x",
-    "name": "Order $X$",
-    "description": "Use X charges to triger an ability. If there’s no X, use 1 charge.",
-    "has_value": true,
-    "has_status_param": false
+	"id": "order_x",
+	"name": "Order $X$",
+	"description": "Use X charges to triger an ability. If there’s no X, use 1 charge.",
+	"has_value": true,
+	"has_status_param": false
   },
   {
-    "id": "boost_x",
-    "name": "Boost $X$",
-    "description": "Increase unit’s power by X.",
-    "has_value": true,
-    "has_status_param": false
+	"id": "boost_x",
+	"name": "Boost $X$",
+	"description": "Increase unit’s power by X.",
+	"has_value": true,
+	"has_status_param": false
   },
   {
-    "id": "heal_x",
-    "name": "Heal $X$",
-    "description": "Increase unit’s power by X, but can’t go over base health. If there’s no X, boost fully until base health.",
-    "has_value": true,
-    "has_status_param": false
+	"id": "heal_x",
+	"name": "Heal $X$",
+	"description": "Increase unit’s power by X, but can’t go over base health. If there’s no X, boost fully until base health.",
+	"has_value": true,
+	"has_status_param": false
   },
   {
-    "id": "spot_valid_67",
-    "name": "Spot Valid 67",
-    "description": "If you see the number 6 adjacent to number 7, trigger the ability.",
-    "has_value": false,
-    "has_status_param": false
+	"id": "spot_valid_67",
+	"name": "Spot Valid 67",
+	"description": "If you see the number 6 adjacent to number 7, trigger the ability.",
+	"has_value": false,
+	"has_status_param": false
   },
   {
-    "id": "deathblow",
-    "name": "Deathblow",
-    "description": "Trigger the ability upon destroying a unit.",
-    "has_value": false,
-    "has_status_param": false
+	"id": "deathblow",
+	"name": "Deathblow",
+	"description": "Trigger the ability upon destroying a unit.",
+	"has_value": false,
+	"has_status_param": false
   },
   {
-    "id": "cleanse",
-    "name": "Cleanse",
-    "description": "Remove all status effects.",
-    "has_value": false,
-    "has_status_param": false
+	"id": "cleanse",
+	"name": "Cleanse",
+	"description": "Remove all status effects.",
+	"has_value": false,
+	"has_status_param": false
   },
   {
-    "id": "discard",
-    "name": "Discard",
-    "description": "Move to graveyard.",
-    "has_value": false,
-    "has_status_param": false
+	"id": "discard",
+	"name": "Discard",
+	"description": "Move to graveyard.",
+	"has_value": false,
+	"has_status_param": false
   },
   {
-    "id": "permanent_status",
-    "name": "Permanent {status}",
-    "description": "The status does not diminish, and cannot be cleansed by any means.",
-    "has_value": false,
-    "has_status_param": false
+	"id": "permanent_status",
+	"name": "Permanent {status}",
+	"description": "The status does not diminish, and cannot be cleansed by any means.",
+	"has_value": false,
+	"has_status_param": false
   },
   {
-    "id": "block_x",
-    "name": "Block $X$",
-    "description": "Reduce incoming damage by X. Statuses bypass this.",
-    "has_value": true,
-    "has_status_param": false
+	"id": "block_x",
+	"name": "Block $X$",
+	"description": "Reduce incoming damage by X. Statuses bypass this.",
+	"has_value": true,
+	"has_status_param": false
   },
   {
-    "id": "seize_x",
-    "name": "Seize $X$",
-    "description": "Deduct X sellary from {specified}, then profit X.",
-    "has_value": true,
-    "has_status_param": false
+	"id": "seize_x",
+	"name": "Seize $X$",
+	"description": "Deduct X sellary from {specified}, then profit X.",
+	"has_value": true,
+	"has_status_param": false
   },
   {
-    "id": "area",
-    "name": "Area",
-    "description": "includes area, adjacent up-down, left-right, and diagonals.",
-    "has_value": false,
-    "has_status_param": false
+	"id": "area",
+	"name": "Area",
+	"description": "includes area, adjacent up-down, left-right, and diagonals.",
+	"has_value": false,
+	"has_status_param": false
   }
 ]

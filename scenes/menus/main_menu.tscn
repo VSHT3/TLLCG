@@ -1,0 +1,274 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/main_menu.gd" id="1_menu"]
+
+[node name="MainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_menu")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.07, 0.08, 0.11, 1)
+mouse_filter = 2
+
+[node name="TitleScreen" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="TitleScreen"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -200.0
+offset_right = 300.0
+offset_bottom = 200.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 24
+alignment = 1
+
+[node name="TitleLabel" type="Label" parent="TitleScreen/VBox"]
+layout_mode = 2
+text = "TLLCG"
+theme_override_font_sizes/font_size = 72
+theme_override_colors/font_color = Color(0.95, 0.85, 0.4, 1)
+horizontal_alignment = 1
+
+[node name="SubtitleLabel" type="Label" parent="TitleScreen/VBox"]
+layout_mode = 2
+text = "Think Look Like Card Game"
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(0.65, 0.65, 0.75, 1)
+horizontal_alignment = 1
+
+[node name="Spacer" type="Control" parent="TitleScreen/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 40)
+
+[node name="StartButton" type="Button" parent="TitleScreen/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(260, 64)
+theme_override_font_sizes/font_size = 22
+text = "NEW GAME"
+
+[node name="DiceScreen" type="Control" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="DiceScreen"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -340.0
+offset_top = -260.0
+offset_right = 340.0
+offset_bottom = 260.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="DiceLabel" type="Label" parent="DiceScreen/VBox"]
+layout_mode = 2
+text = "ROLL FOR FIRST PICK"
+theme_override_font_sizes/font_size = 28
+theme_override_colors/font_color = Color(0.95, 0.85, 0.4, 1)
+horizontal_alignment = 1
+
+[node name="RulesNote" type="Label" parent="DiceScreen/VBox"]
+layout_mode = 2
+text = "Higher roll picks faction first.\nFaction selection then proceeds in reverse order."
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.6, 0.6, 0.7, 1)
+horizontal_alignment = 1
+
+[node name="Spacer" type="Control" parent="DiceScreen/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 20)
+
+[node name="DiceRow" type="HBoxContainer" parent="DiceScreen/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 80
+alignment = 1
+
+[node name="P0Block" type="VBoxContainer" parent="DiceScreen/VBox/DiceRow"]
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="P0Name" type="Label" parent="DiceScreen/VBox/DiceRow/P0Block"]
+layout_mode = 2
+text = "PLAYER 1"
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.7, 0.75, 1.0, 1)
+horizontal_alignment = 1
+
+[node name="P0Die" type="Label" parent="DiceScreen/VBox/DiceRow/P0Block"]
+layout_mode = 2
+text = "?"
+theme_override_font_sizes/font_size = 64
+theme_override_colors/font_color = Color(0.9, 0.9, 0.95, 1)
+horizontal_alignment = 1
+
+[node name="P1Block" type="VBoxContainer" parent="DiceScreen/VBox/DiceRow"]
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="P1Name" type="Label" parent="DiceScreen/VBox/DiceRow/P1Block"]
+layout_mode = 2
+text = "PLAYER 2"
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(1.0, 0.75, 0.7, 1)
+horizontal_alignment = 1
+
+[node name="P1Die" type="Label" parent="DiceScreen/VBox/DiceRow/P1Block"]
+layout_mode = 2
+text = "?"
+theme_override_font_sizes/font_size = 64
+theme_override_colors/font_color = Color(0.9, 0.9, 0.95, 1)
+horizontal_alignment = 1
+
+[node name="Spacer2" type="Control" parent="DiceScreen/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 10)
+
+[node name="ResultLabel" type="Label" parent="DiceScreen/VBox"]
+layout_mode = 2
+text = "Roll to determine first faction pick."
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.75, 0.9, 0.75, 1)
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="Spacer3" type="Control" parent="DiceScreen/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 16)
+
+[node name="RollButton" type="Button" parent="DiceScreen/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(220, 56)
+theme_override_font_sizes/font_size = 20
+text = "ROLL d20"
+
+[node name="FactionScreen" type="Control" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="FactionScreen"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -380.0
+offset_top = -280.0
+offset_right = 380.0
+offset_bottom = 280.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 24
+alignment = 1
+
+[node name="FactionTitle" type="Label" parent="FactionScreen/VBox"]
+layout_mode = 2
+text = "CHOOSE FACTION"
+theme_override_font_sizes/font_size = 28
+theme_override_colors/font_color = Color(0.95, 0.85, 0.4, 1)
+horizontal_alignment = 1
+
+[node name="PickPrompt" type="Label" parent="FactionScreen/VBox"]
+layout_mode = 2
+text = "Player ? — choose your faction:"
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.8, 0.8, 0.9, 1)
+horizontal_alignment = 1
+
+[node name="Spacer" type="Control" parent="FactionScreen/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 8)
+
+[node name="FactionGrid" type="GridContainer" parent="FactionScreen/VBox"]
+layout_mode = 2
+columns = 2
+theme_override_constants/h_separation = 24
+theme_override_constants/v_separation = 16
+
+[node name="SummaryScreen" type="Control" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="SummaryScreen"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -200.0
+offset_right = 300.0
+offset_bottom = 200.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 28
+alignment = 1
+
+[node name="SummaryTitle" type="Label" parent="SummaryScreen/VBox"]
+layout_mode = 2
+text = "MATCH SETUP"
+theme_override_font_sizes/font_size = 28
+theme_override_colors/font_color = Color(0.95, 0.85, 0.4, 1)
+horizontal_alignment = 1
+
+[node name="SummaryLabel" type="Label" parent="SummaryScreen/VBox"]
+layout_mode = 2
+text = ""
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(0.85, 0.85, 0.95, 1)
+horizontal_alignment = 1
+
+[node name="Spacer" type="Control" parent="SummaryScreen/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 20)
+
+[node name="LaunchButton" type="Button" parent="SummaryScreen/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(260, 64)
+theme_override_font_sizes/font_size = 22
+text = "START GAME"

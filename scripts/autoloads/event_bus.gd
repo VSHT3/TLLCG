@@ -53,6 +53,7 @@ signal timer_expired(card: CardInstance)
 
 signal card_selected(card: CardInstance)
 signal card_hovered(card: CardInstance)
+signal card_detail_requested(card_visual: CardVisual)
 signal target_requested(valid_targets: Array, callback: Callable)
 signal target_selected(target: CardInstance)
 signal target_cancelled()

@@ -1,0 +1,210 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/main/main.gd" id="1_main"]
+[ext_resource type="Script" path="res://scripts/ui/board_visual.gd" id="2_board"]
+[ext_resource type="Script" path="res://scripts/ui/hand_manager.gd" id="3_hand"]
+[ext_resource type="Script" path="res://scripts/game/effect_resolver.gd" id="4_effect"]
+[ext_resource type="PackedScene" path="res://scenes/card/card_visual.tscn" id="5_card"]
+
+[node name="Main" type="Node2D"]
+script = ExtResource("1_main")
+
+[node name="GameBoard" type="Node2D" parent="."]
+
+[node name="Player1Board" type="VBoxContainer" parent="GameBoard"]
+offset_left = 260.0
+offset_top = 210.0
+offset_right = 1660.0
+offset_bottom = 490.0
+script = ExtResource("2_board")
+card_visual_scene = ExtResource("5_card")
+
+[node name="Player0Board" type="VBoxContainer" parent="GameBoard"]
+offset_left = 260.0
+offset_top = 520.0
+offset_right = 1660.0
+offset_bottom = 800.0
+script = ExtResource("2_board")
+card_visual_scene = ExtResource("5_card")
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="HandP0" type="HBoxContainer" parent="UI"]
+offset_left = 260.0
+offset_top = 875.0
+offset_right = 1660.0
+offset_bottom = 1060.0
+alignment = 1
+script = ExtResource("3_hand")
+card_visual_scene = ExtResource("5_card")
+
+[node name="HandP1" type="HBoxContainer" parent="UI"]
+visible = false
+offset_left = 260.0
+offset_top = 10.0
+offset_right = 1660.0
+offset_bottom = 195.0
+alignment = 1
+script = ExtResource("3_hand")
+card_visual_scene = ExtResource("5_card")
+
+[node name="HUD" type="Control" parent="UI"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="TurnLabel" type="Label" parent="UI/HUD"]
+offset_left = 24.0
+offset_top = 20.0
+offset_right = 240.0
+offset_bottom = 46.0
+text = "Turn"
+mouse_filter = 2
+
+[node name="PhaseLabel" type="Label" parent="UI/HUD"]
+offset_left = 24.0
+offset_top = 52.0
+offset_right = 240.0
+offset_bottom = 78.0
+text = "Phase"
+mouse_filter = 2
+
+[node name="SellaryP0" type="Label" parent="UI/HUD"]
+offset_left = 24.0
+offset_top = 110.0
+offset_right = 240.0
+offset_bottom = 136.0
+text = "P1 Sellary: 0"
+mouse_filter = 2
+
+[node name="SellaryP1" type="Label" parent="UI/HUD"]
+offset_left = 24.0
+offset_top = 142.0
+offset_right = 240.0
+offset_bottom = 168.0
+text = "P2 Sellary: 0"
+mouse_filter = 2
+
+[node name="HeroHPP0" type="Label" parent="UI/HUD"]
+offset_left = 24.0
+offset_top = 190.0
+offset_right = 240.0
+offset_bottom = 216.0
+text = "P1 Hero: 0 HP"
+mouse_filter = 2
+
+[node name="HeroHPP1" type="Label" parent="UI/HUD"]
+offset_left = 24.0
+offset_top = 222.0
+offset_right = 240.0
+offset_bottom = 248.0
+text = "P2 Hero: 0 HP"
+mouse_filter = 2
+
+[node name="MessageLabel" type="Label" parent="UI/HUD"]
+offset_left = 24.0
+offset_top = 252.0
+offset_right = 320.0
+offset_bottom = 272.0
+text = ""
+autowrap_mode = 2
+mouse_filter = 2
+
+[node name="EndPhaseButton" type="Button" parent="UI/HUD"]
+offset_left = 24.0
+offset_top = 280.0
+offset_right = 180.0
+offset_bottom = 320.0
+text = "Continue"
+
+[node name="DrawNeutralButton" type="Button" parent="UI/HUD"]
+visible = false
+offset_left = 24.0
+offset_top = 330.0
+offset_right = 220.0
+offset_bottom = 370.0
+text = "Draw Neutral (3)"
+
+[node name="DrawFactionButton" type="Button" parent="UI/HUD"]
+visible = false
+offset_left = 24.0
+offset_top = 380.0
+offset_right = 220.0
+offset_bottom = 420.0
+text = "Draw Faction (4)"
+
+[node name="HeroP0" type="Control" parent="UI/HUD"]
+layout_mode = 0
+offset_left = 1740.0
+offset_top = 820.0
+offset_right = 1890.0
+offset_bottom = 892.0
+
+[node name="HeroP1" type="Control" parent="UI/HUD"]
+layout_mode = 0
+offset_left = 1740.0
+offset_top = 180.0
+offset_right = 1890.0
+offset_bottom = 252.0
+
+[node name="CardDetailPopup" type="PanelContainer" parent="UI"]
+visible = false
+layout_mode = 1
+anchor_left = 1.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 0.0
+offset_left = -270.0
+offset_top = 200.0
+offset_right = -8.0
+offset_bottom = 680.0
+grow_horizontal = 0
+mouse_filter = 1
+
+[node name="VBox" type="VBoxContainer" parent="UI/CardDetailPopup"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="DetailName" type="Label" parent="UI/CardDetailPopup/VBox"]
+layout_mode = 2
+text = "Card Name"
+theme_override_font_sizes/font_size = 16
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="DetailMeta" type="Label" parent="UI/CardDetailPopup/VBox"]
+layout_mode = 2
+text = ""
+theme_override_font_sizes/font_size = 11
+modulate = Color(0.7, 0.7, 0.7, 1)
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="DetailPower" type="Label" parent="UI/CardDetailPopup/VBox"]
+layout_mode = 2
+text = ""
+theme_override_font_sizes/font_size = 13
+horizontal_alignment = 1
+
+[node name="Separator" type="HSeparator" parent="UI/CardDetailPopup/VBox"]
+layout_mode = 2
+
+[node name="DetailAbility" type="RichTextLabel" parent="UI/CardDetailPopup/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 200)
+size_flags_vertical = 3
+bbcode_enabled = true
+text = ""
+scroll_active = true
+fit_content = true
+
+[node name="CloseButton" type="Button" parent="UI/CardDetailPopup/VBox"]
+layout_mode = 2
+text = "✕ Close"
+
+[node name="EffectResolver" type="Node" parent="."]
+script = ExtResource("4_effect")

@@ -57,6 +57,13 @@ enum Zone { DECK, HAND, BOARD, GRAVEYARD, BANISHED }
 ## Cards activate from melee row to artillery, left to right.
 const ACTIVATION_ORDER := "melee_to_artillery_left_to_right"
 
+# ── Match Setup (set by MainMenu before scene switch) ────────────────────────
+
+## Faction names chosen by each player. Index = player_id.
+var pending_faction_choices: Array[String] = ["Sir Can", "A.I. Gods"]
+## Player who won the dice roll and goes first.
+var first_player_id: int = 0
+
 # ── Lifecycle ────────────────────────────────────────────────────────────────
 
 func _ready() -> void:

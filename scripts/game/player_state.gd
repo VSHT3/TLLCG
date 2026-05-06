@@ -30,6 +30,7 @@ var banished: Array[CardInstance] = []
 var sellary: int = 0
 var base_sellary: int = 5
 var cards_played_this_turn: int = 0
+var extra_card_plays: int = 0
 var neutral_draws_this_turn: int = 0
 var faction_draws_this_turn: int = 0
 
@@ -51,9 +52,12 @@ static func create(id: int, faction: String) -> PlayerState:
 	# Build faction deck
 	var faction_cards: Array[CardData] = CardDatabase.get_cards_by_faction(faction)
 	for card_data in faction_cards:
-		if card_data.type != "Hero":
-			var inst: CardInstance = CardInstance.create(card_data, id)
-			ps.faction_deck.append(inst)
+		if card_data.type == "Hero":
+			continue
+		if not card_data.has_ability:
+			continue
+		var inst: CardInstance = CardInstance.create(card_data, id)
+		ps.faction_deck.append(inst)
 	ps.faction_deck.shuffle()
 	
 	return ps
@@ -84,7 +88,7 @@ func get_row_count(row_idx: int) -> int:
 
 
 func is_row_full(row_idx: int) -> bool:
-	return get_row_count(row_idx) >= GameConstants.ROW_CAPACITIES[row_idx]
+	return find_free_col(row_idx) < 0
 
 
 func is_board_full() -> bool:
@@ -95,23 +99,118 @@ func is_board_full() -> bool:
 
 
 func find_card_position(card: CardInstance) -> Dictionary:
-	"""Returns {row, col} or empty dict if not found."""
+	"""Returns {row, col} using the card's stored slot position, or empty dict if not found."""
 	for row_idx in range(board.size()):
-		for col_idx in range(board[row_idx].size()):
-			if board[row_idx][col_idx] == card:
-				return {"row": row_idx, "col": col_idx}
+		if card in board[row_idx]:
+			return {"row": row_idx, "col": card.board_position.get("col", -1)}
 	return {}
+
+
+# ── Adjacency Queries ────────────────────────────────────────────────────────
+# All adjacency helpers operate on slot columns (board_position.col), not array indices.
+# "Right" = higher col index. "Left" = lower col index.
+
+func get_cards_in_row(card: CardInstance) -> Array[CardInstance]:
+	"""All cards on the same row as the given card, excluding the card itself."""
+	var pos: Dictionary = find_card_position(card)
+	if pos.is_empty():
+		return []
+	var result: Array[CardInstance] = []
+	for c in board[pos["row"]]:
+		if c != card:
+			result.append(c)
+	return result
+
+
+func is_alone_in_row(card: CardInstance) -> bool:
+	"""True if no other card shares the same row."""
+	var pos: Dictionary = find_card_position(card)
+	if pos.is_empty():
+		return false
+	return board[pos["row"]].size() == 1
+
+
+func get_right_neighbor(card: CardInstance) -> CardInstance:
+	"""Nearest card to the right (next higher col) in the same row. Null if none."""
+	var pos: Dictionary = find_card_position(card)
+	if pos.is_empty():
+		return null
+	var col: int = pos["col"]
+	var best: CardInstance = null
+	var best_dist: int = 999
+	for c in board[pos["row"]]:
+		if c == card:
+			continue
+		var c_col: int = c.board_position.get("col", -1)
+		var dist: int = c_col - col
+		if dist > 0 and dist < best_dist:
+			best_dist = dist
+			best = c
+	return best
+
+
+func get_left_neighbor(card: CardInstance) -> CardInstance:
+	"""Nearest card to the left (next lower col) in the same row. Null if none."""
+	var pos: Dictionary = find_card_position(card)
+	if pos.is_empty():
+		return null
+	var col: int = pos["col"]
+	var best: CardInstance = null
+	var best_dist: int = 999
+	for c in board[pos["row"]]:
+		if c == card:
+			continue
+		var c_col: int = c.board_position.get("col", -1)
+		var dist: int = col - c_col
+		if dist > 0 and dist < best_dist:
+			best_dist = dist
+			best = c
+	return best
+
+
+func get_row_neighbors(card: CardInstance) -> Array[CardInstance]:
+	"""Left and right immediate neighbors in the same row (up to 2 results)."""
+	var result: Array[CardInstance] = []
+	var left: CardInstance = get_left_neighbor(card)
+	var right: CardInstance = get_right_neighbor(card)
+	if left:
+		result.append(left)
+	if right:
+		result.append(right)
+	return result
 
 
 # ── Board Mutations ──────────────────────────────────────────────────────────
 
-func place_on_board(card: CardInstance, row_idx: int) -> bool:
-	"""Place a card on a specific row. Returns false if row is full."""
-	if is_row_full(row_idx):
+func find_free_col(row_idx: int) -> int:
+	"""Return first unoccupied col in row, or -1 if full."""
+	if row_idx < 0 or row_idx >= board.size():
+		return -1
+	for col in range(GameConstants.ROW_CAPACITIES[row_idx]):
+		if not is_slot_occupied(row_idx, col):
+			return col
+	return -1
+
+
+func is_slot_occupied(row_idx: int, col_idx: int) -> bool:
+	if row_idx < 0 or row_idx >= board.size():
+		return true
+	for card in board[row_idx]:
+		if card.board_position.get("col", -1) == col_idx:
+			return true
+	return false
+
+
+func place_on_board(card: CardInstance, row_idx: int, col_idx: int) -> bool:
+	"""Place card in a specific slot. Returns false if slot occupied or row full."""
+	if row_idx < 0 or row_idx >= board.size():
 		return false
-	var col: int = board[row_idx].size()
+	if col_idx < 0 or col_idx >= GameConstants.ROW_CAPACITIES[row_idx]:
+		return false
+	if is_slot_occupied(row_idx, col_idx):
+		return false
 	board[row_idx].append(card)
-	card.place_on_board(row_idx, col)
+	card.place_on_board(row_idx, col_idx)
 	card.controller_id = player_id
 	return true
 
@@ -122,9 +221,6 @@ func remove_from_board(card: CardInstance) -> bool:
 		var idx: int = board[row_idx].find(card)
 		if idx != -1:
 			board[row_idx].remove_at(idx)
-			# Reindex remaining cards in this row
-			for i in range(idx, board[row_idx].size()):
-				board[row_idx][i].board_position = {"row": row_idx, "col": i}
 			return true
 	return false
 
@@ -196,6 +292,7 @@ func get_faction_draw_cost() -> int:
 
 func reset_turn_state() -> void:
 	cards_played_this_turn = 0
+	extra_card_plays = 0
 	neutral_draws_this_turn = 0
 	faction_draws_this_turn = 0
 	for row in board:

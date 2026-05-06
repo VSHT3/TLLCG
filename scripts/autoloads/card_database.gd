@@ -47,6 +47,34 @@ func get_card(card_id: String) -> CardData:
 	return cards.get(card_id)
 
 
+## Resolve ability text: strip Obsidian wiki links, return plain readable string.
+## [[Keywords#^deploy|Deploy]] → "Deploy", **bold** → bold BBCode.
+func resolve_ability_text(raw: String) -> String:
+	var result: String = raw
+	# Strip [[...|text]] wiki links → keep display text
+	var regex := RegEx.new()
+	regex.compile("\\[\\[[^\\]]*\\|([^\\]]+)\\]\\]")
+	var match_result := regex.search(result)
+	while match_result:
+		result = result.replace(match_result.get_string(), match_result.get_string(1))
+		match_result = regex.search(result)
+	# Strip bare [[text]] links with no pipe
+	var regex2 := RegEx.new()
+	regex2.compile("\\[\\[([^\\]|]+)\\]\\]")
+	match_result = regex2.search(result)
+	while match_result:
+		result = result.replace(match_result.get_string(), match_result.get_string(1))
+		match_result = regex2.search(result)
+	# Convert **bold** → [b]bold[/b] for BBCode
+	var regex3 := RegEx.new()
+	regex3.compile("\\*\\*([^*]+)\\*\\*")
+	match_result = regex3.search(result)
+	while match_result:
+		result = result.replace(match_result.get_string(), "[b]%s[/b]" % match_result.get_string(1))
+		match_result = regex3.search(result)
+	return result
+
+
 ## Get all cards of a specific type (Unit, Spell, Artifact, Hero).
 func get_cards_by_type(card_type: String) -> Array[CardData]:
 	var result: Array[CardData] = []
