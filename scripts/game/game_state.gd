@@ -13,6 +13,7 @@ var turn_number: int = 0
 var current_phase: int = GameConstants.TurnPhase.SELLARY
 var game_over: bool = false
 var winner_id: int = -1
+var last_spell_played: CardData = null
 
 
 # ── Setup ────────────────────────────────────────────────────────────────────
@@ -67,60 +68,40 @@ func start_turn() -> void:
 	var player: PlayerState = get_current_player()
 	player.reset_turn_state()
 	EventBus.turn_started.emit(player.player_id, turn_number)
-	
-	# Phase 1: Sellary
+
 	_set_phase(GameConstants.TurnPhase.SELLARY)
 	player.gain_sellary(player.base_sellary)
-	
-	# Phase 2: Start-of-turn abilities
+
 	_set_phase(GameConstants.TurnPhase.START_OF_TURN)
 	_trigger_start_of_turn(player)
-	
-	# Phase 3: Play cards (interactive — handled by UI)
+
+	# Interactive phase — player acts freely until end_turn()
 	_set_phase(GameConstants.TurnPhase.PLAY_CARDS)
 
 
-func end_play_phase() -> void:
-	"""Called when player finishes playing cards. Continues to discard/draw."""
-	_set_phase(GameConstants.TurnPhase.DISCARD_CARDS)
-	# Discard phase is interactive — UI handles it
-	# After discard, call end_discard_phase()
-
-
-func end_discard_phase() -> void:
-	_set_phase(GameConstants.TurnPhase.DRAW_CARDS)
-	# Draw phase is interactive — UI handles it
-	# After draw, call end_draw_phase()
-
-
-func end_draw_phase() -> void:
+func end_turn() -> void:
+	"""Player pressed End Turn. Enforce hand limit, then resolve end-of-turn."""
 	var player: PlayerState = get_current_player()
-	
-	# Phase 6: End-of-turn abilities
-	_set_phase(GameConstants.TurnPhase.END_OF_TURN)
-	_trigger_end_of_turn(player)
-	
-	# Phase 7: Status trigger
-	_set_phase(GameConstants.TurnPhase.STATUS_TRIGGER)
-	_trigger_statuses(player)
-	
-	# Phase 8: Status diminish
-	_set_phase(GameConstants.TurnPhase.STATUS_DIMINISH)
-	_diminish_statuses(player)
-	
-	# Enforce hand limit
+
+	# Enforce hand limit before end-of-turn triggers
 	var discarded: Array[CardInstance] = player.enforce_hand_limit()
 	for card in discarded:
 		EventBus.card_discarded.emit(card, player.player_id)
-	
-	# End turn
+
+	_set_phase(GameConstants.TurnPhase.END_OF_TURN)
+	_trigger_end_of_turn(player)
+
+	_set_phase(GameConstants.TurnPhase.STATUS_TRIGGER)
+	_trigger_statuses(player)
+
+	_set_phase(GameConstants.TurnPhase.STATUS_DIMINISH)
+	_diminish_statuses(player)
+
 	EventBus.turn_ended.emit(player.player_id)
-	
-	# Check win condition
+
 	if _check_game_over():
 		return
-	
-	# Next player
+
 	_advance_turn()
 
 
@@ -139,13 +120,10 @@ func _advance_turn() -> void:
 # ── Card Playing ─────────────────────────────────────────────────────────────
 
 func can_play_card(player: PlayerState, _card: CardInstance) -> bool:
-	"""Check if a player can play a card from hand."""
-	var limit: int = GameConstants.MAX_CARDS_PER_TURN + player.extra_card_plays
-	if player.cards_played_this_turn >= limit:
-		return false
 	if current_phase != GameConstants.TurnPhase.PLAY_CARDS:
 		return false
-	return true
+	var limit: int = GameConstants.MAX_CARDS_PER_TURN + player.extra_card_plays
+	return player.cards_played_this_turn < limit
 
 
 func play_card(player: PlayerState, card: CardInstance, row_idx: int = -1, col_idx: int = -1) -> bool:
@@ -186,6 +164,7 @@ func play_card(player: PlayerState, card: CardInstance, row_idx: int = -1, col_i
 		"Spell":
 			# Spells resolve immediately then go to graveyard
 			_resolve_spell(card, player)
+			last_spell_played = card.data
 			card.move_to_zone("graveyard")
 			player.graveyard.append(card)
 		

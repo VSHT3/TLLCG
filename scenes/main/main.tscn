@@ -1,17 +1,17 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene format=3 uid="uid://c2bx2nxqdmxdd"]
 
-[ext_resource type="Script" path="res://scripts/main/main.gd" id="1_main"]
-[ext_resource type="Script" path="res://scripts/ui/board_visual.gd" id="2_board"]
-[ext_resource type="Script" path="res://scripts/ui/hand_manager.gd" id="3_hand"]
-[ext_resource type="Script" path="res://scripts/game/effect_resolver.gd" id="4_effect"]
+[ext_resource type="Script" uid="uid://dghr4w3qwkl3d" path="res://scripts/main/main.gd" id="1_main"]
+[ext_resource type="Script" uid="uid://bb0y4t3qnxik6" path="res://scripts/ui/board_visual.gd" id="2_board"]
+[ext_resource type="Script" uid="uid://cvoltn0m05tnf" path="res://scripts/ui/hand_manager.gd" id="3_hand"]
+[ext_resource type="Script" uid="uid://dvrsxf4ieql6e" path="res://scripts/game/effect_resolver.gd" id="4_effect"]
 [ext_resource type="PackedScene" path="res://scenes/card/card_visual.tscn" id="5_card"]
 
-[node name="Main" type="Node2D"]
+[node name="Main" type="Node2D" unique_id=2123518663]
 script = ExtResource("1_main")
 
-[node name="GameBoard" type="Node2D" parent="."]
+[node name="GameBoard" type="Node2D" parent="." unique_id=1459744981]
 
-[node name="Player1Board" type="VBoxContainer" parent="GameBoard"]
+[node name="Player1Board" type="VBoxContainer" parent="GameBoard" unique_id=567102059]
 offset_left = 260.0
 offset_top = 210.0
 offset_right = 1660.0
@@ -19,7 +19,7 @@ offset_bottom = 490.0
 script = ExtResource("2_board")
 card_visual_scene = ExtResource("5_card")
 
-[node name="Player0Board" type="VBoxContainer" parent="GameBoard"]
+[node name="Player0Board" type="VBoxContainer" parent="GameBoard" unique_id=1278566392]
 offset_left = 260.0
 offset_top = 520.0
 offset_right = 1660.0
@@ -27,9 +27,9 @@ offset_bottom = 800.0
 script = ExtResource("2_board")
 card_visual_scene = ExtResource("5_card")
 
-[node name="UI" type="CanvasLayer" parent="."]
+[node name="UI" type="CanvasLayer" parent="." unique_id=1861649164]
 
-[node name="HandP0" type="HBoxContainer" parent="UI"]
+[node name="HandP0" type="HBoxContainer" parent="UI" unique_id=1518875674]
 offset_left = 260.0
 offset_top = 875.0
 offset_right = 1660.0
@@ -38,7 +38,7 @@ alignment = 1
 script = ExtResource("3_hand")
 card_visual_scene = ExtResource("5_card")
 
-[node name="HandP1" type="HBoxContainer" parent="UI"]
+[node name="HandP1" type="HBoxContainer" parent="UI" unique_id=1023362003]
 visible = false
 offset_left = 260.0
 offset_top = 10.0
@@ -48,7 +48,7 @@ alignment = 1
 script = ExtResource("3_hand")
 card_visual_scene = ExtResource("5_card")
 
-[node name="HUD" type="Control" parent="UI"]
+[node name="HUD" type="Control" parent="UI" unique_id=2133677623]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -57,107 +57,158 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="TurnLabel" type="Label" parent="UI/HUD"]
+[node name="TurnLabel" type="Label" parent="UI/HUD" unique_id=2026524056]
+layout_mode = 0
 offset_left = 24.0
 offset_top = 20.0
 offset_right = 240.0
 offset_bottom = 46.0
 text = "Turn"
-mouse_filter = 2
 
-[node name="PhaseLabel" type="Label" parent="UI/HUD"]
+[node name="PhaseLabel" type="Label" parent="UI/HUD" unique_id=128099971]
+layout_mode = 0
 offset_left = 24.0
 offset_top = 52.0
 offset_right = 240.0
 offset_bottom = 78.0
 text = "Phase"
-mouse_filter = 2
 
-[node name="SellaryP0" type="Label" parent="UI/HUD"]
+[node name="SellaryP0" type="Label" parent="UI/HUD" unique_id=1620290672]
+layout_mode = 0
 offset_left = 24.0
 offset_top = 110.0
 offset_right = 240.0
 offset_bottom = 136.0
 text = "P1 Sellary: 0"
-mouse_filter = 2
 
-[node name="SellaryP1" type="Label" parent="UI/HUD"]
+[node name="SellaryP1" type="Label" parent="UI/HUD" unique_id=1039098506]
+layout_mode = 0
 offset_left = 24.0
 offset_top = 142.0
 offset_right = 240.0
 offset_bottom = 168.0
 text = "P2 Sellary: 0"
-mouse_filter = 2
 
-[node name="HeroHPP0" type="Label" parent="UI/HUD"]
+[node name="HeroHPP0" type="Label" parent="UI/HUD" unique_id=1027357912]
+layout_mode = 0
 offset_left = 24.0
 offset_top = 190.0
 offset_right = 240.0
 offset_bottom = 216.0
 text = "P1 Hero: 0 HP"
-mouse_filter = 2
 
-[node name="HeroHPP1" type="Label" parent="UI/HUD"]
+[node name="HeroHPP1" type="Label" parent="UI/HUD" unique_id=1626107306]
+layout_mode = 0
 offset_left = 24.0
 offset_top = 222.0
 offset_right = 240.0
 offset_bottom = 248.0
 text = "P2 Hero: 0 HP"
-mouse_filter = 2
 
-[node name="MessageLabel" type="Label" parent="UI/HUD"]
+[node name="MessageLabel" type="Label" parent="UI/HUD" unique_id=1621026774]
+layout_mode = 0
 offset_left = 24.0
 offset_top = 252.0
 offset_right = 320.0
 offset_bottom = 272.0
-text = ""
 autowrap_mode = 2
-mouse_filter = 2
 
-[node name="EndPhaseButton" type="Button" parent="UI/HUD"]
-offset_left = 24.0
-offset_top = 280.0
-offset_right = 180.0
-offset_bottom = 320.0
-text = "Continue"
-
-[node name="DrawNeutralButton" type="Button" parent="UI/HUD"]
-visible = false
-offset_left = 24.0
-offset_top = 330.0
-offset_right = 220.0
-offset_bottom = 370.0
-text = "Draw Neutral (3)"
-
-[node name="DrawFactionButton" type="Button" parent="UI/HUD"]
-visible = false
-offset_left = 24.0
-offset_top = 380.0
-offset_right = 220.0
-offset_bottom = 420.0
-text = "Draw Faction (4)"
-
-[node name="HeroP0" type="Control" parent="UI/HUD"]
+[node name="EndTurnButton" type="Button" parent="UI/HUD" unique_id=1769395983]
 layout_mode = 0
+offset_left = 1676.0
+offset_top = 468.0
+offset_right = 1832.0
+offset_bottom = 508.0
+text = "End Turn"
+
+[node name="HeroP0" type="Control" parent="UI/HUD" unique_id=1300490130]
+anchors_preset = 0
 offset_left = 1740.0
 offset_top = 820.0
 offset_right = 1890.0
 offset_bottom = 892.0
 
-[node name="HeroP1" type="Control" parent="UI/HUD"]
-layout_mode = 0
+[node name="HeroP1" type="Control" parent="UI/HUD" unique_id=1884604242]
+anchors_preset = 0
 offset_left = 1740.0
 offset_top = 180.0
 offset_right = 1890.0
 offset_bottom = 252.0
 
-[node name="CardDetailPopup" type="PanelContainer" parent="UI"]
-visible = false
+[node name="GraveyardPanelP0" type="Panel" parent="UI" unique_id=888226426]
+offset_left = 70.0
+offset_top = 880.0
+offset_right = 250.0
+offset_bottom = 1055.0
+mouse_filter = 2
+
+[node name="GraveyardLabelP0" type="Label" parent="UI/GraveyardPanelP0" unique_id=549416545]
 layout_mode = 1
-anchor_left = 1.0
-anchor_top = 0.0
+anchors_preset = 15
 anchor_right = 1.0
-anchor_bottom = 0.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Graveyard"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="NeutralDeckPanel" type="Panel" parent="UI" unique_id=1872398016]
+offset_left = 70.0
+offset_top = 453.0
+offset_right = 250.0
+offset_bottom = 553.0
+
+[node name="NeutralDeckLabel" type="Label" parent="UI/NeutralDeckPanel" unique_id=1625165367]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Neutral"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="FactionDeckPanelP0" type="Panel" parent="UI" unique_id=1714707801]
+offset_left = 70.0
+offset_top = 569.0
+offset_right = 250.0
+offset_bottom = 669.0
+
+[node name="FactionDeckLabel" type="Label" parent="UI/FactionDeckPanelP0" unique_id=788906951]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Faction P1"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="FactionDeckPanelP1" type="Panel" parent="UI" unique_id=2040218809]
+offset_left = 70.0
+offset_top = 334.0
+offset_right = 250.0
+offset_bottom = 434.0
+
+[node name="FactionDeckLabel" type="Label" parent="UI/FactionDeckPanelP1" unique_id=1310941274]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Faction P2"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CardDetailPopup" type="PanelContainer" parent="UI" unique_id=690784727]
+visible = false
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
 offset_left = -270.0
 offset_top = 200.0
 offset_right = -8.0
@@ -165,46 +216,42 @@ offset_bottom = 680.0
 grow_horizontal = 0
 mouse_filter = 1
 
-[node name="VBox" type="VBoxContainer" parent="UI/CardDetailPopup"]
+[node name="VBox" type="VBoxContainer" parent="UI/CardDetailPopup" unique_id=590439345]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="DetailName" type="Label" parent="UI/CardDetailPopup/VBox"]
+[node name="DetailName" type="Label" parent="UI/CardDetailPopup/VBox" unique_id=522745797]
 layout_mode = 2
-text = "Card Name"
 theme_override_font_sizes/font_size = 16
+text = "Card Name"
 horizontal_alignment = 1
 autowrap_mode = 2
 
-[node name="DetailMeta" type="Label" parent="UI/CardDetailPopup/VBox"]
-layout_mode = 2
-text = ""
-theme_override_font_sizes/font_size = 11
+[node name="DetailMeta" type="Label" parent="UI/CardDetailPopup/VBox" unique_id=1200989665]
 modulate = Color(0.7, 0.7, 0.7, 1)
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
 horizontal_alignment = 1
 autowrap_mode = 2
 
-[node name="DetailPower" type="Label" parent="UI/CardDetailPopup/VBox"]
+[node name="DetailPower" type="Label" parent="UI/CardDetailPopup/VBox" unique_id=924614422]
 layout_mode = 2
-text = ""
 theme_override_font_sizes/font_size = 13
 horizontal_alignment = 1
 
-[node name="Separator" type="HSeparator" parent="UI/CardDetailPopup/VBox"]
+[node name="Separator" type="HSeparator" parent="UI/CardDetailPopup/VBox" unique_id=1284774923]
 layout_mode = 2
 
-[node name="DetailAbility" type="RichTextLabel" parent="UI/CardDetailPopup/VBox"]
-layout_mode = 2
+[node name="DetailAbility" type="RichTextLabel" parent="UI/CardDetailPopup/VBox" unique_id=694924358]
 custom_minimum_size = Vector2(0, 200)
+layout_mode = 2
 size_flags_vertical = 3
 bbcode_enabled = true
-text = ""
-scroll_active = true
 fit_content = true
 
-[node name="CloseButton" type="Button" parent="UI/CardDetailPopup/VBox"]
+[node name="CloseButton" type="Button" parent="UI/CardDetailPopup/VBox" unique_id=1941137484]
 layout_mode = 2
 text = "✕ Close"
 
-[node name="EffectResolver" type="Node" parent="."]
+[node name="EffectResolver" type="Node" parent="." unique_id=1947419035]
 script = ExtResource("4_effect")

@@ -14,6 +14,7 @@ var can_play_func: Callable = Callable()  # set by Main; receives CardInstance â
 
 signal card_drag_started(card: CardInstance)
 signal card_dropped(card: CardInstance, drop_position: Vector2)
+signal card_right_clicked(card: CardInstance)
 
 
 func setup(ps: PlayerState) -> void:
@@ -37,6 +38,7 @@ func refresh() -> void:
 		add_child(cv)
 		cv.setup(card_inst)
 		cv.clicked.connect(_on_card_clicked)
+		cv.right_clicked.connect(_on_card_right_clicked)
 		cv.drag_started.connect(_on_card_drag_started)
 		cv.drag_ended.connect(_on_card_drag_ended)
 		card_visuals.append(cv)
@@ -64,6 +66,10 @@ func _on_card_clicked(cv: CardVisual) -> void:
 	for card_visual in card_visuals:
 		card_visual.set_selected(card_visual == cv)
 	EventBus.card_selected.emit(cv.card_instance)
+
+
+func _on_card_right_clicked(cv: CardVisual) -> void:
+	card_right_clicked.emit(cv.card_instance)
 
 
 func _on_card_drag_started(cv: CardVisual) -> void:
@@ -101,6 +107,7 @@ func add_card(card_inst: CardInstance) -> void:
 	add_child(cv)
 	cv.setup(card_inst)
 	cv.clicked.connect(_on_card_clicked)
+	cv.right_clicked.connect(_on_card_right_clicked)
 	cv.drag_started.connect(_on_card_drag_started)
 	cv.drag_ended.connect(_on_card_drag_ended)
 	card_visuals.append(cv)

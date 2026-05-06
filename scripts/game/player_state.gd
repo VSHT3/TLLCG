@@ -33,6 +33,7 @@ var cards_played_this_turn: int = 0
 var extra_card_plays: int = 0
 var neutral_draws_this_turn: int = 0
 var faction_draws_this_turn: int = 0
+var free_plays_turn: bool = false
 
 
 # ── Setup ────────────────────────────────────────────────────────────────────
@@ -273,6 +274,8 @@ func gain_sellary(amount: int) -> void:
 
 func spend_sellary(amount: int) -> bool:
 	"""Spend sellary. Returns false if insufficient funds."""
+	if free_plays_turn:
+		return true
 	if sellary < amount:
 		return false
 	sellary -= amount
@@ -295,6 +298,7 @@ func reset_turn_state() -> void:
 	extra_card_plays = 0
 	neutral_draws_this_turn = 0
 	faction_draws_this_turn = 0
+	free_plays_turn = false
 	for row in board:
 		for card in row:
 			card.reset_turn_state()

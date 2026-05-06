@@ -5,73 +5,284 @@ Guidance for Claude Code working in this repo.
 ## Commands
 
 ```bash
-# Open project in Godot editor
-godot --path /Users/vsht/tllcg
-
 # Headless startup check (verifies autoloads, scene, no crash)
-godot --headless --path /Users/vsht/tllcg
+/Applications/Godot.app/Contents/MacOS/Godot --headless --path /Users/vsht/tllcg --quit
 
 # Regenerate JSON data from Obsidian vault
 python tools/yaml_to_json.py ./TLLCG ./data
 
-# Regenerate single card test (pipe output, check for errors)
-python tools/yaml_to_json.py ./TLLCG ./data 2>&1 | head -50
+# Open in editor
+/Applications/Godot.app/Contents/MacOS/Godot --path /Users/vsht/tllcg
 ```
 
-No test suite. Manual verify in Godot editor.
+No test suite. Headless check + manual verify in Godot editor.
 
-## Architecture
+---
 
-**Data pipeline:** `TLLCG/*.md` (Obsidian vault) → `tools/yaml_to_json.py` → `data/*.json` → `CardDatabase` autoload → all scripts.
+## System wiring diagram
 
-**TLLCG/ = separate Git repo** (nested). Source of truth for card design. Edit there, re-run converter, reload Godot.
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  DATA PIPELINE                                                  │
+│  TLLCG/*.md (Obsidian vault)                                    │
+│       │  tools/yaml_to_json.py                                  │
+│       ▼                                                         │
+│  data/*.json  ──►  CardDatabase (autoload)                      │
+│                        get_card(id) → CardData                  │
+│                        get_cards_by_faction(name)               │
+│                        resolve_ability_text(raw)                │
+└─────────────────────────────────────────────────────────────────┘
 
-### Autoloads (global singletons, always available)
+┌─────────────────────────────────────────────────────────────────┐
+│  GAME LOGIC  (scripts/game/)                                    │
+│                                                                 │
+│  GameState                                                      │
+│  ├─ players: PlayerState[]                                      │
+│  │    ├─ hero: CardInstance                                     │
+│  │    ├─ hand / board[3][] / faction_deck / graveyard          │
+│  │    ├─ sellary, extra_card_plays                             │
+│  │    └─ adjacency API (see below)                             │
+│  ├─ neutral_deck: CardInstance[]                                │
+│  └─ turn flow:                                                  │
+│       setup_game() → start_turn() → end_play_phase()           │
+│       → end_discard_phase() → end_draw_phase() → _advance_turn │
+│                                                                 │
+│  EffectResolver  (Node, child of Main scene)                    │
+│  ├─ setup(game_state)                                           │
+│  ├─ listens: EventBus.ability_triggered                         │
+│  ├─ _check_costs() → upkeep/tribute/hoard/order gating         │
+│  ├─ _resolve_*()  one per effect type (damage/boost/heal/…)    │
+│  ├─ _resolve_complex() → match source.data.id → _complex_*()   │
+│  └─ shared helpers:                                             │
+│       _get_controller(card) → PlayerState                       │
+│       _get_enemy_player(source) → PlayerState                   │
+│       _get_enemy_hero(player) → CardInstance                    │
+│       _controls_card_id(player, id) → bool                     │
+│       _find_card_owner(card) → PlayerState                      │
+│       _get_valid_damage_targets(source) → Array                 │
+└─────────────────────────────────────────────────────────────────┘
 
-- **CardDatabase** — reads all JSON on startup; `get_card(id)`, `get_cards_by_faction(name)`, `search_cards(query)`
-- **GameConstants** — typed constants from `rules.json`; `TurnPhase` enum, `Zone` enum, `CardType` enum, `ROW_CAPACITIES = [5, 5, 3]`
-- **EventBus** — all game events as signals; UI listens passively, game logic emits; decouples UI from logic
+┌─────────────────────────────────────────────────────────────────┐
+│  EVENT BUS  (autoload — full signal list)                       │
+│                                                                 │
+│  Game flow:   game_started, game_ended                          │
+│               turn_started, turn_ended, phase_changed           │
+│  Cards:       card_played, card_drawn, card_discarded           │
+│               card_destroyed, card_banished, card_moved         │
+│               card_placed_on_board, card_removed_from_board     │
+│  Combat:      damage_dealt, heal_applied, boost_applied         │
+│               status_applied, status_removed, status_triggered  │
+│  Economy:     sellary_gained, sellary_spent, sellary_seized     │
+│  Abilities:   ability_triggered(card, effect)  ← EffectResolver │
+│               deploy_triggered, last_word_triggered             │
+│               deathblow_triggered, timer_expired                │
+│  Targeting:   target_requested(valid_targets, callback)         │
+│               target_selected, target_cancelled                 │
+│  UI:          card_selected, card_hovered                       │
+│               card_detail_requested(card_visual)                │
+│               message_shown(text)                               │
+└─────────────────────────────────────────────────────────────────┘
 
-### Data / state split
+┌─────────────────────────────────────────────────────────────────┐
+│  UI LAYER  (scripts/ui/ + scripts/main/)                        │
+│                                                                 │
+│  MainMenu (scene: scenes/menus/main_menu.tscn)                  │
+│  ├─ dice roll → faction pick (reverse order) → summary          │
+│  └─ sets GameConstants.pending_faction_choices + first_player_id│
+│                                                                 │
+│  Main (scene: scenes/main/main.tscn)                            │
+│  ├─ reads GameConstants.pending_faction_choices on _ready       │
+│  ├─ wires all EventBus signals → refresh/HUD/targeting handlers │
+│  ├─ card placement flow:                                        │
+│  │    right-click hand card → _on_card_selected                 │
+│  │    drag Unit/Artifact → _prepare_unit_placement              │
+│  │    drop on slot → play_card(player, card, row, col)          │
+│  │    Spell → play_card instantly (no board placement)          │
+│  └─ targeting flow:                                             │
+│       target_requested → boards.enter_target_mode(targets)      │
+│       click card/hero → callback(target) → _clear_target_mode  │
+│                                                                 │
+│  BoardVisual  — 3 rows × 5/5/3 Panel slots                      │
+│  ├─ refresh() — places CardVisuals by board_position.col        │
+│  ├─ enter_target_mode / exit_target_mode                        │
+│  └─ signals: row_selected(row,col), target_card_clicked(card)  │
+│                                                                 │
+│  HandManager  — HBoxContainer of CardVisuals                    │
+│  ├─ can_play_func: Callable — injected by Main                  │
+│  └─ refresh_draggable() — dims/enables per can_play_func        │
+│                                                                 │
+│  CardVisual  — single card Control node                         │
+│  ├─ setup(CardInstance), refresh_display()                      │
+│  ├─ set_draggable(bool), set_detail_highlighted(bool)           │
+│  └─ signals: clicked, right_clicked, drag_started, drag_ended  │
+└─────────────────────────────────────────────────────────────────┘
+```
 
-- `CardData` (resource) — immutable card definition (base_power, effects[], factions[], categories[])
-- `CardEffect` (resource) — one parsed ability (type, trigger, value, status, raw_text fallback)
-- `CardInstance` — mutable runtime state (current_power, statuses{}, zone, board_position, owner_id, controller_id)
-
-### Game logic layer (`scripts/game/`)
-
-- **GameState** — owns `players[]` and `neutral_deck`; orchestrates full turn flow; `setup_game()`, `play_card()`, `draw_neutral()`, `draw_faction()`
-- **PlayerState** — per-player: hero, hand, board\[3\]\[\], faction_deck, sellary economy; `place_on_board()`, `enforce_hand_limit()`
-- **BoardManager** — static helpers: adjacency, taunt detection, activation order, valid placement rows
-- **EffectResolver** — listens to `EventBus.ability_triggered`; dispatches to `_resolve_damage/boost/heal/profit/seize/spy/…`; many effects TODO stubs (apply_status, destroy, banish, devour)
-
-### UI layer (`scripts/ui/`)
-
-- **CardVisual** — single card; drag threshold 8px, hover scale 4%; `setup(CardInstance)`, `refresh_display()`
-- **HandManager** — fan layout (5° curve); rebuilds on `refresh()`; emits `card_drag_started/card_dropped` to Main
-- **BoardVisual** — builds 3 HBoxContainers programmatically (5/5/3 slots); `highlight_valid_rows()`, `get_row_at_global_position()`
-
-### Main scene wiring (`scripts/main/main.gd`)
-
-Connects everything: instantiates GameState, wires 13+ EventBus signals, handles card placement workflow (click/drag → highlight rows → confirm → `play_card()` → `_refresh_all()`). Hardcoded default factions: `["Sir Can", "A.I. Gods"]`.
+---
 
 ## Turn flow
 
 ```
-gain_sellary → START_OF_TURN (income triggers) → PLAY_CARDS (interactive)
-→ DISCARD_CARDS → DRAW_CARDS → END_OF_TURN (timer/turn_end triggers)
-→ STATUS_TRIGGER (Poison/Burn/Wither damage) → STATUS_DIMINISH → next player
+SELLARY → START_OF_TURN (income/upkeep triggers)
+→ PLAY_CARDS (interactive, up to MAX_CARDS_PER_TURN + extra_card_plays)
+→ DISCARD_CARDS (interactive) → DRAW_CARDS (interactive)
+→ END_OF_TURN (turn_end triggers, timers)
+→ STATUS_TRIGGER (Poison/Burn/Wither damage)
+→ STATUS_DIMINISH → _advance_turn → next player's start_turn()
 ```
 
-Win: `_check_game_over()` fires when ≤1 hero alive.
+Win condition: `_check_game_over()` after each turn — fires `game_ended` when ≤1 hero alive.
 
-## Card data format
+---
 
-Effects in `cards.json`:
-- `type`: damage / boost / heal / profit / income / draw / apply_status / destroy / banish / spy / devour / seize / block / complex
-- `trigger`: deploy / last_word / deathblow / turn_start / turn_end / timer / upkeep / tribute / order / hoard / spot_67 / passive
+## Data / resource types
 
-`raw_text` = fallback for unparsed effects; `EffectResolver` logs warning for `complex` type.
+| Type | File | Role |
+|---|---|---|
+| `CardData` | `scripts/resources/card_data.gd` | Immutable definition. `id`, `name`, `type`, `base_power`, `effects[]`, `factions[]`, `has_ability`, `ability_text` |
+| `CardEffect` | `scripts/resources/card_effect.gd` | One parsed effect. `type`, `trigger`, `value`, `status`, `stacks`, `upkeep_cost`, `tribute_cost`, `hoard_threshold`, `charges`, `raw_text` |
+| `CardInstance` | `scripts/resources/card_instance.gd` | Mutable runtime state. `current_power`, `statuses{}`, `zone`, `board_position{row,col}`, `owner_id`, `controller_id`, `block`, `charges` |
+
+Effect `type` values: `damage / boost / heal / profit / income / draw / apply_status / destroy / banish / spy / devour / seize / block / complex`
+
+Effect `trigger` values: `deploy / last_word / deathblow / turn_start / turn_end / timer / upkeep / tribute / order / hoard / passive`
+
+---
+
+## Card data format & deck filtering
+
+- Source of truth: `TLLCG/*.md` → `tools/yaml_to_json.py` → `data/cards.json`
+- **TLLCG/ is a separate nested git repo** — do not track its files here
+- Decks only include `has_ability == true` cards (both neutral and faction)
+- `"implemented": true` in `cards.json` marks complex cards with working code
+
+**Currently implemented complex cards (18):**
+`accountant_pro_max`, `carry_on`, `catch_up`, `eggxited`, `hhmds`, `individual_sailor`, `sir_vant`, `s_ibal`,
+`knight`, `tax_er`, `fukacia_pracicka`, `everything_here_here`, `sibal_so_sledovanim_lucov`, `the_lion_does_not_care`, `sir_vival`, `biblography`, `the_prophet`, `opakovacia_dedinka`
+
+**Complex cards still TODO (~19):** see `cards.json` where `effects[].type == "complex"` and `implemented` is absent.
+
+---
+
+## Adding a new complex card
+
+1. Fix effects in `data/cards.json` if the converter missed them (set correct `trigger` + `type`)
+2. Add `"implemented": true` to the card entry
+3. Add a match arm in `EffectResolver._resolve_complex()`:
+   ```gdscript
+   "your_card_id":
+       _complex_your_card(source)
+   ```
+4. Write `_complex_your_card(source: CardInstance)` using existing helpers:
+   - `_get_controller(source)` → owning PlayerState
+   - `_get_enemy_player(source)` / `_get_enemy_hero(player)`
+   - `_controls_card_id(player, id)` → synergy checks
+   - `player.get_right_neighbor(card)` / `get_left_neighbor` / `get_row_neighbors`
+   - `player.is_alone_in_row(card)` / `get_cards_in_row(card)`
+   - `_apply_damage(source, target, amount)` — respects Block, Artifacts immune, kills + triggers deathblow
+   - `EventBus.boost_applied / heal_applied / damage_dealt` — emit after mutations for UI refresh
+
+---
+
+## Slot system
+
+Board uses fixed slots (5/5/3). `board[row][]` is an **unordered array** — `CardInstance.board_position.col` is the authoritative slot index. Never use array index as col. Never reindex cols on removal.
+
+Key methods: `place_on_board(card, row, col)`, `is_slot_occupied(row, col)`, `find_free_col(row)`, `find_card_position(card) → {row, col}`.
+
+---
+
+## PlayerState adjacency API
+
+All methods use `board_position.col`, not array index:
+
+| Method | Returns |
+|---|---|
+| `find_card_position(card)` | `{row, col}` or `{}` |
+| `is_alone_in_row(card)` | `bool` |
+| `get_right_neighbor(card)` | nearest card at higher col, or `null` |
+| `get_left_neighbor(card)` | nearest card at lower col, or `null` |
+| `get_row_neighbors(card)` | `[left?, right?]` — up to 2 |
+| `get_cards_in_row(card)` | all other cards in same row |
+
+---
+
+## Targeting flow
+
+```
+EffectResolver._resolve_damage/destroy/banish/… :
+    EventBus.target_requested.emit(valid_targets, callback_lambda)
+        │
+        ▼
+    Main._on_target_requested():
+        stores callback in pending_target_callback
+        board_p0/p1.enter_target_mode(valid_targets)  → orange highlight
+        hero visuals → MOUSE_FILTER_STOP + orange tint
+        │
+        ▼  (player clicks a card or hero)
+    _on_target_card_clicked(target) / _on_hero_clicked(cv):
+        _clear_target_mode()
+        pending_target_callback.call(target)  → resolves effect
+```
+
+---
+
+## Draggability gating
+
+`HandManager.can_play_func: Callable` injected by Main (`_can_play_card`). Cards with `can_play_func → false` get `MOUSE_FILTER_IGNORE` + alpha 0.5. `_on_phase_changed` calls `refresh_draggable()` — critical because `turn_started` fires before phase reaches `PLAY_CARDS`.
+
+`extra_card_plays` on PlayerState is reset each turn; Carry On / HHMDS increment it; `can_play_card()` checks `cards_played_this_turn >= MAX_CARDS_PER_TURN + extra_card_plays`.
+
+---
+
+## TODO / what to work on next
+
+### P0 — bugs / missing wiring (breaks existing cards)
+
+- **`spot_67` trigger unhandled** — card `67` uses it; `GameState` never fires it. Needs a check in `_trigger_start_of_turn` or similar: scan board for adjacent 6/7 col positions.
+- **Passive spells with `apply_status` / `destroy`** — 7 apply_status + 4 destroy passive spells exist and go through `_resolve_spell` → `ability_triggered` → `_resolve_apply_status/_resolve_destroy` which both call `target_requested`. This should work but is **untested**. Verify with Egg, A Salt, Abeer, etc.
+
+### P1 — complex cards to implement (29 remaining)
+
+Easy ones (single clear effect, all helpers exist):
+- **`dawood`** — choice: boost non-hero unit by 2 OR damage non-hero unit by 1. Needs a 2-option choice UI (not yet built) or just auto-target.
+
+Medium (need new small helpers):
+- **`scrolling_papers`** — look at top 3 neutral/faction cards. Needs a "peek" UI panel.
+- **`breakthru`** — swap positions of two opponent cards. Needs `swap_board_positions(c1, c2)` on PlayerState.
+- **`claws_the_production`** — debuff opponent's next-turn base_sellary by 2. Add `sellary_modifier_next_turn: int` to PlayerState, apply in `gain_sellary`.
+- **`my_country_called_me`** — suppress opponent's turn_end triggers next turn. Add `suppress_end_of_turn: bool` flag to PlayerState, check in `_trigger_end_of_turn`.
+- **`premium_account`** — tribute 3 → spawn Neural Networks adjacent; upkeep 2 → profit equal to board unit count. Needs token spawning (`CardDatabase.get_card("neural_network")`).
+- **`negromancy` / `negromancy_premium`** — replay card from graveyard + give Cursed. Needs graveyard picker UI.
+
+Hard / needs new systems:
+- **`sellers_sailors`** — summon 4 specific token cards (Parrot, Ship, Captain, Mate). Token spawning system needed.
+- **`damina`** — deploy: play specific card from deck/graveyard. Needs deck search.
+- **`obratnost_ruk`** — d20 roll for all players, winner effect. Needs dice roll UI.
+- **`velke_jazykove_monstrum`** — choose 4 slots, timer + d4 roll each turn. Needs slot-picker UI + dice.
+- **`opakovacia_dedinka`** — remember + replay last spell. Add `last_spell_played: CardData` to GameState.
+- **`nak_mitchrbat`** — rearrange own board. Needs drag-reorder within board.
+- **`discard_this_card`** — force opponent to discard. Needs opponent hand peek + discard UI.
+- **`sir_veillance`** — surveil opponent hand. Needs opponent hand reveal panel.
+- **`miss_spell`** — apply Miss Spell status to enemy hero. Miss Spell status not yet defined.
+
+### P2 — UX / visual polish
+
+- **Card artwork** — `CardArt` TextureRect exists but `visible = false`. Load from `card_data.artwork_path` in `refresh_display()` when file exists at `res://assets/cards/<path>`.
+- **Status icons on cards** — `_update_status_visuals()` only tints modulate; no icons. Add small icon overlays per active status.
+- **Power change animations** — flash red on damage, green on boost (currently instant).
+- **Hand layout** — currently flat HBox; could fan cards (angle + overlap) for better feel.
+- **`message_shown` log** — single label overwrites; a scrolling log would be better for debugging.
+- **Hero card visuals** — hero containers exist in HUD but small (150×72); heroes deserve larger display with HP bar.
+
+### P3 — systems not yet started
+
+- **AI opponent** — single-player mode. Even a simple "play random card each turn" would let solo testing.
+- **Deck builder** — currently factions are hardcoded sets; no card selection.
+- **Win/lose screen** — `game_ended` signal fires but no scene transition, just a label.
+- **Sound** — no audio at all.
+
+---
 
 ## Coding conventions
 
@@ -79,23 +290,5 @@ Effects in `cards.json`:
 - `snake_case` vars/functions, `PascalCase` class names
 - Typed vars preferred (`var x: int`)
 - Static typing in function signatures where practical
-
-## Current implementation status
-
-**Complete:** data loading, game state, turn flow, card placement (units/spells/artifacts), basic ability triggers (damage, profit, income, boost, heal, spy, seize), targeting UI (deploy/damage/destroy/banish/apply_status/devour), drag-drop UI, EventBus wiring, draw/discard phase UI, slot-precise board placement, card draggability gating, spell play from hand.
-
-**Complex cards implemented** (`"implemented": true` in `cards.json`): Accountant Pro Max (hoard tiers), Carry On (+2 plays), Catch-up (match opponent sellary), Individual Sailor (boost right / alone→damage hero), Sir Vant (pay 2→heal hero; last word→Sir Can heal+boost), Šibal (shuffle 2 + draw 2 faction).
-
-**Complex cards implemented** — add new ones in `EffectResolver._resolve_complex` as a match on `source.data.id`. Set `"implemented": true` in `cards.json` to track. Decks only draw `has_ability=true` cards (neutral + faction).
-
-**Incomplete (TODO):** full card visual (art hidden), remaining `complex` effects (30+ cards unimplemented).
-
-**Out of scope for MVP:** multiplayer (NetworkManager stub), AI opponent, deck building, menus.
-
-## Slot system notes
-
-Board uses fixed slots (5/5/3). `board[][]` stores cards by array order but `CardInstance.board_position.col` holds the actual slot index. `BoardVisual.refresh()` uses `board_position.col` to place visuals — not array index. `PlayerState.is_slot_occupied(row, col)` checks by stored col. `find_free_col(row)` returns first empty slot (used by artifact auto-place + spy). Never reindex cols on removal.
-
-## Draggability gating
-
-`HandManager.can_play_func` is a `Callable` injected by Main (`_can_play_card`). Called per card in `refresh()` and `refresh_draggable()`. Cards dim (alpha 0.5) + `MOUSE_FILTER_IGNORE` when not playable. `_on_phase_changed` calls `refresh_draggable()` on both hands — critical because `turn_started` fires before phase reaches `PLAY_CARDS`.
+- No comments unless the WHY is non-obvious
+- Always run headless check after changes

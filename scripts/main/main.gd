@@ -16,9 +16,15 @@ extends Node2D
 @onready var hero_hp_p0: Label = $UI/HUD/HeroHPP0
 @onready var hero_hp_p1: Label = $UI/HUD/HeroHPP1
 @onready var message_label: Label = $UI/HUD/MessageLabel
-@onready var end_phase_button: Button = $UI/HUD/EndPhaseButton
-@onready var draw_neutral_button: Button = $UI/HUD/DrawNeutralButton
-@onready var draw_faction_button: Button = $UI/HUD/DrawFactionButton
+@onready var end_turn_button: Button = $UI/HUD/EndTurnButton
+@onready var neutral_deck_panel: Panel = $UI/NeutralDeckPanel
+@onready var faction_deck_panel_p0: Panel = $UI/FactionDeckPanelP0
+@onready var faction_deck_panel_p1: Panel = $UI/FactionDeckPanelP1
+@onready var neutral_deck_label: Label = $UI/NeutralDeckPanel/NeutralDeckLabel
+@onready var faction_deck_label_p0: Label = $UI/FactionDeckPanelP0/FactionDeckLabel
+@onready var faction_deck_label_p1: Label = $UI/FactionDeckPanelP1/FactionDeckLabel
+@onready var graveyard_panel_p0: Panel = $UI/GraveyardPanelP0
+@onready var graveyard_panel_p1: Panel = $UI/GraveyardPanelP1
 @onready var hero_container_p0: Control = $UI/HUD/HeroP0
 @onready var hero_container_p1: Control = $UI/HUD/HeroP1
 var hero_visual_p0: CardVisual = null
@@ -35,6 +41,7 @@ var hero_visual_p1: CardVisual = null
 
 var game_state: GameState = null
 var pending_unit_card: CardInstance = null
+var pending_drag_card: CardInstance = null
 var pending_target_callback: Callable = Callable()
 var _detail_card_visual: CardVisual = null
 
@@ -102,12 +109,14 @@ func _connect_signals() -> void:
 	if detail_close_button:
 		detail_close_button.pressed.connect(_close_card_detail)
 	
-	if end_phase_button:
-		end_phase_button.pressed.connect(_on_end_phase_pressed)
-	if draw_neutral_button:
-		draw_neutral_button.pressed.connect(_on_draw_neutral_pressed)
-	if draw_faction_button:
-		draw_faction_button.pressed.connect(_on_draw_faction_pressed)
+	if end_turn_button:
+		end_turn_button.pressed.connect(_on_end_turn_pressed)
+	if neutral_deck_panel:
+		neutral_deck_panel.gui_input.connect(_on_neutral_deck_input)
+	if faction_deck_panel_p0:
+		faction_deck_panel_p0.gui_input.connect(_on_faction_deck_input.bind(0))
+	if faction_deck_panel_p1:
+		faction_deck_panel_p1.gui_input.connect(_on_faction_deck_input.bind(1))
 	if board_p0:
 		board_p0.row_selected.connect(_on_board_row_selected.bind(0))
 		board_p0.target_card_clicked.connect(_on_target_card_clicked)
@@ -117,9 +126,11 @@ func _connect_signals() -> void:
 	if hand_p0:
 		hand_p0.card_drag_started.connect(_on_hand_card_drag_started)
 		hand_p0.card_dropped.connect(_on_hand_card_dropped)
+		hand_p0.card_right_clicked.connect(_on_hand_card_right_clicked)
 	if hand_p1:
 		hand_p1.card_drag_started.connect(_on_hand_card_drag_started)
 		hand_p1.card_dropped.connect(_on_hand_card_dropped)
+		hand_p1.card_right_clicked.connect(_on_hand_card_right_clicked)
 
 
 # ── Signal Handlers ──────────────────────────────────────────────────────────
@@ -141,39 +152,30 @@ func _on_phase_changed(phase: int, _player_id: int) -> void:
 		_clear_pending_unit()
 	_clear_target_mode()
 	_update_active_hand_visibility()
-	_update_draw_buttons()
+	_update_deck_labels()
 	if hand_p0:
 		hand_p0.refresh_draggable()
 	if hand_p1:
 		hand_p1.refresh_draggable()
-
-	if end_phase_button:
-		match phase:
-			GameConstants.TurnPhase.PLAY_CARDS:
-				end_phase_button.text = "Done Playing"
-			GameConstants.TurnPhase.DISCARD_CARDS:
-				end_phase_button.text = "Done Discarding"
-			GameConstants.TurnPhase.DRAW_CARDS:
-				end_phase_button.text = "Done Drawing"
-			_:
-				end_phase_button.text = "Continue"
+	if end_turn_button:
+		end_turn_button.disabled = (phase != GameConstants.TurnPhase.PLAY_CARDS)
 
 
 func _on_card_selected(card: CardInstance) -> void:
 	if not game_state or game_state.game_over:
 		return
+	if game_state.current_phase != GameConstants.TurnPhase.PLAY_CARDS:
+		return
 
 	var player: PlayerState = game_state.get_current_player()
 	if not (card in player.hand):
-		EventBus.message_shown.emit("That card is not in the active player's hand.")
-		return
-
-	if game_state.current_phase == GameConstants.TurnPhase.DISCARD_CARDS:
-		_discard_card(player, card)
 		return
 
 	if not game_state.can_play_card(player, card):
-		EventBus.message_shown.emit("Cannot play during %s." % GameConstants.PHASE_NAMES.get(game_state.current_phase, "this phase"))
+		EventBus.message_shown.emit("Card limit reached (%d/%d)." % [
+			player.cards_played_this_turn,
+			GameConstants.MAX_CARDS_PER_TURN + player.extra_card_plays
+		])
 		return
 
 	match card.data.type:
@@ -237,8 +239,11 @@ func _on_hand_card_drag_started(card: CardInstance) -> void:
 	var player: PlayerState = game_state.get_current_player()
 	if not (card in player.hand):
 		return
+	pending_drag_card = card
+	_highlight_graveyard(player)
+	if game_state.current_phase != GameConstants.TurnPhase.PLAY_CARDS:
+		return
 	if not game_state.can_play_card(player, card):
-		EventBus.message_shown.emit("You cannot play a card during %s." % GameConstants.PHASE_NAMES.get(game_state.current_phase, "this phase"))
 		return
 	match card.data.type:
 		"Unit", "Artifact":
@@ -248,19 +253,32 @@ func _on_hand_card_drag_started(card: CardInstance) -> void:
 			_clear_hand_selection()
 			if not game_state.play_card(player, card):
 				EventBus.message_shown.emit("Could not play %s." % card.data.name)
+			pending_drag_card = null
+			_clear_graveyard_highlight()
 			_refresh_all()
-		_:
-			_clear_pending_unit()
-			_clear_hand_selection()
-			EventBus.message_shown.emit("%s type not playable." % card.data.type)
 
 
 func _on_hand_card_dropped(card: CardInstance, drop_position: Vector2) -> void:
 	if not game_state or game_state.game_over:
 		return
+	pending_drag_card = null
+	_clear_graveyard_highlight()
 	var player: PlayerState = game_state.get_current_player()
-	if card != pending_unit_card:
+
+	# Graveyard drop — works regardless of play limit
+	if _is_over_graveyard(drop_position, player):
+		if card in player.hand:
+			_discard_card(player, card)
+		_clear_pending_unit()
+		_clear_hand_selection()
 		return
+
+	if card != pending_unit_card:
+		_clear_pending_unit()
+		_clear_hand_selection()
+		_refresh_all()
+		return
+
 	var slot := _get_active_board_slot_at_position(drop_position)
 	if slot.row < 0:
 		_clear_pending_unit()
@@ -354,16 +372,15 @@ func _on_message(text: String) -> void:
 		message_label.text = text
 
 
-func _on_end_phase_pressed() -> void:
+func _on_end_turn_pressed() -> void:
+	if not game_state or game_state.game_over:
+		return
+	if game_state.current_phase != GameConstants.TurnPhase.PLAY_CARDS:
+		return
 	_clear_pending_unit()
 	_clear_hand_selection()
-	match game_state.current_phase:
-		GameConstants.TurnPhase.PLAY_CARDS:
-			game_state.end_play_phase()
-		GameConstants.TurnPhase.DISCARD_CARDS:
-			game_state.end_discard_phase()
-		GameConstants.TurnPhase.DRAW_CARDS:
-			game_state.end_draw_phase()
+	game_state.end_turn()
+	_refresh_all()
 
 
 # ── Targeting ────────────────────────────────────────────────────────────────
@@ -427,54 +444,90 @@ func _discard_card(player: PlayerState, card: CardInstance) -> void:
 	_refresh_all()
 
 
-func _on_draw_neutral_pressed() -> void:
+func _is_over_graveyard(pos: Vector2, player: PlayerState) -> bool:
+	var panel: Panel = graveyard_panel_p0 if player.player_id == 0 else graveyard_panel_p1
+	if not panel:
+		return false
+	var rect: Rect2 = Rect2(panel.global_position, panel.size)
+	return rect.has_point(pos)
+
+
+func _highlight_graveyard(player: PlayerState) -> void:
+	var panel: Panel = graveyard_panel_p0 if player.player_id == 0 else graveyard_panel_p1
+	if panel:
+		panel.modulate = Color(1.0, 0.4, 0.4)
+
+
+func _clear_graveyard_highlight() -> void:
+	if graveyard_panel_p0:
+		graveyard_panel_p0.modulate = Color.WHITE
+	if graveyard_panel_p1:
+		graveyard_panel_p1.modulate = Color.WHITE
+
+
+func _on_hand_card_right_clicked(_card: CardInstance) -> void:
+	pass  # Right-click opens detail popup via card_detail_requested (handled in card_visual.gd)
+
+
+func _on_neutral_deck_input(event: InputEvent) -> void:
+	if not event is InputEventMouseButton:
+		return
+	if not (event as InputEventMouseButton).pressed:
+		return
 	if not game_state or game_state.game_over:
 		return
+	if game_state.current_phase != GameConstants.TurnPhase.PLAY_CARDS:
+		return
 	var player: PlayerState = game_state.get_current_player()
+	var cost: int = player.get_neutral_draw_cost()
 	var card: CardInstance = game_state.draw_neutral(player)
 	if not card:
-		var cost: int = player.get_neutral_draw_cost()
 		if player.sellary < cost:
-			EventBus.message_shown.emit("Not enough sellary (need %d)." % cost)
+			EventBus.message_shown.emit("Need %d sellary to draw neutral (have %d)." % [cost, player.sellary])
 		else:
 			EventBus.message_shown.emit("Neutral deck is empty.")
-	_update_draw_buttons()
+	_update_deck_labels()
 	_refresh_all()
 
 
-func _on_draw_faction_pressed() -> void:
+func _on_faction_deck_input(event: InputEvent, player_id: int) -> void:
+	if not event is InputEventMouseButton:
+		return
+	if not (event as InputEventMouseButton).pressed:
+		return
 	if not game_state or game_state.game_over:
 		return
+	if game_state.current_phase != GameConstants.TurnPhase.PLAY_CARDS:
+		return
 	var player: PlayerState = game_state.get_current_player()
+	if player.player_id != player_id:
+		EventBus.message_shown.emit("Not your faction deck.")
+		return
+	var cost: int = player.get_faction_draw_cost()
 	var card: CardInstance = game_state.draw_faction(player)
 	if not card:
-		var cost: int = player.get_faction_draw_cost()
 		if player.sellary < cost:
-			EventBus.message_shown.emit("Not enough sellary (need %d)." % cost)
+			EventBus.message_shown.emit("Need %d sellary to draw faction (have %d)." % [cost, player.sellary])
 		else:
 			EventBus.message_shown.emit("Faction deck is empty.")
-	_update_draw_buttons()
+	_update_deck_labels()
 	_refresh_all()
 
 
-func _update_draw_buttons() -> void:
+func _update_deck_labels() -> void:
 	if not game_state:
 		return
-	var in_draw: bool = game_state.current_phase == GameConstants.TurnPhase.DRAW_CARDS
-	if draw_neutral_button:
-		draw_neutral_button.visible = in_draw
-	if draw_faction_button:
-		draw_faction_button.visible = in_draw
-	if in_draw:
-		var player: PlayerState = game_state.get_current_player()
-		var nc: int = player.get_neutral_draw_cost()
-		var fc: int = player.get_faction_draw_cost()
-		if draw_neutral_button:
-			draw_neutral_button.text = "Draw Neutral (%d)" % nc
-			draw_neutral_button.disabled = player.sellary < nc or game_state.neutral_deck.is_empty()
-		if draw_faction_button:
-			draw_faction_button.text = "Draw Faction (%d)" % fc
-			draw_faction_button.disabled = player.sellary < fc or player.faction_deck.is_empty()
+	var player: PlayerState = game_state.get_current_player()
+	var nc: int = player.get_neutral_draw_cost()
+	var fc: int = player.get_faction_draw_cost()
+	if neutral_deck_label:
+		neutral_deck_label.text = "Neutral\n(%d cards)\nCost: %d" % [game_state.neutral_deck.size(), nc]
+	if faction_deck_label_p0:
+		var p0: PlayerState = game_state.players[0]
+		faction_deck_label_p0.text = "Faction\n(%d cards)\nCost: %d" % [p0.faction_deck.size(), p0.get_faction_draw_cost()]
+	if faction_deck_label_p1:
+		var p1: PlayerState = game_state.players[1]
+		faction_deck_label_p1.text = "Faction\n(%d cards)\nCost: %d" % [p1.faction_deck.size(), p1.get_faction_draw_cost()]
 
 
 # ── Refresh ──────────────────────────────────────────────────────────────────
@@ -511,7 +564,7 @@ func _refresh_all() -> void:
 	if hero_visual_p1:
 		hero_visual_p1.refresh_display()
 	_update_active_hand_visibility()
-	_update_draw_buttons()
+	_update_deck_labels()
 	_refresh_hud()
 
 
