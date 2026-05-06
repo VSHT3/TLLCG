@@ -10,3 +10,15 @@ scripts/.DS_Store
 # Claude Code
 .claude/
 .zed/
+
+# Obsidian
+.obsidian/workspace.json
+.obsidian/
+
+# Obsidian vault internals
+.obsidian/
+.trash/
+thumbnails/
+Personal/
+Personal 2/
+Personal 3/
