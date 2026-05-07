@@ -156,11 +156,10 @@ Effect `trigger` values: `deploy / last_word / deathblow / turn_start / turn_end
 - Decks only include `has_ability == true` cards (neutral + faction)
 - `"implemented": true` in `cards.json` marks complex cards with working code
 
-**Currently implemented complex cards (18):**
-`accountant_pro_max`, `carry_on`, `catch_up`, `eggxited`, `hhmds`, `individual_sailor`, `sir_vant`, `s_ibal`,
-`knight`, `tax_er`, `fukacia_pracicka`, `everything_here_here`, `sibal_so_sledovanim_lucov`, `the_lion_does_not_care`, `sir_vival`, `biblography`, `the_prophet`, `opakovacia_dedinka`
+**Currently implemented complex cards (38):**
+`accountant_pro_max`, `biblography`, `breakthru`, `carry_on`, `catch_up`, `claws_the_production`, `damina`, `dawood`, `discard_this_card`, `everything_here_here`, `fukacia_pracicka`, `hhmds`, `individual_sailor`, `knight`, `mikrofo_novy_pokles`, `miss_spell`, `mr_rural`, `my_country_called_me`, `masovystit`, `negromancy_premium`, `negromancy`, `obratnost_ruk`, `opakovacia_dedinka`, `premium_account`, `scrolling_papers`, `sellers_sailors`, `sir_vant`, `sir_veillance`, `sir_vival`, `s_ibal`, `tax_er`, `the_lion_does_not_care`, `the_prophet`, `the_why_axes`, `trembling_lips`, `velke_jazykove_monstrum`, `nak_mitchrbat`, `sibal_so_sledovanim_lucov`
 
-**Complex cards TODO (~19):** see `cards.json` where `effects[].type == "complex"` and `implemented` absent.
+**Complex cards TODO:** none currently; check `cards.json` where `effects[].type == "complex"` and `implemented` absent after importing new card data.
 
 ---
 
@@ -239,32 +238,12 @@ EffectResolver._resolve_damage/destroy/banish/… :
 
 ### P0 — bugs / missing wiring (breaks existing cards)
 
-- **`spot_67` trigger unhandled** — card `67` uses it; `GameState` never fires it. Needs check in `_trigger_start_of_turn` or similar: scan board for adjacent 6/7 col positions.
-- **Passive spells with `apply_status` / `destroy`** — 7 apply_status + 4 destroy passive spells exist, go through `_resolve_spell` → `ability_triggered` → `_resolve_apply_status/_resolve_destroy`, both call `target_requested`. Should work but **untested**. Verify with Egg, A Salt, Abeer, etc.
+- **Passive spells with `apply_status` / `destroy`** — targetable passive spells route through `target_requested` and pass headless startup, but still need manual in-editor gameplay verification with several examples.
 
-### P1 — complex cards to implement (29 remaining)
+### P1 — complex/system follow-up
 
-Easy (single clear effect, all helpers exist):
-- **`dawood`** — choice: boost non-hero unit by 2 OR damage non-hero unit by 1. Needs 2-option choice UI (not yet built) or auto-target.
-
-Medium (need new small helpers):
-- **`scrolling_papers`** — look at top 3 neutral/faction cards. Needs "peek" UI panel.
-- **`breakthru`** — swap positions of two opponent cards. Needs `swap_board_positions(c1, c2)` on PlayerState.
-- **`claws_the_production`** — debuff opponent's next-turn base_sellary by 2. Add `sellary_modifier_next_turn: int` to PlayerState, apply in `gain_sellary`.
-- **`my_country_called_me`** — suppress opponent's turn_end triggers next turn. Add `suppress_end_of_turn: bool` to PlayerState, check in `_trigger_end_of_turn`.
-- **`premium_account`** — tribute 3 → spawn Neural Networks adjacent; upkeep 2 → profit = board unit count. Needs token spawning (`CardDatabase.get_card("neural_network")`).
-- **`negromancy` / `negromancy_premium`** — replay card from graveyard + give Cursed. Needs graveyard picker UI.
-
-Hard / needs new systems:
-- **`sellers_sailors`** — summon 4 specific token cards (Parrot, Ship, Captain, Mate). Token spawning needed.
-- **`damina`** — deploy: play specific card from deck/graveyard. Needs deck search.
-- **`obratnost_ruk`** — d20 roll all players, winner effect. Needs dice roll UI.
-- **`velke_jazykove_monstrum`** — choose 4 slots, timer + d4 roll each turn. Needs slot-picker UI + dice.
-- **`opakovacia_dedinka`** — remember + replay last spell. Add `last_spell_played: CardData` to GameState.
-- **`nak_mitchrbat`** — rearrange own board. Needs drag-reorder within board.
-- **`discard_this_card`** — force opponent to discard. Needs opponent hand peek + discard UI.
-- **`sir_veillance`** — surveil opponent hand. Needs opponent hand reveal panel.
-- **`miss_spell`** — apply Miss Spell status to enemy hero. Miss Spell status not yet defined.
+- **Manual gameplay audit** — all current complex cards have resolver paths, but several newer systems use pragmatic UI prompts instead of bespoke panels: slot choice, graveyard choice, opponent-hand reveal, and board swap.
+- **Regeneration safety** — if `tools/yaml_to_json.py` is rerun from source markdown, re-check `data/cards.json` for cards whose effects needed manual split triggers (`damina`, `trembling_lips`, `premium_account`, `mr_rural`, `velke_jazykove_monstrum`).
 
 ### P2 — UX / visual polish
 

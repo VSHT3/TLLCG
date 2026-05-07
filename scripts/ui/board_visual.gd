@@ -15,6 +15,7 @@ var _valid_targets: Array = []
 signal card_dropped_on_row(card: CardInstance, row_idx: int)
 signal row_selected(row_idx: int, col_idx: int)
 signal target_card_clicked(card: CardInstance)
+signal ability_card_clicked(card: CardInstance)
 
 
 func setup(ps: PlayerState) -> void:
@@ -49,10 +50,12 @@ func _create_slot(row_idx: int, col: int) -> Panel:
 	
 	# Visual styling
 	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.15, 0.15, 0.2, 0.5)
-	style.border_color = Color(0.3, 0.3, 0.4)
+	style.bg_color = Color(0.08, 0.09, 0.12, 0.82)
+	style.border_color = Color(0.22, 0.25, 0.33)
 	style.set_border_width_all(1)
 	style.set_corner_radius_all(4)
+	style.shadow_color = Color(0, 0, 0, 0.2)
+	style.shadow_size = 3
 	slot.add_theme_stylebox_override("panel", style)
 	
 	# Store metadata
@@ -130,9 +133,20 @@ func _place_card_in_slot(card_inst: CardInstance, slot: Panel) -> void:
 	cv.clicked.connect(_on_board_card_clicked)
 
 
+func pulse_card(card: CardInstance, color: Color = Color(1.0, 0.72, 0.24)) -> void:
+	for row in rows:
+		for slot in row:
+			for child in slot.get_children():
+				if child is CardVisual and child.card_instance == card:
+					child.pulse_event(color)
+					return
+
+
 func _on_board_card_clicked(cv: CardVisual) -> void:
 	if _target_mode and cv.card_instance in _valid_targets:
 		target_card_clicked.emit(cv.card_instance)
+	elif not _target_mode:
+		ability_card_clicked.emit(cv.card_instance)
 
 
 func get_row_at_global_position(pos: Vector2) -> int:
@@ -159,12 +173,12 @@ func highlight_valid_rows(valid_rows: Array[int]) -> void:
 			var style: StyleBoxFlat = slot.get_theme_stylebox("panel").duplicate()
 			var occupied: bool = player_state and player_state.is_slot_occupied(row_idx, col_idx)
 			if row_idx in valid_rows and not occupied:
-				style.bg_color = Color(0.18, 0.34, 0.22, 0.95)
-				style.border_color = Color(0.3, 1.0, 0.45)
-				style.set_border_width_all(4)
+				style.bg_color = Color(0.11, 0.24, 0.17, 0.95)
+				style.border_color = Color(0.42, 0.9, 0.48)
+				style.set_border_width_all(3)
 			else:
-				style.bg_color = Color(0.15, 0.15, 0.2, 0.5)
-				style.border_color = Color(0.3, 0.3, 0.4)
+				style.bg_color = Color(0.08, 0.09, 0.12, 0.82)
+				style.border_color = Color(0.22, 0.25, 0.33)
 				style.set_border_width_all(1)
 			slot.add_theme_stylebox_override("panel", style)
 
@@ -173,7 +187,7 @@ func clear_highlights() -> void:
 	for row in rows:
 		for slot in row:
 			var style: StyleBoxFlat = slot.get_theme_stylebox("panel").duplicate()
-			style.bg_color = Color(0.15, 0.15, 0.2, 0.5)
-			style.border_color = Color(0.3, 0.3, 0.4)
+			style.bg_color = Color(0.08, 0.09, 0.12, 0.82)
+			style.border_color = Color(0.22, 0.25, 0.33)
 			style.set_border_width_all(1)
 			slot.add_theme_stylebox_override("panel", style)

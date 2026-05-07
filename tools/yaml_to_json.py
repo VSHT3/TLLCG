@@ -26,6 +26,9 @@ import re
 import sys
 from pathlib import Path
 
+VALID_CARD_TYPES = {"Unit", "Spell", "Artifact", "Hero"}
+VALID_RARITIES = {"Common", "Rare", "Epic", "Legendary", "Hero"}
+
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -153,6 +156,127 @@ def sanitize_id(name: str) -> str:
     return s
 
 
+def normalize_scalar(value):
+    """Normalize simple YAML-ish scalar/list values produced by the lightweight parser."""
+    if isinstance(value, list):
+        return [normalize_scalar(v) for v in value if normalize_scalar(v) not in ("", None)]
+    if value is None:
+        return None
+    if isinstance(value, str):
+        value = value.strip().strip('"').strip("'")
+        if value.startswith("[") and value.endswith("]"):
+            parts = [p.strip().strip('"').strip("'") for p in value[1:-1].split(",")]
+            return [p for p in parts if p]
+    return value
+
+
+def normalize_list(value) -> list:
+    value = normalize_scalar(value)
+    if isinstance(value, list):
+        return [str(v).strip() for v in value if str(v).strip()]
+    if value in ("", None):
+        return []
+    return [str(value).strip()]
+
+
+def normalize_card_type(value, power) -> str:
+    value = normalize_scalar(value)
+    if isinstance(value, list):
+        value = value[0] if value else ""
+    text = str(value or "").strip()
+    for valid in VALID_CARD_TYPES:
+        if text.lower() == valid.lower():
+            return valid
+    if power is not None:
+        return "Unit"
+    return "Unknown"
+
+
+def normalize_rarity(value, card_type: str, has_ability: bool) -> str:
+    value = normalize_scalar(value)
+    if isinstance(value, list):
+        value = value[0] if value else ""
+    text = str(value or "").strip()
+    for valid in VALID_RARITIES:
+        if text.lower() == valid.lower():
+            return valid
+    if card_type == "Hero":
+        return "Hero"
+    if has_ability:
+        return "Common"
+    return "Unknown"
+
+
+def normalize_status_name(status: str) -> str:
+    key = status.strip().lower().replace("_", " ")
+    return {
+        "economic fury": "Economic Fury",
+        "cancerous": "Economic Fury",
+        "cursed": "Cursed",
+        "crit": "Crit",
+        "vulnerable": "Vulnerable",
+        "perplexed": "Perplexed",
+        "invisible": "Invisible",
+        "drunk": "Drunk",
+        "defender": "Defender",
+        "protector": "Protector",
+        "poison": "Poison",
+        "burn": "Burn",
+        "wither": "Wither",
+    }.get(key, status.strip().title())
+
+
+def infer_target_metadata(text_lower: str, effect_type: str) -> dict:
+    meta = {
+        "target_scope": "enemy",
+        "target_kind": "card",
+        "area": "area" in text_lower or "adjacent" in text_lower,
+        "requires_target": True,
+        "permanent_status": "permanent" in text_lower,
+    }
+
+    if "self" in text_lower or "this card" in text_lower or "this unit" in text_lower or "this artifact" in text_lower:
+        meta["target_scope"] = "self"
+        meta["requires_target"] = False
+    elif "your hero" in text_lower or "own hero" in text_lower:
+        meta["target_scope"] = "ally"
+        meta["target_kind"] = "hero"
+        meta["requires_target"] = False
+    elif "allied" in text_lower or "ally" in text_lower or "you control" in text_lower:
+        meta["target_scope"] = "ally"
+    elif "all players" in text_lower or "all units" in text_lower or "any" in text_lower:
+        meta["target_scope"] = "any"
+
+    if "non-hero" in text_lower or "non hero" in text_lower:
+        meta["target_kind"] = "non_hero"
+    elif "non-unit" in text_lower or "non unit" in text_lower:
+        meta["target_kind"] = "non_unit"
+    elif "hero" in text_lower:
+        meta["target_kind"] = "hero"
+    elif "artifact" in text_lower:
+        meta["target_kind"] = "artifact"
+    elif "unit" in text_lower:
+        meta["target_kind"] = "unit"
+
+    if "all " in text_lower or "random" in text_lower:
+        meta["requires_target"] = False
+    if effect_type in ("profit", "income", "draw", "seize", "block", "gain_charge", "spy"):
+        meta["requires_target"] = False
+    if effect_type in ("boost", "heal") and meta["target_scope"] == "enemy":
+        meta["target_scope"] = "self"
+        meta["requires_target"] = False
+
+    return meta
+
+
+def add_effect(effects: list[dict], text_lower: str, effect: dict) -> None:
+    meta = infer_target_metadata(text_lower, effect["type"])
+    meta.update(effect)
+    effect = meta
+    effect.setdefault("raw_text", "")
+    effects.append(effect)
+
+
 # ── Card Parser ──────────────────────────────────────────────────────────────
 
 def parse_card_file(filepath: Path) -> dict:
@@ -163,42 +287,23 @@ def parse_card_file(filepath: Path) -> dict:
     card_name = filepath.stem  # Filename without .md
 
     # Extract frontmatter fields with normalization
-    card_type_raw = frontmatter.get("Card Type", [])
-    if isinstance(card_type_raw, list):
-        card_type = card_type_raw[0] if card_type_raw else "Unknown"
-    else:
-        card_type = str(card_type_raw) if card_type_raw else "Unknown"
-
-    rarity_raw = frontmatter.get("Card Rarity", [])
-    if isinstance(rarity_raw, list):
-        rarity = rarity_raw[0] if rarity_raw else "Unknown"
-    else:
-        rarity = str(rarity_raw) if rarity_raw else "Unknown"
-
-    faction_raw = frontmatter.get("Card Faction", [])
-    if isinstance(faction_raw, str):
-        faction_raw = [faction_raw]
-    elif not isinstance(faction_raw, list):
-        faction_raw = []
-
-    category_raw = frontmatter.get("Card Category", [])
-    if isinstance(category_raw, str):
-        category_raw = [category_raw] if category_raw else []
-    elif not isinstance(category_raw, list):
-        category_raw = []
-    # Filter empty strings
-    category_raw = [c for c in category_raw if c]
-
     power = frontmatter.get("Card Power")
     if power is not None:
         try:
             power = int(power)
         except (ValueError, TypeError):
             power = 0
-    else:
-        power = 0 if card_type in ("Unit", "Hero") else None
 
     has_ability = frontmatter.get("Ability", False)
+    card_type = normalize_card_type(frontmatter.get("Card Type", []), power)
+    rarity = normalize_rarity(frontmatter.get("Card Rarity", []), card_type, bool(has_ability))
+    faction_raw = normalize_list(frontmatter.get("Card Faction", []))
+    category_raw = normalize_list(frontmatter.get("Card Category", []))
+    if has_ability and not faction_raw and card_type != "Hero":
+        faction_raw = ["Neutral"]
+    if power is None:
+        power = 0 if card_type in ("Unit", "Hero") else None
+
     ability_text = extract_ability(body) if has_ability else ""
 
     # Artwork path
@@ -218,6 +323,7 @@ def parse_card_file(filepath: Path) -> dict:
         "has_ability": has_ability,
         "ability_text": ability_text,
         "artwork": artwork,
+        "effects": [],
     }
 
     # Parse ability into structured effects (best-effort)
@@ -256,45 +362,47 @@ def parse_ability_effects(text: str, card_name: str = "") -> list[dict]:
         trigger = "upkeep"
     elif "tribute" in text_lower:
         trigger = "tribute"
-    elif re.search(r'order\b', text_lower):
-        trigger = "order"
     elif re.search(r'hoard\s+\d+', text_lower):
         trigger = "hoard"
     elif "spot valid 67" in text_lower:
         trigger = "spot_67"
+    elif re.search(r'order\b', text_lower):
+        trigger = "order"
+    elif re.search(r'pay\s+\d+', text_lower):
+        trigger = "pay"
 
     # Detect effect types
     # Damage
-    dmg_match = re.search(r'deal\s+(\d+)\s+damage', text_lower)
+    dmg_match = re.search(r'(?:deal\s+)?(\d+)\s+damage|damage\s+(?:a|an|the|target|enemy|allied|ally|unit|hero|card|self|\w+\s+)*\s*by\s+(\d+)', text_lower)
     if dmg_match:
-        effects.append({
+        add_effect(effects, text_lower, {
             "type": "damage",
-            "value": int(dmg_match.group(1)),
+            "value": int(dmg_match.group(1) or dmg_match.group(2)),
             "trigger": trigger,
         })
 
     # Boost
     boost_match = re.search(r'boost\s+(\d+)', text_lower)
     if boost_match:
-        effects.append({
+        add_effect(effects, text_lower, {
             "type": "boost",
             "value": int(boost_match.group(1)),
             "trigger": trigger,
         })
 
     # Heal
-    heal_match = re.search(r'heal\s+(\d+)', text_lower)
+    heal_match = re.search(r'heal(?:\s+(\d+))?', text_lower)
     if heal_match:
-        effects.append({
+        add_effect(effects, text_lower, {
             "type": "heal",
-            "value": int(heal_match.group(1)),
+            "value": int(heal_match.group(1)) if heal_match.group(1) else 0,
             "trigger": trigger,
         })
 
     # Profit
     profit_match = re.search(r'profit\s+(\d+)', text_lower)
     if profit_match:
-        effects.append({
+        add_effect(effects, text_lower, {
             "type": "profit",
             "value": int(profit_match.group(1)),
             "trigger": trigger,
@@ -303,7 +411,7 @@ def parse_ability_effects(text: str, card_name: str = "") -> list[dict]:
     # Income
     income_match = re.search(r'income\s+(\d+)', text_lower)
     if income_match:
-        effects.append({
+        add_effect(effects, text_lower, {
             "type": "income",
             "value": int(income_match.group(1)),
             "trigger": "turn_start",
@@ -312,56 +420,90 @@ def parse_ability_effects(text: str, card_name: str = "") -> list[dict]:
     # Draw
     draw_match = re.search(r'draw\s+(?:up to\s+)?(\d+)', text_lower)
     if draw_match:
-        effects.append({
+        add_effect(effects, text_lower, {
             "type": "draw",
             "value": int(draw_match.group(1)),
             "trigger": trigger,
         })
 
     # Apply status
-    status_pattern = r'apply\s+(cursed|vulnerable|perplexed|invisible|cancerous|economic fury|drunk|defender|protector|poison|burn|wither)(?:\s+(\d+))?'
+    status_pattern = r'apply\s+(cursed|crit|vulnerable|perplexed|invisible|cancerous|economic fury|drunk|defender|protector|poison|burn|wither)(?:\s+(\d+))?'
     for m in re.finditer(status_pattern, text_lower):
-        effects.append({
+        add_effect(effects, text_lower, {
             "type": "apply_status",
-            "status": m.group(1),
+            "status": normalize_status_name(m.group(1)),
             "stacks": int(m.group(2)) if m.group(2) else 1,
             "trigger": trigger,
         })
 
+    if re.search(r'\bcrit\b', text_lower) and not re.search(r'apply\s+crit', text_lower):
+        add_effect(effects, text_lower, {
+            "type": "apply_status",
+            "status": "Crit",
+            "stacks": 1,
+            "trigger": "passive",
+            "target_scope": "self",
+            "target_kind": "card",
+            "requires_target": False,
+            "permanent_status": True,
+        })
+
     # Destroy
     if "destroy" in text_lower and not dmg_match:
-        effects.append({
+        add_effect(effects, text_lower, {
             "type": "destroy",
             "trigger": trigger,
         })
 
     # Banish
     if "banish" in text_lower:
-        effects.append({
+        add_effect(effects, text_lower, {
             "type": "banish",
             "trigger": trigger,
         })
 
     # Spy
     if "spy" in text_lower:
-        effects.append({
+        add_effect(effects, text_lower, {
             "type": "spy",
             "trigger": trigger,
         })
 
     # Devour
     if "devour" in text_lower:
-        effects.append({
+        add_effect(effects, text_lower, {
             "type": "devour",
+            "trigger": trigger,
+            "target_scope": "ally",
+            "target_kind": "unit",
+        })
+
+    if "cleanse" in text_lower:
+        add_effect(effects, text_lower, {
+            "type": "cleanse",
+            "trigger": trigger,
+        })
+
+    if "discard" in text_lower:
+        add_effect(effects, text_lower, {
+            "type": "discard",
             "trigger": trigger,
         })
 
     # Seize
     seize_match = re.search(r'seize\s+(\d+)', text_lower)
     if seize_match:
-        effects.append({
+        add_effect(effects, text_lower, {
             "type": "seize",
             "value": int(seize_match.group(1)),
+            "trigger": trigger,
+        })
+
+    gain_charge_match = re.search(r'gain\s+(\d+)\s+charges?', text_lower)
+    if gain_charge_match:
+        add_effect(effects, text_lower, {
+            "type": "gain_charge",
+            "value": int(gain_charge_match.group(1)),
             "trigger": trigger,
         })
 
@@ -394,21 +536,50 @@ def parse_ability_effects(text: str, card_name: str = "") -> list[dict]:
             if eff["trigger"] == "hoard":
                 eff["hoard_threshold"] = int(hoard_match.group(1))
 
+    # Pay cost
+    pay_match = re.search(r'pay\s+(\d+)', text_lower)
+    if pay_match:
+        for eff in effects:
+            if eff["trigger"] in ("pay", "passive"):
+                eff["trigger"] = "pay"
+                eff["pay_cost"] = int(pay_match.group(1))
+
     # Block
     block_match = re.search(r'block\s+(\d+)', text_lower)
     if block_match:
-        effects.append({
+        add_effect(effects, text_lower, {
             "type": "block",
             "value": int(block_match.group(1)),
             "trigger": "passive",
         })
 
-    # Charge
-    charge_match = re.search(r'charge\s+(\d+)', text_lower)
+    # Charge gives the card a charge pool. Order consumes charges from that pool.
+    charge_match = re.search(r'charge\s*:?\s*(\d+)(?:\s*\(\s*max\s*(\d+)\s*\))?', text_lower)
+    order_match = re.search(r'order\s*(\d+)?', text_lower)
     if charge_match:
+        initial_charges = int(charge_match.group(1))
+        max_charges = int(charge_match.group(2)) if charge_match.group(2) else initial_charges
+        for eff in effects:
+            eff["initial_charges"] = initial_charges
+            eff["max_charges"] = max_charges
+    if order_match:
+        order_cost = int(order_match.group(1)) if order_match.group(1) else 1
         for eff in effects:
             if eff.get("trigger") == "order":
-                eff["charges"] = int(charge_match.group(1))
+                eff["charges"] = order_cost
+
+    counter_match = re.search(r'counter\s+(\d+)', text_lower)
+    if counter_match:
+        for eff in effects:
+            eff["counter_threshold"] = int(counter_match.group(1))
+    if "increase counter" in text_lower:
+        delta_match = re.search(r'increase counter(?: by)?\s+(\d+)', text_lower)
+        for eff in effects:
+            eff["counter_delta"] = int(delta_match.group(1)) if delta_match else 1
+    elif "decrease counter" in text_lower or "reduce counter" in text_lower:
+        delta_match = re.search(r'(?:decrease|reduce) counter(?: by)?\s+(\d+)', text_lower)
+        for eff in effects:
+            eff["counter_delta"] = -(int(delta_match.group(1)) if delta_match else 1)
 
     # If nothing was parsed, mark as complex/manual
     if not effects:
@@ -417,6 +588,21 @@ def parse_ability_effects(text: str, card_name: str = "") -> list[dict]:
             "trigger": trigger,
             "raw_text": text,
         })
+
+    if charge_match:
+        initial_charges = int(charge_match.group(1))
+        max_charges = int(charge_match.group(2)) if charge_match.group(2) else initial_charges
+        for eff in effects:
+            eff.setdefault("initial_charges", initial_charges)
+            eff.setdefault("max_charges", max_charges)
+    if order_match:
+        order_cost = int(order_match.group(1)) if order_match.group(1) else 1
+        for eff in effects:
+            if eff.get("trigger") == "order":
+                eff.setdefault("charges", order_cost)
+
+    for eff in effects:
+        eff.setdefault("raw_text", text)
 
     return effects
 

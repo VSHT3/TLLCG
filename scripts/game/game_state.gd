@@ -70,7 +70,9 @@ func start_turn() -> void:
 	EventBus.turn_started.emit(player.player_id, turn_number)
 
 	_set_phase(GameConstants.TurnPhase.SELLARY)
-	player.gain_sellary(player.base_sellary)
+	var sellary_gain: int = maxi(player.base_sellary + player.base_sellary_modifier_next_turn, 0)
+	player.base_sellary_modifier_next_turn = 0
+	player.gain_sellary(sellary_gain)
 
 	_set_phase(GameConstants.TurnPhase.START_OF_TURN)
 	_trigger_start_of_turn(player)
@@ -89,7 +91,11 @@ func end_turn() -> void:
 		EventBus.card_discarded.emit(card, player.player_id)
 
 	_set_phase(GameConstants.TurnPhase.END_OF_TURN)
-	_trigger_end_of_turn(player)
+	if player.suppress_end_turn_next_turn:
+		player.suppress_end_turn_next_turn = false
+		EventBus.message_shown.emit("End-of-turn abilities suppressed.")
+	else:
+		_trigger_end_of_turn(player)
 
 	_set_phase(GameConstants.TurnPhase.STATUS_TRIGGER)
 	_trigger_statuses(player)
@@ -146,8 +152,6 @@ func play_card(player: PlayerState, card: CardInstance, row_idx: int = -1, col_i
 	
 	player.cards_played_this_turn += 1
 	
-	print("[DEBUG] play_card: type=%s row=%d col=%d" % [card.data.type, row_idx, col_idx])
-	EventBus.message_shown.emit("PLAY: %s r%d c%d" % [card.data.name, row_idx, col_idx])
 	match card.data.type:
 		"Unit":
 			if player.is_board_full():
@@ -156,10 +160,11 @@ func play_card(player: PlayerState, card: CardInstance, row_idx: int = -1, col_i
 				EventBus.card_discarded.emit(card, player.player_id)
 				return true
 			if not player.place_on_board(card, row_idx, col_idx):
-				print("[DEBUG] place_on_board failed")
 				return false
 			EventBus.card_placed_on_board.emit(card, row_idx, col_idx)
 			_trigger_deploy(card)
+			_trigger_tribute(card)
+			_trigger_passive(card)
 		
 		"Spell":
 			# Spells resolve immediately then go to graveyard
@@ -175,8 +180,12 @@ func play_card(player: PlayerState, card: CardInstance, row_idx: int = -1, col_i
 				return false
 			EventBus.card_placed_on_board.emit(card, row_idx, col_idx)
 			_trigger_deploy(card)
+			_trigger_tribute(card)
+			_trigger_passive(card)
 	
 	EventBus.card_played.emit(card, player.player_id)
+	_trigger_hoard(player)
+	_trigger_spot_67_all()
 	return true
 
 
@@ -195,6 +204,7 @@ func draw_neutral(player: PlayerState) -> CardInstance:
 	player.add_to_hand(card)
 	player.neutral_draws_this_turn += 1
 	EventBus.card_drawn.emit(card, player.player_id, "neutral")
+	_trigger_spot_67_all()
 	return card
 
 
@@ -207,6 +217,7 @@ func draw_faction(player: PlayerState) -> CardInstance:
 	if card:
 		player.faction_draws_this_turn += 1
 		EventBus.card_drawn.emit(card, player.player_id, "faction")
+		_trigger_spot_67_all()
 	return card
 
 
@@ -232,45 +243,232 @@ func _draw_faction_cards(player_idx: int, count: int) -> void:
 # ── Ability Triggers ─────────────────────────────────────────────────────────
 
 func _trigger_deploy(card: CardInstance) -> void:
-	print("[DEBUG] _trigger_deploy: %s has %d effects" % [card.data.name, card.data.effects.size()])
+	if _trigger_card_effects(card, "deploy"):
+		EventBus.deploy_triggered.emit(card)
+
+
+func _trigger_tribute(card: CardInstance) -> void:
+	var player := _get_card_controller(card)
+	if not player:
+		return
 	for effect in card.data.effects:
-		print("[DEBUG] effect trigger=%s type=%s" % [effect.trigger, effect.type])
-		if effect.trigger == "deploy":
-			print("[DEBUG] emitting ability_triggered for deploy effect")
-			EventBus.deploy_triggered.emit(card)
-			EventBus.ability_triggered.emit(card, effect)
+		if effect.trigger != "tribute":
+			continue
+		var tribute_effect: CardEffect = effect
+		if tribute_effect.tribute_cost > 0:
+			if player.sellary < tribute_effect.tribute_cost:
+				continue
+			EventBus.choice_requested.emit("Tribute %d for %s?" % [tribute_effect.tribute_cost, card.data.name], [
+				{"label": "Pay", "value": true},
+				{"label": "Skip", "value": false},
+			], func(accepted: bool) -> void:
+				if accepted:
+					_emit_triggered_effect(card, tribute_effect)
+			)
+		else:
+			_emit_triggered_effect(card, tribute_effect)
+
+
+func _trigger_passive(card: CardInstance) -> void:
+	_trigger_card_effects(card, "passive")
 
 
 func _resolve_spell(card: CardInstance, _player: PlayerState) -> void:
 	"""Resolve all effects of a spell card."""
 	for effect in card.data.effects:
-		EventBus.ability_triggered.emit(card, effect)
+		_emit_triggered_effect(card, effect)
 
 
 func _trigger_start_of_turn(player: PlayerState) -> void:
 	"""Trigger all start-of-turn abilities (activation order: melee->artillery, L->R)."""
-	for card in player.get_all_board_units():
-		for effect in card.data.effects:
-			if effect.trigger == "turn_start" or effect.trigger == "upkeep":
-				EventBus.ability_triggered.emit(card, effect)
-		# Income keyword
-		for effect in card.data.effects:
-			if effect.type == "income":
-				player.gain_sellary(effect.value)
+	_trigger_player_effects(player, ["turn_start", "upkeep"])
+	_trigger_hoard(player)
+	_trigger_spot_67_all()
 
 
 func _trigger_end_of_turn(player: PlayerState) -> void:
 	"""Trigger end-of-turn abilities and tick timers."""
 	for card in player.get_all_board_units():
-		for effect in card.data.effects:
-			if effect.trigger == "turn_end":
-				EventBus.ability_triggered.emit(card, effect)
+		_trigger_card_effects(card, "turn_end")
 		# Tick timers
 		if card.tick_timer():
 			EventBus.timer_expired.emit(card)
-			for effect in card.data.effects:
-				if effect.trigger == "timer":
-					EventBus.ability_triggered.emit(card, effect)
+			_trigger_card_effects(card, "timer")
+	_trigger_hoard(player)
+	_trigger_spot_67_all()
+
+
+func _trigger_player_effects(player: PlayerState, triggers: Array[String]) -> void:
+	for card in player.get_all_board_units().duplicate():
+		for trigger in triggers:
+			_trigger_card_effects(card, trigger)
+
+
+func _trigger_card_effects(card: CardInstance, trigger: String) -> bool:
+	var emitted := false
+	for effect in card.data.effects:
+		if effect.trigger == trigger:
+			_emit_triggered_effect(card, effect)
+			emitted = true
+	return emitted
+
+
+func _emit_triggered_effect(card: CardInstance, effect: CardEffect) -> void:
+	EventBus.ability_triggered.emit(card, effect)
+
+
+func _get_card_controller(card: CardInstance) -> PlayerState:
+	for player in players:
+		if player.player_id == card.controller_id:
+			return player
+	return null
+
+
+func _trigger_hoard(player: PlayerState) -> void:
+	for card in player.get_all_board_units().duplicate():
+		_trigger_card_effects(card, "hoard")
+
+
+func _trigger_spot_67_all() -> void:
+	for player in players:
+		if _player_spots_67(player):
+			for card in player.get_all_board_units().duplicate():
+				_trigger_card_effects(card, "spot_67")
+
+
+func _player_spots_67(player: PlayerState) -> bool:
+	for card in player.get_all_board_units():
+		if card.data.id == "67":
+			return true
+		if _card_represents_number(card, "6"):
+			var pos: Dictionary = player.find_card_position(card)
+			if pos.is_empty():
+				continue
+			for adjacent in BoardManager.get_adjacent_cards(player, pos["row"], pos["col"]):
+				if _card_represents_number(adjacent, "7"):
+					return true
+	return false
+
+
+func _card_represents_number(card: CardInstance, number_text: String) -> bool:
+	return card.data.id == number_text or card.data.name.strip_edges() == number_text
+
+
+func activate_order(card: CardInstance) -> bool:
+	"""Activate a board card's Order effects for the current player."""
+	if current_phase != GameConstants.TurnPhase.PLAY_CARDS or card.activated_this_turn:
+		return false
+	var player := get_current_player()
+	if card.controller_id != player.player_id or not (card in player.get_all_board_units()):
+		return false
+	if not _card_has_payable_trigger(card, "order", player):
+		return false
+	var triggered := _trigger_card_effects(card, "order")
+	if triggered:
+		card.activated_this_turn = true
+		_trigger_hoard(player)
+		_trigger_spot_67_all()
+	return triggered
+
+
+func activate_pay(card: CardInstance) -> bool:
+	"""Activate a board card's Pay effects for the current player."""
+	if current_phase != GameConstants.TurnPhase.PLAY_CARDS:
+		return false
+	var player := get_current_player()
+	if card.controller_id != player.player_id or not (card in player.get_all_board_units()):
+		return false
+	if not _card_has_payable_trigger(card, "pay", player):
+		return false
+	var triggered := _trigger_card_effects(card, "pay")
+	if triggered:
+		_trigger_hoard(player)
+		_trigger_spot_67_all()
+	return triggered
+
+
+func _card_has_payable_trigger(card: CardInstance, trigger: String, player: PlayerState) -> bool:
+	for effect in card.data.effects:
+		if effect.trigger != trigger:
+			continue
+		if effect.pay_cost > 0 and player.sellary < effect.pay_cost:
+			continue
+		if effect.upkeep_cost > 0 and player.sellary < effect.upkeep_cost:
+			continue
+		if trigger == "order":
+			var charge_cost: int = effect.charges
+			if charge_cost == 0 and card.max_charges > 0:
+				charge_cost = 1
+			if charge_cost > 0 and card.charges < charge_cost:
+				continue
+		return true
+	return false
+
+
+func spawn_card_for_player(player: PlayerState, card_id: String, anchor: CardInstance = null, cursed: bool = false) -> CardInstance:
+	var card_data: CardData = CardDatabase.get_card(card_id)
+	if not card_data:
+		return null
+	var inst := CardInstance.create(card_data, player.player_id)
+	if cursed:
+		inst.apply_status("Cursed", 1, true)
+	var placed := false
+	if anchor:
+		placed = player.place_adjacent_to(inst, anchor)
+	else:
+		placed = player.place_in_first_free_slot(inst)
+	if not placed:
+		inst.move_to_zone("graveyard")
+		player.graveyard.append(inst)
+		EventBus.card_discarded.emit(inst, player.player_id)
+		return inst
+	EventBus.card_placed_on_board.emit(inst, inst.board_position.get("row", -1), inst.board_position.get("col", -1))
+	_trigger_deploy(inst)
+	_trigger_passive(inst)
+	return inst
+
+
+func play_specific_from_deck_or_graveyard(player: PlayerState, card_id: String, anchor: CardInstance = null, cursed: bool = false) -> CardInstance:
+	var card: CardInstance = player.take_from_faction_deck(card_id)
+	if not card:
+		card = player.take_from_graveyard(card_id)
+	if not card:
+		return null
+	if cursed:
+		card.apply_status("Cursed", 1, true)
+	var placed := false
+	if anchor:
+		placed = player.place_adjacent_to(card, anchor)
+	else:
+		placed = player.place_in_first_free_slot(card)
+	if not placed:
+		card.move_to_zone("graveyard")
+		player.graveyard.append(card)
+		return card
+	EventBus.card_placed_on_board.emit(card, card.board_position.get("row", -1), card.board_position.get("col", -1))
+	_trigger_deploy(card)
+	_trigger_passive(card)
+	return card
+
+
+func replay_from_graveyard(player: PlayerState, card: CardInstance, cursed: bool = false) -> bool:
+	if not (card in player.graveyard):
+		return false
+	player.graveyard.erase(card)
+	if cursed:
+		card.apply_status("Cursed", 1, true)
+	if card.data.type in ["Unit", "Artifact"]:
+		if not player.place_in_first_free_slot(card):
+			player.graveyard.append(card)
+			return false
+		EventBus.card_placed_on_board.emit(card, card.board_position.get("row", -1), card.board_position.get("col", -1))
+		_trigger_deploy(card)
+		_trigger_passive(card)
+	elif card.data.type == "Spell":
+		_resolve_spell(card, player)
+		card.move_to_zone("graveyard")
+		player.graveyard.append(card)
+	return true
 
 
 func _trigger_statuses(player: PlayerState) -> void:
@@ -284,13 +482,15 @@ func _trigger_statuses(player: PlayerState) -> void:
 			var stacks: int = card.get_status_stacks("Poison")
 			var dmg: int = mini(stacks, card.current_power - 1)
 			if dmg > 0:
-				card.apply_damage(dmg)
+				card.apply_direct_damage(dmg)
+				EventBus.damage_dealt.emit(card, dmg, null)
 				EventBus.status_triggered.emit(card, "Poison")
 		
 		# Burn: 1 damage per stack, can kill
 		if card.has_status("Burn"):
 			var stacks: int = card.get_status_stacks("Burn")
-			card.apply_damage(stacks)
+			card.apply_direct_damage(stacks)
+			EventBus.damage_dealt.emit(card, stacks, null)
 			EventBus.status_triggered.emit(card, "Burn")
 			if card.current_power <= 0:
 				_destroy_card(card, player)
@@ -298,14 +498,21 @@ func _trigger_statuses(player: PlayerState) -> void:
 		# Wither: damage = stacks, remove all stacks, can kill
 		if card.has_status("Wither"):
 			var stacks: int = card.get_status_stacks("Wither")
-			card.apply_damage(stacks)
+			card.apply_direct_damage(stacks)
+			EventBus.damage_dealt.emit(card, stacks, null)
 			card.remove_status("Wither")
 			EventBus.status_triggered.emit(card, "Wither")
 			if card.current_power <= 0:
 				_destroy_card(card, player)
 		
-		# Vulnerable: if damaged this turn, +1 damage per stack
-		# (This is handled in the damage application, not here)
+		# Vulnerable: if damaged this turn, damage self by 1 per stack.
+		if card.has_status("Vulnerable") and card.damaged_this_turn:
+			var stacks: int = card.get_status_stacks("Vulnerable")
+			card.apply_direct_damage(stacks)
+			EventBus.damage_dealt.emit(card, stacks, null)
+			EventBus.status_triggered.emit(card, "Vulnerable")
+			if card.current_power <= 0:
+				_destroy_card(card, player)
 
 
 func _diminish_statuses(player: PlayerState) -> void:
@@ -318,6 +525,8 @@ func _diminish_statuses(player: PlayerState) -> void:
 
 func _destroy_card(card: CardInstance, player: PlayerState) -> void:
 	"""Handle card destruction: Last Word, Cursed check, graveyard/banish."""
+	if card.data.type in ["Unit", "Hero"]:
+		card.current_power = 0
 	# Trigger Last Word
 	for effect in card.data.effects:
 		if effect.trigger == "last_word":
@@ -353,3 +562,9 @@ func _check_game_over() -> bool:
 		EventBus.game_ended.emit(winner_id)
 		return true
 	return false
+
+
+func force_game_over(forced_winner_id: int) -> void:
+	game_over = true
+	winner_id = forced_winner_id
+	EventBus.game_ended.emit(winner_id)

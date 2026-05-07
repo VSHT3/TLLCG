@@ -162,15 +162,20 @@ func _load_json_array(filename: String) -> Array:
 
 func _load_cards() -> void:
 	var card_array: Array = _load_json_array("cards.json")
+	var faction_card_index: Dictionary = _build_faction_card_index()
 	for entry in card_array:
+		if str(entry.get("id", "")).strip_edges() == "":
+			continue
 		var card := CardData.new()
 		card.id = entry.get("id", "")
 		card.name = entry.get("name", "")
-		card.type = entry.get("type", "Unknown")
-		card.rarity = entry.get("rarity", "Unknown")
-		card.factions = Array(entry.get("factions", []))
+		card.type = _normalize_card_type(entry.get("type", "Unknown"), entry)
+		card.rarity = _normalize_rarity(entry.get("rarity", "Unknown"), entry)
+		card.factions = _normalize_factions(card.id, Array(entry.get("factions", [])), faction_card_index, entry)
 		card.categories = Array(entry.get("categories", []))
 		card.base_power = entry.get("power", 0) if entry.get("power") != null else 0
+		if card.type in ["Unit", "Hero"] and card.base_power <= 0:
+			card.base_power = GameConstants.STARTING_HERO_HP if card.type == "Hero" else 1
 		card.has_ability = entry.get("has_ability", false)
 		card.ability_text = entry.get("ability_text", "")
 		card.artwork_path = entry.get("artwork", "")
@@ -188,11 +193,98 @@ func _load_cards() -> void:
 			effect.upkeep_cost = eff.get("upkeep_cost", 0)
 			effect.tribute_cost = eff.get("tribute_cost", 0)
 			effect.hoard_threshold = eff.get("hoard_threshold", 0)
+			effect.pay_cost = eff.get("pay_cost", 0)
+			effect.initial_charges = eff.get("initial_charges", 0)
 			effect.charges = eff.get("charges", 0)
+			effect.max_charges = eff.get("max_charges", 0)
+			effect.counter_delta = eff.get("counter_delta", 0)
+			effect.counter_threshold = eff.get("counter_threshold", 0)
+			effect.max_uses_per_turn = eff.get("max_uses_per_turn", 0)
+			effect.permanent_status = eff.get("permanent_status", false)
+			effect.target_scope = eff.get("target_scope", "enemy")
+			effect.target_kind = eff.get("target_kind", "card")
+			effect.area = eff.get("area", false)
+			effect.requires_target = eff.get("requires_target", true)
 			effect.raw_text = eff.get("raw_text", "")
 			card.effects.append(effect)
+
+		if card.ability_text.strip_edges() == "" and card.effects.is_empty():
+			card.has_ability = false
 		
 		cards[card.id] = card
+
+
+func _build_faction_card_index() -> Dictionary:
+	var result: Dictionary = {}
+	for faction in factions.values():
+		var name: String = faction.get("name", "")
+		if name == "":
+			continue
+		for card_id in faction.get("card_ids", []):
+			if str(card_id) == "":
+				continue
+			if not result.has(card_id):
+				result[card_id] = []
+			result[card_id].append(name)
+	return result
+
+
+func _normalize_card_type(raw_type, entry: Dictionary) -> String:
+	var t: String = str(raw_type).strip_edges()
+	match t.to_lower():
+		"unit":
+			return "Unit"
+		"spell":
+			return "Spell"
+		"artifact":
+			return "Artifact"
+		"hero":
+			return "Hero"
+		_:
+			pass
+	if entry.get("power") != null:
+		return "Unit"
+	if bool(entry.get("has_ability", false)) or str(entry.get("ability_text", "")).strip_edges() != "":
+		return "Spell"
+	if str(entry.get("id", "")).strip_edges() != "" or str(entry.get("name", "")).strip_edges() != "":
+		return "Spell"
+	return "Unknown"
+
+
+func _normalize_rarity(raw_rarity, entry: Dictionary) -> String:
+	var rarity: String = str(raw_rarity).strip_edges()
+	match rarity.to_lower():
+		"common":
+			return "Common"
+		"rare":
+			return "Rare"
+		"epic":
+			return "Epic"
+		"legendary":
+			return "Legendary"
+		"hero":
+			return "Hero"
+		_:
+			pass
+	if entry.get("type", "") == "Hero":
+		return "Hero"
+	if entry.get("has_ability", false):
+		return "Common"
+	return "Common"
+
+
+func _normalize_factions(card_id: String, raw_factions: Array, faction_card_index: Dictionary, entry: Dictionary) -> Array:
+	var result: Array = []
+	for faction in raw_factions:
+		var name: String = str(faction).strip_edges()
+		if name != "" and not (name in result):
+			result.append(name)
+	for faction in faction_card_index.get(card_id, []):
+		if not (faction in result):
+			result.append(faction)
+	if result.is_empty() and entry.get("type", "") != "Hero":
+		result.append("Neutral")
+	return result
 
 
 func _load_keywords() -> void:

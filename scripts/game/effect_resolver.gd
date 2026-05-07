@@ -12,6 +12,7 @@ func _ready() -> void:
 	EventBus.ability_triggered.connect(_on_ability_triggered)
 	EventBus.deploy_triggered.connect(_on_deploy_triggered)
 	EventBus.timer_expired.connect(_on_timer_expired)
+	EventBus.damage_dealt.connect(_on_damage_dealt)
 
 
 func setup(gs: GameState) -> void:
@@ -21,12 +22,11 @@ func setup(gs: GameState) -> void:
 # ── Signal Handlers ──────────────────────────────────────────────────────────
 
 func _on_ability_triggered(card: CardInstance, effect: CardEffect) -> void:
-	print("[DEBUG] _on_ability_triggered: %s effect=%s trigger=%s" % [card.data.name, effect.type, effect.trigger])
 	EventBus.message_shown.emit("ABILITY: %s %s/%s" % [card.data.name, effect.type, effect.trigger])
 	if not _check_costs(card, effect):
-		print("[DEBUG] cost check failed")
-		EventBus.message_shown.emit("COST FAIL")
 		return
+	if effect.counter_delta != 0:
+		card.change_counter(effect.counter_delta)
 
 	match effect.type:
 		"damage":
@@ -55,6 +55,8 @@ func _on_ability_triggered(card: CardInstance, effect: CardEffect) -> void:
 			_resolve_seize(card, effect)
 		"block":
 			_resolve_block(card, effect)
+		"gain_charge":
+			_resolve_gain_charge(card, effect)
 		"complex":
 			_resolve_complex(card, effect)
 		"cleanse":
@@ -75,12 +77,24 @@ func _on_timer_expired(_card: CardInstance) -> void:
 	pass
 
 
+func _on_damage_dealt(target: CardInstance, amount: int, source: CardInstance) -> void:
+	if amount <= 0 or not game_state:
+		return
+	_apply_masovystit_redirect(target, amount, source)
+
+
 # ── Cost Checking ────────────────────────────────────────────────────────────
 
 func _check_costs(card: CardInstance, effect: CardEffect) -> bool:
 	var player: PlayerState = _get_controller(card)
 	if not player:
 		return false
+
+	var use_key := "%s:%s:%s" % [effect.type, effect.trigger, effect.raw_text]
+	if effect.max_uses_per_turn > 0:
+		var uses: int = card.effect_uses_this_turn.get(use_key, 0)
+		if uses >= effect.max_uses_per_turn:
+			return false
 	
 	# Tribute: optional cost
 	if effect.trigger == "tribute" and effect.tribute_cost > 0:
@@ -88,8 +102,8 @@ func _check_costs(card: CardInstance, effect: CardEffect) -> bool:
 			return false  # Can't afford — skip ability
 		player.spend_sellary(effect.tribute_cost)
 	
-	# Upkeep: mandatory cost
-	if effect.trigger == "upkeep" and effect.upkeep_cost > 0:
+	# Upkeep: mandatory cost attached to any trigger.
+	if effect.upkeep_cost > 0:
 		if not player.spend_sellary(effect.upkeep_cost):
 			return false  # Can't afford — ability doesn't trigger
 	
@@ -100,13 +114,19 @@ func _check_costs(card: CardInstance, effect: CardEffect) -> bool:
 	
 	# Order: charge check
 	if effect.trigger == "order":
-		var charge_cost: int = effect.charges if effect.charges > 0 else 1
-		if not card.use_charge(charge_cost):
+		var charge_cost: int = effect.charges
+		if charge_cost == 0 and card.max_charges > 0:
+			charge_cost = 1
+		if charge_cost > 0 and not card.use_charge(charge_cost):
 			return false
 	
 	# Pay: explicit sellary cost
-	if effect.trigger == "passive":
-		pass  # TODO: handle Pay keyword separately
+	if effect.trigger == "pay" and effect.pay_cost > 0:
+		if not player.spend_sellary(effect.pay_cost):
+			return false
+	
+	if effect.max_uses_per_turn > 0:
+		card.effect_uses_this_turn[use_key] = card.effect_uses_this_turn.get(use_key, 0) + 1
 	
 	return true
 
@@ -114,17 +134,15 @@ func _check_costs(card: CardInstance, effect: CardEffect) -> bool:
 # ── Effect Resolvers ─────────────────────────────────────────────────────────
 
 func _resolve_damage(source: CardInstance, effect: CardEffect) -> void:
-	var targets: Array = _get_valid_damage_targets(source)
-	print("[DEBUG] _resolve_damage: targets=%d needs_target=%s" % [targets.size(), effect.needs_target()])
+	var targets: Array = _get_effect_targets(source, effect)
 	if targets.is_empty():
 		return
 
 	if effect.needs_target():
 		EventBus.target_requested.emit(targets, func(target: CardInstance) -> void:
-			_apply_damage(source, target, effect.value)
+			_apply_damage_to_effect_targets(source, target, effect)
 		)
 	else:
-		# No target needed (e.g. area) — hit all valid targets
 		for target in targets:
 			_apply_damage(source, target, effect.value)
 
@@ -133,6 +151,8 @@ func _apply_damage(source: CardInstance, target: CardInstance, base_damage: int)
 	if target.data.type == "Artifact":
 		return
 	var damage: int = base_damage
+	if source.has_status("Crit"):
+		damage *= 2
 
 	if source.has_status("Perplexed") and randf() < 0.5:
 		var player: PlayerState = _get_controller(source)
@@ -161,27 +181,40 @@ func _apply_damage(source: CardInstance, target: CardInstance, base_damage: int)
 		var owner: PlayerState = _find_card_owner(target)
 		if owner:
 			game_state._destroy_card(target, owner)
-		for eff in source.data.effects:
-			if eff.trigger == "deathblow":
-				EventBus.deathblow_triggered.emit(source, target)
-				EventBus.ability_triggered.emit(source, eff)
+		if target.data.type == "Unit":
+			for eff in source.data.effects:
+				if eff.trigger == "deathblow":
+					EventBus.deathblow_triggered.emit(source, target)
+					EventBus.ability_triggered.emit(source, eff)
 
 
 func _resolve_boost(source: CardInstance, effect: CardEffect) -> void:
-	# Default: boost self. Targeting handled by complex abilities.
-	source.apply_boost(effect.value)
-	EventBus.boost_applied.emit(source, effect.value)
+	var targets: Array = _get_effect_targets(source, effect)
+	if targets.is_empty():
+		return
+	if effect.needs_target():
+		EventBus.target_requested.emit(targets, func(target: CardInstance) -> void:
+			_apply_boost_to_effect_targets(target, effect)
+		)
+	else:
+		for target in targets:
+			target.apply_boost(effect.value)
+			EventBus.boost_applied.emit(target, effect.value)
 
 
 func _resolve_heal(source: CardInstance, effect: CardEffect) -> void:
-	# Spells heal the casting player's hero; units/artifacts heal self
-	var target: CardInstance = source
-	if source.data.type == "Spell":
-		var player: PlayerState = _get_controller(source)
-		if player and player.hero:
-			target = player.hero
-	target.apply_heal(effect.value)
-	EventBus.heal_applied.emit(target, effect.value)
+	var targets: Array = _get_effect_targets(source, effect)
+	if targets.is_empty():
+		return
+	if effect.needs_target():
+		EventBus.target_requested.emit(targets, func(target: CardInstance) -> void:
+			_apply_heal_to_effect_targets(target, effect)
+		)
+	else:
+		for target in targets:
+			var amount: int = target.missing_health() if effect.value <= 0 else effect.value
+			target.apply_heal(amount)
+			EventBus.heal_applied.emit(target, amount)
 
 
 func _resolve_profit(source: CardInstance, effect: CardEffect) -> void:
@@ -224,38 +257,42 @@ func _resolve_draw(source: CardInstance, effect: CardEffect) -> void:
 
 
 func _resolve_apply_status(source: CardInstance, effect: CardEffect) -> void:
-	var targets: Array = _get_all_board_units_except(source)
+	var targets: Array = _get_effect_targets(source, effect)
 	if targets.is_empty():
 		return
-	EventBus.target_requested.emit(targets, func(target: CardInstance) -> void:
-		target.apply_status(effect.status, effect.stacks if effect.stacks > 0 else 1)
-		EventBus.status_applied.emit(target, effect.status, effect.stacks)
-	)
+	if effect.needs_target():
+		EventBus.target_requested.emit(targets, func(target: CardInstance) -> void:
+			_apply_status_to_target(target, effect)
+		)
+	else:
+		for target in targets:
+			_apply_status_to_target(target, effect)
 
 
-func _resolve_destroy(source: CardInstance, _effect: CardEffect) -> void:
-	var targets: Array = _get_valid_damage_targets(source)
+func _resolve_destroy(source: CardInstance, effect: CardEffect) -> void:
+	var targets: Array = _get_effect_targets(source, effect)
 	if targets.is_empty():
 		return
-	EventBus.target_requested.emit(targets, func(target: CardInstance) -> void:
-		var owner: PlayerState = _find_card_owner(target)
-		if owner:
-			game_state._destroy_card(target, owner)
-	)
+	if effect.needs_target():
+		EventBus.target_requested.emit(targets, func(target: CardInstance) -> void:
+			_destroy_effect_target(target)
+		)
+	else:
+		for target in targets:
+			_destroy_effect_target(target)
 
 
-func _resolve_banish(source: CardInstance, _effect: CardEffect) -> void:
-	var targets: Array = _get_valid_damage_targets(source)
+func _resolve_banish(source: CardInstance, effect: CardEffect) -> void:
+	var targets: Array = _get_effect_targets(source, effect)
 	if targets.is_empty():
 		return
-	EventBus.target_requested.emit(targets, func(target: CardInstance) -> void:
-		var owner: PlayerState = _find_card_owner(target)
-		if owner:
-			owner.remove_from_board(target)
-			target.move_to_zone("banished")
-			owner.banished.append(target)
-			EventBus.card_banished.emit(target)
-	)
+	if effect.needs_target():
+		EventBus.target_requested.emit(targets, func(target: CardInstance) -> void:
+			_banish_effect_target(target)
+		)
+	else:
+		for target in targets:
+			_banish_effect_target(target)
 
 
 func _resolve_spy(source: CardInstance, _effect: CardEffect) -> void:
@@ -268,12 +305,20 @@ func _resolve_spy(source: CardInstance, _effect: CardEffect) -> void:
 		if p.player_id != player.player_id:
 			# Move to opponent's board
 			player.remove_from_board(source)
+			EventBus.card_removed_from_board.emit(source)
 			source.controller_id = p.player_id
+			var placed := false
 			for row_idx in range(p.board.size()):
 				var free_col: int = p.find_free_col(row_idx)
 				if free_col >= 0:
-					p.place_on_board(source, row_idx, free_col)
+					placed = p.place_on_board(source, row_idx, free_col)
+					if placed:
+						EventBus.card_placed_on_board.emit(source, row_idx, free_col)
 					break
+			if not placed:
+				source.move_to_zone("graveyard")
+				player.graveyard.append(source)
+				EventBus.card_discarded.emit(source, player.player_id)
 			break
 
 
@@ -283,7 +328,7 @@ func _resolve_devour(source: CardInstance, _effect: CardEffect) -> void:
 		return
 	var allies: Array = []
 	for card in player.get_all_board_units():
-		if card != source:
+		if card != source and card.data.type == "Unit":
 			allies.append(card)
 	if allies.is_empty():
 		return
@@ -300,17 +345,127 @@ func _resolve_seize(source: CardInstance, effect: CardEffect) -> void:
 	var player: PlayerState = _get_controller(source)
 	if not player:
 		return
+	var targets: Array[PlayerState] = []
 	for p in game_state.players:
-		if p.player_id != player.player_id:
-			var amount: int = mini(effect.value, p.sellary)
-			p.sellary -= amount
-			player.gain_sellary(amount)
-			EventBus.sellary_seized.emit(p.player_id, player.player_id, amount)
-			break
+		match effect.target_scope:
+			"self", "ally":
+				if p.player_id == player.player_id:
+					targets.append(p)
+			"any":
+				targets.append(p)
+			_:
+				if p.player_id != player.player_id:
+					targets.append(p)
+	if targets.is_empty():
+		return
+	if targets.size() == 1:
+		_apply_seize(player, targets[0], effect.value)
+		return
+	var options: Array = []
+	for target_player in targets:
+		var who := "You" if target_player.player_id == player.player_id else "Opponent"
+		options.append({"label": who, "detail": "%d sellary available." % target_player.sellary, "value": target_player})
+	EventBus.choice_requested.emit("Seize from", options, func(target_player: PlayerState) -> void:
+		_apply_seize(player, target_player, effect.value)
+	)
 
 
 func _resolve_block(source: CardInstance, effect: CardEffect) -> void:
 	source.block = effect.value
+
+
+func _resolve_gain_charge(source: CardInstance, effect: CardEffect) -> void:
+	source.gain_charge(effect.value if effect.value > 0 else 1)
+	EventBus.message_shown.emit("%s gained charge (%d)." % [source.data.name, source.charges])
+
+
+func _apply_seize(to_player: PlayerState, from_player: PlayerState, value: int) -> void:
+	var amount: int = mini(value, from_player.sellary)
+	from_player.sellary -= amount
+	to_player.gain_sellary(amount)
+	EventBus.sellary_seized.emit(from_player.player_id, to_player.player_id, amount)
+
+
+func _apply_damage_to_effect_targets(source: CardInstance, target: CardInstance, effect: CardEffect) -> void:
+	for affected in _expand_area_targets(target, effect):
+		_apply_damage(source, affected, effect.value)
+
+
+func _apply_boost_to_effect_targets(target: CardInstance, effect: CardEffect) -> void:
+	for affected in _expand_area_targets(target, effect):
+		affected.apply_boost(effect.value)
+		EventBus.boost_applied.emit(affected, effect.value)
+
+
+func _apply_heal_to_effect_targets(target: CardInstance, effect: CardEffect) -> void:
+	for affected in _expand_area_targets(target, effect):
+		var amount: int = affected.missing_health() if effect.value <= 0 else effect.value
+		affected.apply_heal(amount)
+		EventBus.heal_applied.emit(affected, amount)
+
+
+func _apply_status_to_target(target: CardInstance, effect: CardEffect) -> void:
+	var stacks: int = effect.stacks if effect.stacks > 0 else 1
+	for affected in _expand_area_targets(target, effect):
+		affected.apply_status(effect.status, stacks, effect.permanent_status)
+		EventBus.status_applied.emit(affected, effect.status, stacks)
+
+
+func _destroy_effect_target(target: CardInstance) -> void:
+	var owner: PlayerState = _find_card_owner(target)
+	if owner:
+		game_state._destroy_card(target, owner)
+
+
+func _banish_effect_target(target: CardInstance) -> void:
+	var owner: PlayerState = _find_card_owner(target)
+	if not owner:
+		owner = _find_card_owner_or_zone_owner(target)
+	if owner:
+		_remove_card_from_owner_zones(owner, target)
+		target.move_to_zone("banished")
+		owner.banished.append(target)
+		EventBus.card_banished.emit(target)
+
+
+func _cleanse_effect_target(target: CardInstance) -> void:
+	target.cleanse()
+	EventBus.message_shown.emit("Cleanse: %s cleansed" % target.data.name)
+
+
+func _move_card_to_graveyard(owner: PlayerState, card: CardInstance) -> void:
+	_remove_card_from_owner_zones(owner, card)
+	card.move_to_zone("graveyard")
+	owner.graveyard.append(card)
+	EventBus.card_discarded.emit(card, owner.player_id)
+
+
+func _remove_card_from_owner_zones(owner: PlayerState, card: CardInstance) -> void:
+	if card in owner.get_all_board_units():
+		owner.remove_from_board(card)
+		EventBus.card_removed_from_board.emit(card)
+	if card in owner.hand:
+		owner.remove_from_hand(card)
+	if card in owner.graveyard:
+		owner.graveyard.erase(card)
+	if card in owner.banished:
+		owner.banished.erase(card)
+
+
+func _expand_area_targets(target: CardInstance, effect: CardEffect) -> Array:
+	var result: Array = [target]
+	if not effect.area:
+		return result
+	var owner: PlayerState = _find_card_owner(target)
+	if not owner:
+		return result
+	var pos: Dictionary = owner.find_card_position(target)
+	if pos.is_empty():
+		return result
+	for adjacent in BoardManager.get_adjacent_cards(owner, pos["row"], pos["col"]):
+		if not (adjacent in result):
+			result.append(adjacent)
+	return result
 
 
 func _resolve_complex(source: CardInstance, effect: CardEffect) -> void:
@@ -349,6 +504,48 @@ func _resolve_complex(source: CardInstance, effect: CardEffect) -> void:
 			_complex_the_prophet(source, effect)
 		"opakovacia_dedinka":
 			_complex_opakovacia_dedinka(source)
+		"breakthru":
+			_complex_breakthru(source)
+		"dawood":
+			_complex_dawood(source)
+		"discard_this_card":
+			_complex_discard_this_card(source)
+		"claws_the_production":
+			_complex_claws_the_production(source)
+		"my_country_called_me":
+			_complex_my_country_called_me(source)
+		"negromancy":
+			_complex_negromancy(source, ["Common", "Rare"])
+		"negromancy_premium":
+			_complex_negromancy(source, ["Epic", "Legendary"])
+		"sellers_sailors":
+			_complex_sellers_sailors(source)
+		"premium_account":
+			_complex_premium_account(source, effect)
+		"scrolling_papers":
+			_complex_scrolling_papers(source)
+		"damina":
+			_complex_damina(source, effect)
+		"trembling_lips":
+			_complex_trembling_lips(source, effect)
+		"miss_spell":
+			_complex_miss_spell(source)
+		"mikrofo_novy_pokles":
+			_complex_mikrofo_novy_pokles(source)
+		"the_why_axes":
+			_complex_the_why_axes(source)
+		"sir_veillance":
+			_complex_sir_veillance(source)
+		"obratnost_ruk":
+			_complex_obratnost_ruk(source)
+		"mr_rural":
+			_complex_mr_rural(source, effect)
+		"velke_jazykove_monstrum":
+			_complex_velke_jazykove_monstrum(source, effect)
+		"nak_mitchrbat":
+			_complex_nak_mitchrbat(source)
+		"masovystit":
+			_complex_masovystit(source)
 		_:
 			push_warning("[EffectResolver] Unimplemented complex effect on %s: %s" % [source.data.name, effect.raw_text])
 
@@ -669,33 +866,497 @@ func _complex_opakovacia_dedinka(source: CardInstance) -> void:
 	EventBus.message_shown.emit("Opakovacia Dedinka: replayed %s" % last.name)
 
 
-func _resolve_cleanse(source: CardInstance, _effect: CardEffect) -> void:
-	var all_units: Array = _get_all_board_units_except(source)
-	all_units.append(source)
-	if all_units.is_empty():
-		return
-	EventBus.target_requested.emit(all_units, func(target: CardInstance) -> void:
-		target.cleanse()
-		EventBus.message_shown.emit("Cleanse: %s cleansed" % target.data.name)
-	)
-
-
-func _resolve_discard(source: CardInstance, _effect: CardEffect) -> void:
+func _complex_breakthru(source: CardInstance) -> void:
 	var player: PlayerState = _get_controller(source)
 	if not player:
 		return
-	if player.hand.is_empty():
+	var targets: Array = _get_enemy_board_cards(player)
+	if targets.size() < 2:
+		EventBus.message_shown.emit("Breakthru needs two enemy cards.")
 		return
-	# Discard a card from own hand (player chooses — use target_requested on hand cards)
-	EventBus.target_requested.emit(player.hand.duplicate(), func(target: CardInstance) -> void:
-		player.remove_from_hand(target)
-		target.move_to_zone("graveyard")
-		player.graveyard.append(target)
-		EventBus.card_discarded.emit(target, player.player_id)
+	EventBus.target_requested.emit(targets, func(first: CardInstance) -> void:
+		var remaining: Array = targets.duplicate()
+		remaining.erase(first)
+		EventBus.target_requested.emit(remaining, func(second: CardInstance) -> void:
+			var owner: PlayerState = _find_card_owner(first)
+			if owner and owner == _find_card_owner(second) and owner.swap_board_positions(first, second):
+				EventBus.message_shown.emit("Breakthru swapped %s and %s." % [first.data.name, second.data.name])
+		)
+	)
+
+
+func _complex_dawood(source: CardInstance) -> void:
+	var player: PlayerState = _get_controller(source)
+	if not player:
+		return
+	EventBus.choice_requested.emit("Dawood", [
+		{"label": "Boost a non-hero unit", "detail": "+2 power to a chosen unit.", "value": "boost"},
+		{"label": "Damage a non-hero unit", "detail": "Deal 1 damage to a chosen unit.", "value": "damage"},
+	], func(choice: String) -> void:
+		var targets: Array = _get_board_cards_by_filter("any", "unit", player)
+		if targets.is_empty():
+			EventBus.message_shown.emit("No unit target.")
+			return
+		EventBus.target_requested.emit(targets, func(target: CardInstance) -> void:
+			if choice == "boost":
+				target.apply_boost(2)
+				EventBus.boost_applied.emit(target, 2)
+			else:
+				_apply_damage(source, target, 1)
+		)
+	)
+
+
+func _complex_discard_this_card(source: CardInstance) -> void:
+	var opponent: PlayerState = _get_enemy_player(source)
+	if not opponent or opponent.hand.is_empty():
+		EventBus.message_shown.emit("Opponent has no hand to discard.")
+		return
+	opponent.hand.shuffle()
+	var card: CardInstance = opponent.hand.pop_front()
+	card.move_to_zone("graveyard")
+	opponent.graveyard.append(card)
+	EventBus.card_discarded.emit(card, opponent.player_id)
+	EventBus.message_shown.emit("Discarded %s from opponent." % card.data.name)
+
+
+func _complex_claws_the_production(source: CardInstance) -> void:
+	var opponent: PlayerState = _get_enemy_player(source)
+	if not opponent:
+		return
+	opponent.base_sellary_modifier_next_turn -= 2
+	EventBus.message_shown.emit("Opponent loses 2 base sellary next turn.")
+
+
+func _complex_my_country_called_me(source: CardInstance) -> void:
+	var opponent: PlayerState = _get_enemy_player(source)
+	if not opponent:
+		return
+	opponent.suppress_end_turn_next_turn = true
+	EventBus.message_shown.emit("Opponent's next end-of-turn abilities are suppressed.")
+
+
+func _complex_negromancy(source: CardInstance, rarities: Array[String]) -> void:
+	var player: PlayerState = _get_controller(source)
+	if not player:
+		return
+	var candidates: Array[CardInstance] = player.get_graveyard_cards_by_rarity(rarities)
+	if candidates.is_empty():
+		EventBus.message_shown.emit("No graveyard card of matching rarity.")
+		return
+	var options: Array = []
+	for card in candidates:
+		options.append({"label": "%s (%s %s)" % [card.data.name, card.data.rarity, card.data.type], "value": card})
+	EventBus.choice_requested.emit("Replay from graveyard", options, func(card: CardInstance) -> void:
+		if game_state.replay_from_graveyard(player, card, true):
+			EventBus.message_shown.emit("Replayed %s with Cursed." % card.data.name)
+	)
+
+
+func _complex_sellers_sailors(source: CardInstance) -> void:
+	var player: PlayerState = _get_controller(source)
+	if not player:
+		return
+	for card_id in ["the_parrot", "the_ship", "the_captain", "the_mate"]:
+		game_state.spawn_card_for_player(player, card_id)
+	EventBus.message_shown.emit("Summoned The Crew.")
+
+
+func _complex_premium_account(source: CardInstance, effect: CardEffect) -> void:
+	var player: PlayerState = _get_controller(source)
+	if not player:
+		return
+	if effect.trigger == "tribute":
+		for i in range(2):
+			game_state.spawn_card_for_player(player, "neural_network", source)
+		EventBus.message_shown.emit("Premium Account spawned Neural Networks.")
+	else:
+		var count: int = 0
+		for card in player.get_all_board_units():
+			if "A.I." in card.data.categories or "A.I. Gods" in card.data.factions:
+				count += 1
+		player.gain_sellary(count)
+		EventBus.message_shown.emit("Premium Account profit %d." % count)
+
+
+func _complex_scrolling_papers(source: CardInstance) -> void:
+	var player: PlayerState = _get_controller(source)
+	if not player:
+		return
+	EventBus.choice_requested.emit("Look through top 3", [
+		{"label": "Neutral deck", "detail": "Reveal the next 3 shared cards.", "value": "neutral"},
+		{"label": "Faction deck", "detail": "Reveal the next 3 cards from your faction deck.", "value": "faction"},
+	], func(deck_name: String) -> void:
+		var cards: Array = game_state.neutral_deck if deck_name == "neutral" else player.faction_deck
+		var names: Array[String] = []
+		var revealed: Array = []
+		for i in range(mini(3, cards.size())):
+			names.append(cards[i].data.name)
+			revealed.append(cards[i])
+		EventBus.ability_panel_requested.emit("%s top cards" % deck_name.capitalize(), revealed)
+		EventBus.message_shown.emit("%s top: %s" % [deck_name.capitalize(), ", ".join(names)])
+	)
+
+
+func _complex_damina(source: CardInstance, effect: CardEffect) -> void:
+	var player: PlayerState = _get_controller(source)
+	if not player:
+		return
+	match effect.trigger:
+		"deploy":
+			if _controls_card_id(player, "trembling_lips"):
+				source.apply_boost(1)
+				EventBus.boost_applied.emit(source, 1)
+			elif game_state.play_specific_from_deck_or_graveyard(player, "trembling_lips", source):
+				EventBus.message_shown.emit("Damina played Trembling Lips.")
+		"turn_start":
+			EventBus.message_shown.emit("Damina counter: %d." % source.counter)
+		"order":
+			if source.counter > 0:
+				if effect.charges > 0:
+					source.gain_charge(effect.charges)
+				EventBus.message_shown.emit("Damina counter is not 0.")
+				return
+			var targets: Array = _get_board_cards_by_filter("any", "hero", player)
+			EventBus.target_requested.emit(targets, func(target: CardInstance) -> void:
+				_apply_damage(source, target, 5)
+			)
+
+
+func _complex_trembling_lips(source: CardInstance, effect: CardEffect) -> void:
+	var player: PlayerState = _get_controller(source)
+	if not player:
+		return
+	match effect.trigger:
+		"deploy":
+			if _controls_card_id(player, "damina"):
+				source.apply_boost(1)
+				EventBus.boost_applied.emit(source, 1)
+			elif game_state.play_specific_from_deck_or_graveyard(player, "damina", source):
+				EventBus.message_shown.emit("Trembling Lips played Damina.")
+		"turn_start":
+			if source.timer % 2 != 0:
+				return
+			var pos: Dictionary = player.find_card_position(source)
+			if pos.is_empty():
+				return
+			for card in player.board[pos["row"]]:
+				card.apply_status("Invisible", 1)
+				EventBus.status_applied.emit(card, "Invisible", 1)
+			for opponent in game_state.players:
+				if opponent.player_id == player.player_id:
+					continue
+				for card in opponent.board[pos["row"]]:
+					card.apply_status("Invisible", 1)
+					EventBus.status_applied.emit(card, "Invisible", 1)
+
+
+func _complex_miss_spell(source: CardInstance) -> void:
+	var player: PlayerState = _get_controller(source)
+	if not player:
+		return
+	var target := _get_enemy_hero(player)
+	if not target:
+		return
+	target.apply_status("Miss Spell", 1)
+	EventBus.status_applied.emit(target, "Miss Spell", 1)
+	EventBus.message_shown.emit("Miss Spell applied to enemy hero.")
+
+
+func _complex_mikrofo_novy_pokles(source: CardInstance) -> void:
+	var player: PlayerState = _get_controller(source)
+	if not player:
+		return
+	if player.cards_played_this_turn > 1:
+		EventBus.message_shown.emit("Mikrofonovy Pokles must be your first action.")
+		return
+	var amount: int = player.sellary
+	if amount <= 0:
+		EventBus.message_shown.emit("No sellary to spend.")
+		return
+	player.spend_sellary(amount)
+	var targets: Array = _get_board_cards_by_filter("any", "unit", player)
+	if targets.is_empty():
+		EventBus.message_shown.emit("No unit target.")
+		return
+	EventBus.target_requested.emit(targets, func(target: CardInstance) -> void:
+		_apply_damage(source, target, amount)
+	)
+
+
+func _complex_the_why_axes(source: CardInstance) -> void:
+	EventBus.choice_requested.emit("Choose row", [
+		{"label": "Melee", "detail": "Front row, 5 slots.", "value": 0},
+		{"label": "Ranged", "detail": "Middle row, 5 slots.", "value": 1},
+		{"label": "Artillery", "detail": "Back row, 3 slots.", "value": 2},
+	], func(row_idx: int) -> void:
+		var cards: Array[CardInstance] = []
+		for player in game_state.players:
+			for card in player.board[row_idx]:
+				if card.data.type == "Unit":
+					cards.append(card)
+		if cards.is_empty():
+			EventBus.message_shown.emit("No units on that row.")
+			return
+		var total := 0
+		for card in cards:
+			total += card.current_power
+		var average: int = total / cards.size()
+		for card in cards:
+			card.current_power = average
+		EventBus.message_shown.emit("The Why Axes set row power to %d." % average)
+	)
+
+
+func _complex_sir_veillance(source: CardInstance) -> void:
+	var opponent: PlayerState = _get_enemy_player(source)
+	if not opponent:
+		return
+	if opponent.hand.is_empty():
+		EventBus.message_shown.emit("Opponent hand is empty.")
+		return
+	var names: Array[String] = []
+	for card in opponent.hand:
+		names.append("%s (%s)" % [card.data.name, card.data.rarity])
+	EventBus.message_shown.emit("Opponent hand: %s" % ", ".join(names))
+
+
+func _complex_obratnost_ruk(source: CardInstance) -> void:
+	var player: PlayerState = _get_controller(source)
+	if not player:
+		return
+	var best_player: PlayerState = null
+	var best_score := -1
+	var rolls: Array[String] = []
+	for participant in game_state.players:
+		var score: int
+		if participant.player_id == player.player_id:
+			score = maxi(randi_range(1, 20), randi_range(1, 20))
+		else:
+			score = randi_range(1, 20)
+		rolls.append("%s=%d" % ["You" if participant.player_id == player.player_id else "Opponent", score])
+		if score > best_score:
+			best_score = score
+			best_player = participant
+	if not best_player:
+		return
+	for participant in game_state.players:
+		if participant.player_id == best_player.player_id:
+			continue
+		var amount: int = mini(4, participant.sellary)
+		participant.sellary -= amount
+		best_player.gain_sellary(amount)
+		EventBus.sellary_seized.emit(participant.player_id, best_player.player_id, amount)
+	EventBus.message_shown.emit("Obratnost Ruk: %s. %s seized 4." % [
+		", ".join(rolls),
+		"You" if best_player.player_id == player.player_id else "Opponent",
+	])
+
+
+func _complex_mr_rural(source: CardInstance, effect: CardEffect) -> void:
+	var player: PlayerState = _get_controller(source)
+	if not player:
+		return
+	match effect.trigger:
+		"turn_start", "upkeep":
+			var egg_count := 0
+			for card in player.hand:
+				if card.data.id == "egg":
+					egg_count += 1
+			if egg_count <= 0:
+				EventBus.message_shown.emit("Mr. Rural: no eggs in hand.")
+				return
+			var targets: Array = _get_board_cards_by_filter("enemy", "non_unit", player)
+			if targets.is_empty():
+				EventBus.message_shown.emit("Mr. Rural: no non-unit target.")
+				return
+			EventBus.target_requested.emit(targets, func(target: CardInstance) -> void:
+				_apply_damage(source, target, egg_count)
+			)
+		"pay":
+			for participant in game_state.players:
+				_create_card_in_hand(participant, "egg")
+			EventBus.message_shown.emit("Both players drew an Egg.")
+
+
+func _complex_velke_jazykove_monstrum(source: CardInstance, effect: CardEffect) -> void:
+	match effect.trigger:
+		"deploy":
+			source.ability_state["monster_slots"] = []
+			_choose_monster_slot(source)
+		"turn_end":
+			var slots: Array = source.ability_state.get("monster_slots", [])
+			if slots.is_empty():
+				EventBus.message_shown.emit("Jazykove Monstrum has no chosen slots.")
+				return
+			var roll_idx: int = randi_range(0, mini(3, slots.size() - 1))
+			var slot: Dictionary = slots[roll_idx]
+			var player := _get_player_by_id(slot.get("player_id", -1))
+			if not player:
+				return
+			var target := BoardManager.get_card_at(player, slot.get("row", -1), slot.get("col", -1))
+			if not target or target.data.type != "Unit":
+				EventBus.message_shown.emit("Jazykove Monstrum rolled an empty slot.")
+				return
+			target.apply_status("Poison", 1)
+			EventBus.status_applied.emit(target, "Poison", 1)
+			_apply_damage(source, target, 1)
+
+
+func _complex_nak_mitchrbat(source: CardInstance) -> void:
+	var player: PlayerState = _get_controller(source)
+	if not player:
+		return
+	var cards: Array = player.get_all_board_units()
+	if cards.size() < 2:
+		EventBus.message_shown.emit("Need two own cards to rearrange.")
+		return
+	EventBus.target_requested.emit(cards, func(first: CardInstance) -> void:
+		var remaining: Array = cards.duplicate()
+		remaining.erase(first)
+		EventBus.target_requested.emit(remaining, func(second: CardInstance) -> void:
+			if player.swap_board_positions(first, second):
+				EventBus.message_shown.emit("Swapped %s and %s." % [first.data.name, second.data.name])
+		)
+	)
+
+
+func _complex_masovystit(_source: CardInstance) -> void:
+	# The actual redirect is handled by _on_damage_dealt so it can react globally.
+	pass
+
+
+func _resolve_cleanse(source: CardInstance, _effect: CardEffect) -> void:
+	var targets: Array = _get_effect_targets(source, _effect)
+	if targets.is_empty():
+		return
+	if _effect.needs_target():
+		EventBus.target_requested.emit(targets, func(target: CardInstance) -> void:
+			_cleanse_effect_target(target)
+		)
+	else:
+		for target in targets:
+			_cleanse_effect_target(target)
+
+
+func _resolve_discard(source: CardInstance, effect: CardEffect) -> void:
+	var player: PlayerState = _get_controller(source)
+	if not player:
+		return
+	if effect.target_scope == "self":
+		_move_card_to_graveyard(player, source)
+		return
+	var players_to_scan: Array[PlayerState] = []
+	match effect.target_scope:
+		"ally":
+			players_to_scan.append(player)
+		"any":
+			for p in game_state.players:
+				players_to_scan.append(p)
+		_:
+			for p in game_state.players:
+				if p.player_id != player.player_id:
+					players_to_scan.append(p)
+	var candidates: Array[CardInstance] = []
+	for p in players_to_scan:
+		for card in p.hand:
+			candidates.append(card)
+	if candidates.is_empty():
+		return
+	var options: Array = []
+	for card in candidates:
+		options.append({"label": "%s (%s)" % [card.data.name, card.data.rarity], "value": card})
+	EventBus.choice_requested.emit("Discard", options, func(target: CardInstance) -> void:
+		var owner := _find_card_owner_or_zone_owner(target)
+		if owner:
+			_move_card_to_graveyard(owner, target)
 	)
 
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
+
+func _choose_monster_slot(source: CardInstance) -> void:
+	var selected: Array = source.ability_state.get("monster_slots", [])
+	if selected.size() >= 4:
+		EventBus.message_shown.emit("Jazykove Monstrum marked 4 slots.")
+		return
+
+	var options: Array = []
+	for player in game_state.players:
+		for row_idx in range(GameConstants.ROW_CAPACITIES.size()):
+			for col_idx in range(GameConstants.ROW_CAPACITIES[row_idx]):
+				var slot := {"player_id": player.player_id, "row": row_idx, "col": col_idx}
+				if _slot_is_selected(selected, slot):
+					continue
+				options.append({
+					"label": "%s %s %d" % ["Your" if player.player_id == source.controller_id else "Opponent", _row_name(row_idx), col_idx + 1],
+					"detail": "Mark this slot for the monster effect.",
+					"value": slot,
+				})
+
+	EventBus.choice_requested.emit("Choose slot %d/4" % [selected.size() + 1], options, func(slot: Dictionary) -> void:
+		selected.append(slot)
+		source.ability_state["monster_slots"] = selected
+		_choose_monster_slot(source)
+	)
+
+
+func _slot_is_selected(selected: Array, slot: Dictionary) -> bool:
+	for item in selected:
+		if item.get("player_id") == slot.get("player_id") and item.get("row") == slot.get("row") and item.get("col") == slot.get("col"):
+			return true
+	return false
+
+
+func _row_name(row_idx: int) -> String:
+	match row_idx:
+		0:
+			return "Melee"
+		1:
+			return "Ranged"
+		_:
+			return "Artillery"
+
+
+func _create_card_in_hand(player: PlayerState, card_id: String) -> CardInstance:
+	var data: CardData = CardDatabase.get_card(card_id)
+	if not data:
+		return null
+	var card := CardInstance.create(data, player.player_id)
+	card.zone = "hand"
+	player.add_to_hand(card)
+	EventBus.card_drawn.emit(card, player.player_id, "created")
+	return card
+
+
+func _apply_masovystit_redirect(target: CardInstance, amount: int, damage_source: CardInstance) -> void:
+	var owner: PlayerState = _find_card_owner(target)
+	if not owner:
+		return
+	var pos: Dictionary = owner.find_card_position(target)
+	if pos.is_empty():
+		return
+	var shield_row: int = pos["row"] - 1
+	if shield_row < 0:
+		return
+	var shield := BoardManager.get_card_at(owner, shield_row, pos["col"])
+	if not shield or shield.data.id != "masovystit" or shield == target:
+		return
+	target.current_power += amount
+	EventBus.heal_applied.emit(target, amount)
+	var redirected_damage := amount * 2
+	var actual := shield.apply_damage(redirected_damage)
+	EventBus.damage_dealt.emit(shield, actual, damage_source)
+	EventBus.message_shown.emit("MasovyStit redirected %d damage." % amount)
+	if shield.current_power <= 0:
+		game_state._destroy_card(shield, owner)
+
+
+func _get_player_by_id(player_id: int) -> PlayerState:
+	for player in game_state.players:
+		if player.player_id == player_id:
+			return player
+	return null
 
 func _get_controller(card: CardInstance) -> PlayerState:
 	for p in game_state.players:
@@ -709,6 +1370,18 @@ func _find_card_owner(card: CardInstance) -> PlayerState:
 		if card in p.get_all_board_units():
 			return p
 		if p.hero == card:
+			return p
+	return null
+
+
+func _find_card_owner_or_zone_owner(card: CardInstance) -> PlayerState:
+	var owner := _find_card_owner(card)
+	if owner:
+		return owner
+	for p in game_state.players:
+		if card in p.hand or card in p.graveyard or card in p.banished:
+			return p
+		if p.player_id == card.owner_id:
 			return p
 	return null
 
@@ -741,10 +1414,111 @@ func _get_enemy_hero(player: PlayerState) -> CardInstance:
 	return null
 
 
+func _get_enemy_board_cards(player: PlayerState) -> Array:
+	var result: Array = []
+	for p in game_state.players:
+		if p.player_id == player.player_id:
+			continue
+		for card in p.get_all_board_units():
+			result.append(card)
+	return result
+
+
+func _get_board_cards_by_filter(scope: String, kind: String, source_player: PlayerState) -> Array:
+	var effect := CardEffect.new()
+	effect.target_scope = scope
+	effect.target_kind = kind
+	effect.requires_target = true
+	var source := source_player.hero
+	if source_player.get_all_board_units().size() > 0:
+		source = source_player.get_all_board_units()[0]
+	if not source:
+		return []
+	return _get_effect_targets(source, effect)
+
+
 func _controls_card_id(player: PlayerState, card_id: String) -> bool:
 	"""True if the player has a card with the given ID on their board."""
 	for card in player.get_all_board_units():
 		if card.data.id == card_id:
+			return true
+	return false
+
+
+func _get_effect_targets(source: CardInstance, effect: CardEffect) -> Array:
+	if effect.target_scope == "self":
+		return [source]
+
+	var source_player: PlayerState = _get_controller(source)
+	if not source_player:
+		return []
+
+	var players_to_scan: Array[PlayerState] = []
+	match effect.target_scope:
+		"ally":
+			players_to_scan.append(source_player)
+		"any":
+			for p in game_state.players:
+				players_to_scan.append(p)
+		_:
+			for p in game_state.players:
+				if p.player_id != source_player.player_id:
+					players_to_scan.append(p)
+
+	var targets: Array = []
+	for player in players_to_scan:
+		match effect.target_kind:
+			"hero":
+				if player.hero and player.hero.current_power > 0:
+					targets.append(player.hero)
+			"artifact":
+				for card in player.get_all_board_units():
+					if card.data.type == "Artifact":
+						targets.append(card)
+			"unit":
+				for card in player.get_all_board_units():
+					if card.data.type == "Unit":
+						targets.append(card)
+			"non_hero":
+				for card in player.get_all_board_units():
+					targets.append(card)
+			"non_unit":
+				for card in player.get_all_board_units():
+					if card.data.type != "Unit":
+						targets.append(card)
+				if player.hero and player.hero.current_power > 0:
+					targets.append(player.hero)
+			_:
+				for card in player.get_all_board_units():
+					targets.append(card)
+				if player.hero and player.hero.current_power > 0:
+					targets.append(player.hero)
+
+	var filtered: Array = []
+	for target in targets:
+		if target == source and effect.target_scope != "self":
+			continue
+		if target.is_invisible() and effect.needs_target():
+			continue
+		if _is_blocked_by_protector_or_defender(target):
+			continue
+		filtered.append(target)
+	return filtered
+
+
+func _is_blocked_by_protector_or_defender(target: CardInstance) -> bool:
+	var owner: PlayerState = _find_card_owner(target)
+	if not owner:
+		return false
+	if target == owner.hero:
+		for card in owner.get_all_board_units():
+			if card.has_status("Protector"):
+				return true
+	var pos: Dictionary = owner.find_card_position(target)
+	if pos.is_empty():
+		return false
+	for card in owner.board[pos["row"]]:
+		if card != target and card.has_status("Defender") and not target.has_status("Defender"):
 			return true
 	return false
 

@@ -24,6 +24,7 @@ config/features=PackedStringArray("4.6", "GL Compatibility")
 CardDatabase="*res://scripts/autoloads/card_database.gd"
 GameConstants="*res://scripts/autoloads/game_constants.gd"
 EventBus="*res://scripts/autoloads/event_bus.gd"
+AudioManager="*res://scripts/autoloads/audio_manager.gd"
 
 [display]
 

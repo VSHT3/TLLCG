@@ -79,7 +79,7 @@ offset_left = 24.0
 offset_top = 110.0
 offset_right = 240.0
 offset_bottom = 136.0
-text = "P1 Sellary: 0"
+text = "Sellary: 0"
 
 [node name="SellaryP1" type="Label" parent="UI/HUD" unique_id=1039098506]
 layout_mode = 0
@@ -87,7 +87,7 @@ offset_left = 24.0
 offset_top = 142.0
 offset_right = 240.0
 offset_bottom = 168.0
-text = "P2 Sellary: 0"
+text = "Sellary: 0"
 
 [node name="HeroHPP0" type="Label" parent="UI/HUD" unique_id=1027357912]
 layout_mode = 0
@@ -95,7 +95,7 @@ offset_left = 24.0
 offset_top = 190.0
 offset_right = 240.0
 offset_bottom = 216.0
-text = "P1 Hero: 0 HP"
+text = "Hero: 0"
 
 [node name="HeroHPP1" type="Label" parent="UI/HUD" unique_id=1626107306]
 layout_mode = 0
@@ -103,7 +103,7 @@ offset_left = 24.0
 offset_top = 222.0
 offset_right = 240.0
 offset_bottom = 248.0
-text = "P2 Hero: 0 HP"
+text = "Hero: 0"
 
 [node name="MessageLabel" type="Label" parent="UI/HUD" unique_id=1621026774]
 layout_mode = 0
@@ -116,9 +116,9 @@ autowrap_mode = 2
 [node name="EndTurnButton" type="Button" parent="UI/HUD" unique_id=1769395983]
 layout_mode = 0
 offset_left = 1676.0
-offset_top = 468.0
+offset_top = 72.0
 offset_right = 1832.0
-offset_bottom = 508.0
+offset_bottom = 112.0
 text = "End Turn"
 
 [node name="HeroP0" type="Control" parent="UI/HUD" unique_id=1300490130]
@@ -134,6 +134,25 @@ offset_left = 1740.0
 offset_top = 180.0
 offset_right = 1890.0
 offset_bottom = 252.0
+
+[node name="GraveyardPanelP1" type="Panel" parent="UI"]
+visible = false
+offset_left = 70.0
+offset_top = 20.0
+offset_right = 250.0
+offset_bottom = 195.0
+mouse_filter = 2
+
+[node name="GraveyardLabelP1" type="Label" parent="UI/GraveyardPanelP1"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Graveyard"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="GraveyardPanelP0" type="Panel" parent="UI" unique_id=888226426]
 offset_left = 70.0
@@ -183,7 +202,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-text = "Faction P1"
+text = "Your Faction"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -200,7 +219,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-text = "Faction P2"
+text = "Opponent"
 horizontal_alignment = 1
 vertical_alignment = 1
 

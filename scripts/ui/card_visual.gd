@@ -13,6 +13,9 @@ extends Control
 @onready var type_label: Label = $TypeLabel
 @onready var ability_label: RichTextLabel = $AbilityLabel
 @onready var cost_label: Label = $CostLabel  # For sellary cost display
+var status_label: Label = null
+var state_label: Label = null
+var rarity_band: ColorRect = null
 
 # ── State ────────────────────────────────────────────────────────────────────
 
@@ -44,20 +47,15 @@ func setup(inst: CardInstance) -> void:
 	card_instance = inst
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	_ensure_overlays()
 	refresh_display()
 
 
 func set_detail_highlighted(enabled: bool) -> void:
 	if not card_frame:
 		return
-	var style: StyleBoxFlat = card_frame.get_theme_stylebox("panel").duplicate()
-	if enabled:
-		style.border_color = Color(0.9, 0.75, 0.1)
-		style.set_border_width_all(3)
-	else:
-		style.border_color = Color(0.42, 0.46, 0.55, 1)
-		style.set_border_width_all(1)
-	card_frame.add_theme_stylebox_override("panel", style)
+	is_selected = enabled
+	_apply_frame_style()
 
 
 func set_draggable(enabled: bool) -> void:
@@ -76,6 +74,8 @@ func refresh_display() -> void:
 		return
 	
 	var data: CardData = card_instance.data
+	_ensure_overlays()
+	_apply_frame_style()
 	
 	if name_label:
 		name_label.text = data.name
@@ -104,24 +104,167 @@ func refresh_display() -> void:
 	
 	# Status indicators (visual cue)
 	_update_status_visuals()
+	_update_state_visuals()
+	_consume_pending_flash()
 
 
 func _update_status_visuals() -> void:
 	if not card_instance:
 		return
-	if is_selected:
-		modulate = Color(1.0, 0.95, 0.55)
+	modulate = Color(1.0, 0.95, 0.55) if is_selected else Color.WHITE
+	if not status_label:
 		return
-	# TODO: Add status icons/overlays
-	# For now, modulate color as a hint
-	if card_instance.has_status("Burn"):
-		modulate = Color(1.0, 0.7, 0.5)
-	elif card_instance.has_status("Poison"):
-		modulate = Color(0.7, 1.0, 0.5)
-	elif card_instance.has_status("Cursed"):
-		modulate = Color(0.7, 0.5, 0.7)
-	else:
-		modulate = Color.WHITE
+	var parts: Array[String] = []
+	var keys: Array = card_instance.statuses.keys()
+	keys.sort()
+	for status_name in keys:
+		var stacks: int = card_instance.statuses.get(status_name, 0)
+		if stacks <= 0:
+			continue
+		var label := _status_abbrev(status_name)
+		if stacks > 1:
+			label += str(stacks)
+		if card_instance.permanent_statuses.get(status_name, false):
+			label += "*"
+		parts.append(label)
+	status_label.visible = not parts.is_empty()
+	status_label.text = " ".join(parts)
+
+
+func _update_state_visuals() -> void:
+	if not card_instance or not state_label:
+		return
+	var parts: Array[String] = []
+	if card_instance.timer > 0:
+		parts.append("T%d" % card_instance.timer)
+	if card_instance.counter > 0:
+		parts.append("C%d" % card_instance.counter)
+	if card_instance.max_charges > 0 or card_instance.charges > 0:
+		parts.append("Q%d" % card_instance.charges)
+	if card_instance.block > 0:
+		parts.append("B%d" % card_instance.block)
+	state_label.visible = not parts.is_empty()
+	state_label.text = " ".join(parts)
+
+
+func _ensure_overlays() -> void:
+	if not status_label:
+		status_label = Label.new()
+		status_label.name = "StatusLabel"
+		status_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		status_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		status_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		status_label.add_theme_font_size_override("font_size", 10)
+		status_label.offset_left = 6.0
+		status_label.offset_top = 45.0
+		status_label.offset_right = 144.0
+		status_label.offset_bottom = 60.0
+		add_child(status_label)
+	if not rarity_band:
+		rarity_band = ColorRect.new()
+		rarity_band.name = "RarityBand"
+		rarity_band.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		rarity_band.offset_left = 0.0
+		rarity_band.offset_top = 0.0
+		rarity_band.offset_right = 5.0
+		rarity_band.offset_bottom = 72.0
+		add_child(rarity_band)
+		move_child(rarity_band, 1)
+	if not state_label:
+		state_label = Label.new()
+		state_label.name = "StateLabel"
+		state_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		state_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		state_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		state_label.add_theme_font_size_override("font_size", 10)
+		state_label.offset_left = 46.0
+		state_label.offset_top = 4.0
+		state_label.offset_right = 144.0
+		state_label.offset_bottom = 18.0
+		add_child(state_label)
+
+
+func _apply_frame_style() -> void:
+	if not card_frame or not card_instance:
+		return
+	var style: StyleBoxFlat = card_frame.get_theme_stylebox("panel").duplicate()
+	style.bg_color = Color(0.095, 0.105, 0.135)
+	style.border_color = _rarity_color(card_instance.data.rarity)
+	style.set_border_width_all(2)
+	style.shadow_color = Color(0, 0, 0, 0.28)
+	style.shadow_size = 4
+	style.shadow_offset = Vector2(0, 2)
+	if is_selected:
+		style.border_color = Color(0.9, 0.75, 0.1)
+		style.set_border_width_all(3)
+	card_frame.add_theme_stylebox_override("panel", style)
+	if rarity_band:
+		rarity_band.color = _rarity_color(card_instance.data.rarity)
+
+
+func _rarity_color(rarity: String) -> Color:
+	match rarity:
+		"Common":
+			return Color(0.68, 0.72, 0.78)
+		"Rare":
+			return Color(0.24, 0.56, 0.95)
+		"Epic":
+			return Color(0.62, 0.35, 0.9)
+		"Legendary":
+			return Color(0.95, 0.62, 0.18)
+		"Hero":
+			return Color(0.92, 0.28, 0.22)
+		_:
+			return Color(0.42, 0.46, 0.55)
+
+
+func _status_abbrev(status_name: String) -> String:
+	match status_name:
+		"Burn":
+			return "BRN"
+		"Poison":
+			return "PSN"
+		"Wither":
+			return "WTH"
+		"Cursed":
+			return "CRS"
+		"Invisible":
+			return "INV"
+		"Vulnerable":
+			return "VUL"
+		"Defender":
+			return "DEF"
+		"Protector":
+			return "PRT"
+		"Crit":
+			return "CRT"
+		"Economic Fury":
+			return "ECO"
+		"Perplexed":
+			return "PRX"
+		"Drunk":
+			return "DRK"
+		_:
+			return status_name.substr(0, mini(3, status_name.length())).to_upper()
+
+
+func _consume_pending_flash() -> void:
+	if not card_instance or not card_instance.ability_state.has("ui_flash_color"):
+		return
+	var color: Color = card_instance.ability_state.get("ui_flash_color", Color(1, 1, 1))
+	card_instance.ability_state.erase("ui_flash_color")
+	call_deferred("pulse_event", color)
+
+
+func pulse_event(color: Color = Color(1.0, 0.72, 0.24)) -> void:
+	if not card_frame:
+		return
+	var original_scale := scale
+	var tween := create_tween()
+	tween.tween_property(self, "scale", original_scale * 1.06, 0.08)
+	tween.parallel().tween_property(card_frame, "modulate", color, 0.08)
+	tween.tween_property(self, "scale", original_scale, 0.18)
+	tween.parallel().tween_property(card_frame, "modulate", Color.WHITE, 0.18)
 
 
 # ── Input ────────────────────────────────────────────────────────────────────

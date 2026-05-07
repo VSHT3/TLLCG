@@ -42,9 +42,11 @@ static func get_adjacent_cards(player: PlayerState, row: int, col: int) -> Array
 		var c: int = col + dir.y
 		if r < 0 or r >= player.board.size():
 			continue
-		if c < 0 or c >= player.board[r].size():
+		if c < 0 or c >= GameConstants.ROW_CAPACITIES[r]:
 			continue
-		adjacent.append(player.board[r][c])
+		var card := get_card_at(player, r, c)
+		if card:
+			adjacent.append(card)
 	
 	return adjacent
 
@@ -62,9 +64,12 @@ static func get_row_cards(player: PlayerState, row: int) -> Array[CardInstance]:
 static func get_card_at(player: PlayerState, row: int, col: int) -> CardInstance:
 	if row < 0 or row >= player.board.size():
 		return null
-	if col < 0 or col >= player.board[row].size():
+	if col < 0 or col >= GameConstants.ROW_CAPACITIES[row]:
 		return null
-	return player.board[row][col]
+	for card in player.board[row]:
+		if card.board_position.get("col", -1) == col:
+			return card
+	return null
 
 
 ## Check if a position has a Defender or Protector that must be attacked first.

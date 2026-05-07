@@ -34,6 +34,8 @@ var extra_card_plays: int = 0
 var neutral_draws_this_turn: int = 0
 var faction_draws_this_turn: int = 0
 var free_plays_turn: bool = false
+var base_sellary_modifier_next_turn: int = 0
+var suppress_end_turn_next_turn: bool = false
 
 
 # ── Setup ────────────────────────────────────────────────────────────────────
@@ -181,6 +183,28 @@ func get_row_neighbors(card: CardInstance) -> Array[CardInstance]:
 	return result
 
 
+func get_adjacent_empty_slots(card: CardInstance) -> Array[Dictionary]:
+	var pos: Dictionary = find_card_position(card)
+	if pos.is_empty():
+		return []
+	var result: Array[Dictionary] = []
+	var directions: Array[Vector2i] = [
+		Vector2i(-1, -1), Vector2i(-1, 0), Vector2i(-1, 1),
+		Vector2i(0, -1),                    Vector2i(0, 1),
+		Vector2i(1, -1),  Vector2i(1, 0),   Vector2i(1, 1),
+	]
+	for dir in directions:
+		var row_idx: int = pos["row"] + dir.x
+		var col_idx: int = pos["col"] + dir.y
+		if row_idx < 0 or row_idx >= board.size():
+			continue
+		if col_idx < 0 or col_idx >= GameConstants.ROW_CAPACITIES[row_idx]:
+			continue
+		if not is_slot_occupied(row_idx, col_idx):
+			result.append({"row": row_idx, "col": col_idx})
+	return result
+
+
 # ── Board Mutations ──────────────────────────────────────────────────────────
 
 func find_free_col(row_idx: int) -> int:
@@ -226,6 +250,37 @@ func remove_from_board(card: CardInstance) -> bool:
 	return false
 
 
+func place_in_first_free_slot(card: CardInstance) -> bool:
+	for row_idx in range(board.size()):
+		var col_idx: int = find_free_col(row_idx)
+		if col_idx >= 0:
+			return place_on_board(card, row_idx, col_idx)
+	return false
+
+
+func place_adjacent_to(card: CardInstance, anchor: CardInstance) -> bool:
+	for slot in get_adjacent_empty_slots(anchor):
+		if place_on_board(card, slot["row"], slot["col"]):
+			return true
+	return place_in_first_free_slot(card)
+
+
+func swap_board_positions(a: CardInstance, b: CardInstance) -> bool:
+	var pos_a: Dictionary = find_card_position(a)
+	var pos_b: Dictionary = find_card_position(b)
+	if pos_a.is_empty() or pos_b.is_empty():
+		return false
+	a.board_position = {"row": pos_b["row"], "col": pos_b["col"]}
+	b.board_position = {"row": pos_a["row"], "col": pos_a["col"]}
+	var row_a: Array = board[pos_a["row"]]
+	var row_b: Array = board[pos_b["row"]]
+	row_a.erase(a)
+	row_b.erase(b)
+	row_a.append(b)
+	row_b.append(a)
+	return true
+
+
 # ── Hand Operations ──────────────────────────────────────────────────────────
 
 func add_to_hand(card: CardInstance) -> void:
@@ -263,6 +318,32 @@ func draw_faction_card() -> CardInstance:
 	var card: CardInstance = faction_deck.pop_front() as CardInstance
 	add_to_hand(card)
 	return card
+
+
+func take_from_faction_deck(card_id: String) -> CardInstance:
+	for i in range(faction_deck.size()):
+		var card: CardInstance = faction_deck[i]
+		if card.data.id == card_id:
+			faction_deck.remove_at(i)
+			return card
+	return null
+
+
+func take_from_graveyard(card_id: String = "") -> CardInstance:
+	for i in range(graveyard.size()):
+		var card: CardInstance = graveyard[i]
+		if card_id == "" or card.data.id == card_id:
+			graveyard.remove_at(i)
+			return card
+	return null
+
+
+func get_graveyard_cards_by_rarity(rarities: Array[String]) -> Array[CardInstance]:
+	var result: Array[CardInstance] = []
+	for card in graveyard:
+		if card.data.rarity in rarities:
+			result.append(card)
+	return result
 
 
 # ── Economy ──────────────────────────────────────────────────────────────────

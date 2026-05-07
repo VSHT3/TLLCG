@@ -22,12 +22,19 @@ var current_power: int = 0
 
 ## Status effects: status_name -> stack count.
 var statuses: Dictionary = {}
+var permanent_statuses: Dictionary = {}
+var damaged_this_turn: bool = false
+
+## Generic scratch state for reusable ability systems.
+var ability_state: Dictionary = {}
+var effect_uses_this_turn: Dictionary = {}
 
 ## Timer value (counts down each turn).
 var timer: int = 0
 
 ## Charge counter (for Order abilities).
 var charges: int = 0
+var max_charges: int = 0
 
 ## Generic counter (for Counter keyword).
 var counter: int = 0
@@ -67,8 +74,12 @@ static func create(card_data: CardData, owner: int) -> CardInstance:
 	for effect in card_data.effects:
 		if effect.timer_value > 0:
 			inst.timer = effect.timer_value
-		if effect.charges > 0:
-			inst.charges = effect.charges
+		if effect.initial_charges > 0:
+			inst.charges = max(inst.charges, effect.initial_charges)
+		if effect.max_charges > 0:
+			inst.max_charges = max(inst.max_charges, effect.max_charges)
+		if effect.counter_threshold > 0 and inst.counter == 0:
+			inst.counter = effect.counter_threshold
 	
 	return inst
 
@@ -88,7 +99,7 @@ func is_in_hand() -> bool:
 
 
 func get_status_stacks(status_name: String) -> int:
-	return statuses.get(status_name, 0)
+	return statuses.get(_normalize_status_name(status_name), 0)
 
 
 func has_status(status_name: String) -> bool:
@@ -110,6 +121,17 @@ func apply_damage(amount: int) -> int:
 	var blocked: int = mini(amount, block)
 	var actual: int = amount - blocked
 	current_power = maxi(current_power - actual, 0)
+	if actual > 0:
+		damaged_this_turn = true
+	return actual
+
+
+func apply_direct_damage(amount: int) -> int:
+	"""Apply damage that bypasses Block, such as status damage."""
+	var actual: int = maxi(amount, 0)
+	current_power = maxi(current_power - actual, 0)
+	if actual > 0:
+		damaged_this_turn = true
 	return actual
 
 
@@ -122,15 +144,24 @@ func apply_heal(amount: int) -> void:
 	current_power = mini(current_power + amount, data.base_power)
 
 
-func apply_status(status_name: String, stacks: int = 1) -> void:
-	if status_name in statuses:
-		statuses[status_name] += stacks
+func missing_health() -> int:
+	return maxi(data.base_power - current_power, 0)
+
+
+func apply_status(status_name: String, stacks: int = 1, permanent: bool = false) -> void:
+	var normalized := _normalize_status_name(status_name)
+	if normalized in statuses:
+		statuses[normalized] += stacks
 	else:
-		statuses[status_name] = stacks
+		statuses[normalized] = stacks
+	if permanent:
+		permanent_statuses[normalized] = true
 
 
 func remove_status(status_name: String) -> void:
-	statuses.erase(status_name)
+	var normalized := _normalize_status_name(status_name)
+	statuses.erase(normalized)
+	permanent_statuses.erase(normalized)
 
 
 func cleanse() -> void:
@@ -139,6 +170,8 @@ func cleanse() -> void:
 	for s in statuses:
 		# Tokens have permanent Cursed — don't cleanse it
 		if s == "Cursed" and data.is_token():
+			continue
+		if permanent_statuses.get(s, false):
 			continue
 		to_remove.append(s)
 	for s in to_remove:
@@ -151,6 +184,8 @@ func diminish_statuses() -> void:
 	for status_name in statuses:
 		# Permanent statuses don't diminish
 		if status_name == "Cursed" and data.is_token():
+			continue
+		if permanent_statuses.get(status_name, false):
 			continue
 		# Drunk diminishes every 4 turns (handled separately)
 		if status_name == "Drunk":
@@ -178,6 +213,17 @@ func use_charge(amount: int = 1) -> bool:
 	return false
 
 
+func gain_charge(amount: int = 1) -> void:
+	if max_charges > 0:
+		charges = mini(charges + amount, max_charges)
+	else:
+		charges += amount
+
+
+func change_counter(delta: int) -> void:
+	counter = maxi(counter + delta, 0)
+
+
 func move_to_zone(new_zone: String) -> void:
 	zone = new_zone
 	if new_zone != "board":
@@ -191,3 +237,36 @@ func place_on_board(row: int, col: int) -> void:
 
 func reset_turn_state() -> void:
 	activated_this_turn = false
+	damaged_this_turn = false
+	effect_uses_this_turn.clear()
+
+
+func _normalize_status_name(status_name: String) -> String:
+	var key := status_name.strip_edges().to_lower().replace("_", " ")
+	match key:
+		"economic fury", "cancerous":
+			return "Economic Fury"
+		"cursed":
+			return "Cursed"
+		"crit":
+			return "Crit"
+		"vulnerable":
+			return "Vulnerable"
+		"perplexed":
+			return "Perplexed"
+		"invisible":
+			return "Invisible"
+		"drunk":
+			return "Drunk"
+		"defender":
+			return "Defender"
+		"protector":
+			return "Protector"
+		"poison":
+			return "Poison"
+		"burn":
+			return "Burn"
+		"wither":
+			return "Wither"
+		_:
+			return status_name.capitalize()
