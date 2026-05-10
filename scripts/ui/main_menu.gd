@@ -34,6 +34,8 @@ var _book_active_faction: String = "All"
 var _rulebook_panel: PanelContainer = null
 var _rulebook_tabs: TabContainer = null
 var _sound_button: Button = null
+var _settings_panel = null
+const SettingsPanelScript := preload("res://scripts/ui/settings_panel.gd")
 
 # ── Node refs ──────────────────────────────────────────────────────────────────
 
@@ -66,11 +68,17 @@ var _sound_button: Button = null
 # ── Lifecycle ──────────────────────────────────────────────────────────────────
 
 func _ready() -> void:
+	AudioManager.set_music_context(AudioManager.MUSIC_CONTEXT_MENU)
 	_factions = _get_playable_factions()
 	_build_menu_actions()
+	_build_settings_panel()
 	_build_card_book()
 	_build_rulebook()
 	_apply_menu_theme()
+	SettingsManager.settings_changed.connect(func(key: String, _value: Variant) -> void:
+		if key == "theme":
+			_apply_menu_theme()
+	)
 	start_button.pressed.connect(_on_start_pressed)
 	roll_button.pressed.connect(_on_roll_pressed)
 	launch_button.pressed.connect(_on_launch_pressed)
@@ -169,11 +177,14 @@ func _show_faction_pick_for_next() -> void:
 		_populate_summary()
 		return
 
-	pick_prompt.text = "Player %d — choose your faction:" % (current_picker + 1)
+	pick_prompt.text = "PLAYER %d: CHOOSE HERO FACTION" % (current_picker + 1)
 
 	# Clear old buttons
 	for child in faction_grid.get_children():
 		child.queue_free()
+	faction_grid.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	faction_grid.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	faction_grid.columns = 2
 
 	var taken: Array[String] = []
 	for c in _faction_choices:
@@ -183,11 +194,12 @@ func _show_faction_pick_for_next() -> void:
 	for faction in _factions:
 		var btn := Button.new()
 		btn.text = faction
-		btn.custom_minimum_size = Vector2(220, 60)
+		btn.custom_minimum_size = Vector2(280, 76)
+		btn.add_theme_font_size_override("font_size", 18)
 		_style_button(btn)
 		btn.disabled = faction in taken
 		if faction in taken:
-			btn.modulate = Color(0.4, 0.4, 0.4)
+			btn.modulate = Color(0.48, 0.48, 0.48)
 		btn.pressed.connect(_on_faction_chosen.bind(current_picker, faction))
 		faction_grid.add_child(btn)
 
@@ -246,15 +258,39 @@ func _build_menu_actions() -> void:
 	actions.add_child(_sound_button)
 	_update_sound_button()
 
+	var quit_button := _menu_button("QUIT GAME", Vector2(150, 48))
+	quit_button.pressed.connect(func():
+		AudioManager.play_ui()
+		get_tree().quit()
+	)
+	actions.add_child(quit_button)
+
+
+func _build_settings_panel() -> void:
+	_settings_panel = SettingsPanelScript.new()
+	_settings_panel.name = "MenuSettings"
+	_settings_panel.build(Vector2(1766, 70), false)
+	add_child(_settings_panel)
+
 
 func _apply_menu_theme() -> void:
+	var background := get_node_or_null("Background") as ColorRect
+	if background:
+		background.color = SettingsManager.color("background")
 	for label in [title_label, subtitle_label, dice_label, dice_result_label, pick_prompt, summary_label]:
 		if label:
-			label.add_theme_color_override("font_color", Color(0.86, 0.88, 0.94))
+			label.add_theme_color_override("font_color", SettingsManager.color("text"))
 	if title_label:
-		title_label.add_theme_color_override("font_color", Color(0.95, 0.82, 0.38))
+		title_label.add_theme_color_override("font_color", SettingsManager.color("accent"))
 	for button in [start_button, roll_button, launch_button]:
 		_style_button(button)
+	if faction_screen:
+		faction_screen.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	if faction_grid:
+		faction_grid.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		faction_grid.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		faction_grid.add_theme_constant_override("h_separation", 18)
+		faction_grid.add_theme_constant_override("v_separation", 14)
 	_style_control_tree(self)
 
 
@@ -268,9 +304,9 @@ func _style_control_tree(node: Node) -> void:
 func _style_button(button: Button) -> void:
 	if not button:
 		return
-	button.add_theme_stylebox_override("normal", _panel_style(Color(0.12, 0.145, 0.19), Color(0.34, 0.39, 0.52), 1))
-	button.add_theme_stylebox_override("hover", _panel_style(Color(0.16, 0.19, 0.25), Color(0.62, 0.71, 0.92), 1))
-	button.add_theme_stylebox_override("pressed", _panel_style(Color(0.09, 0.11, 0.15), Color(0.95, 0.75, 0.28), 1))
+	button.add_theme_stylebox_override("normal", _panel_style(SettingsManager.color("panel_soft"), SettingsManager.color("border"), 1))
+	button.add_theme_stylebox_override("hover", _panel_style(SettingsManager.color("panel"), SettingsManager.color("accent"), 1))
+	button.add_theme_stylebox_override("pressed", _panel_style(SettingsManager.color("rail"), SettingsManager.color("accent"), 1))
 	button.add_theme_color_override("font_color", Color(0.9, 0.92, 0.96))
 
 

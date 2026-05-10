@@ -170,8 +170,9 @@ func play_card(player: PlayerState, card: CardInstance, row_idx: int = -1, col_i
 			# Spells resolve immediately then go to graveyard
 			_resolve_spell(card, player)
 			last_spell_played = card.data
-			card.move_to_zone("graveyard")
-			player.graveyard.append(card)
+			if card.zone != "deck" and card.zone != "banished":
+				card.move_to_zone("graveyard")
+				player.graveyard.append(card)
 		
 		"Artifact":
 			if row_idx < 0 or col_idx < 0:

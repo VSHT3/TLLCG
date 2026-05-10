@@ -5,8 +5,9 @@ class_name HandManager
 extends HBoxContainer
 
 @export var card_visual_scene: PackedScene
-@export var max_card_width: float = 120.0
-@export var fan_curve: float = 5.0  # Degrees of rotation for fan effect
+@export var max_card_width: float = 132.0
+@export var min_card_width: float = 104.0
+@export var fan_curve: float = 0.0  # Keep zero for stable two-player readability
 
 var card_visuals: Array[CardVisual] = []
 var player_state: PlayerState = null
@@ -19,6 +20,7 @@ signal card_right_clicked(card: CardInstance)
 
 func setup(ps: PlayerState) -> void:
 	player_state = ps
+	alignment = BoxContainer.ALIGNMENT_CENTER
 	refresh()
 
 
@@ -45,6 +47,7 @@ func refresh() -> void:
 		_apply_draggable(cv)
 
 	_layout_cards()
+	call_deferred("_layout_cards")
 
 
 func _layout_cards() -> void:
@@ -52,14 +55,20 @@ func _layout_cards() -> void:
 	var count: int = card_visuals.size()
 	if count == 0:
 		return
-	
+	var available_width: float = max(size.x, custom_minimum_size.x)
+	if available_width <= 0.0:
+		available_width = 1400.0
+	var separation := 8
+	add_theme_constant_override("separation", separation)
+	var target_width: float = floor((available_width - float(separation * maxi(count - 1, 0))) / float(count))
+	target_width = clampf(target_width, min_card_width, max_card_width)
 	for i in range(count):
 		var cv: CardVisual = card_visuals[i]
-		# Calculate fan rotation
-		var center_offset := float(i) - float(count - 1) / 2.0
-		cv.rotation_degrees = center_offset * fan_curve
-		# Slight Y offset for arc effect
-		cv.position.y = abs(center_offset) * 5.0
+		cv.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		cv.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		cv.set_card_dimensions(Vector2(target_width, 150.0))
+		cv.rotation_degrees = 0.0
+		cv.position.y = 0.0
 
 
 func _on_card_clicked(cv: CardVisual) -> void:
@@ -122,3 +131,15 @@ func remove_card(card_inst: CardInstance) -> void:
 			card_visuals.remove_at(i)
 			_layout_cards()
 			return
+
+
+func play_deal_intro(from_top: bool = false) -> void:
+	var delay := 0.0
+	for cv in card_visuals:
+		cv.modulate.a = 0.0
+		cv.position.y = -34.0 if from_top else 34.0
+		var tween := create_tween()
+		tween.tween_interval(delay)
+		tween.tween_property(cv, "modulate:a", 1.0, 0.16)
+		tween.parallel().tween_property(cv, "position:y", 0.0, 0.18)
+		delay += 0.045

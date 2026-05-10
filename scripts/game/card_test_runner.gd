@@ -93,7 +93,7 @@ func _audit_effect(card: CardData, effect: CardEffect, result: Dictionary) -> vo
 	if effect.trigger == "tribute":
 		_check(result, effect.tribute_cost > 0, context, "tribute trigger without cost")
 	if effect.trigger == "pay":
-		_check(result, effect.pay_cost > 0, context, "pay trigger without cost")
+		_check(result, effect.pay_cost > 0 or _has_paid_pay_sibling(card, effect), context, "pay trigger without cost")
 	if effect.type == "apply_status":
 		_check(result, _is_known_status(effect.status), context, "unknown status: %s" % effect.status)
 	if effect.type in ["damage", "boost", "heal", "profit", "income", "draw", "block", "gain_charge"] and effect.value <= 0:
@@ -116,6 +116,17 @@ func _is_known_status(status_name: String) -> bool:
 		if str(entry.get("name", "")).to_lower() == status_name.strip_edges().to_lower():
 			return true
 	return status_name in ["Economic Fury", "Miss Spell", "Protector", "Crit"]
+
+
+func _has_paid_pay_sibling(card: CardData, effect: CardEffect) -> bool:
+	if effect.raw_text.strip_edges() == "":
+		return false
+	for sibling in card.effects:
+		if sibling == effect:
+			continue
+		if sibling.trigger == "pay" and sibling.pay_cost > 0 and sibling.raw_text == effect.raw_text:
+			return true
+	return false
 
 
 func _database() -> Node:

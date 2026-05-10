@@ -31,16 +31,22 @@ extends Node2D
 @onready var hero_container_p1: Control = $UI/HUD/HeroP1
 var hero_visual_p0: CardVisual = null
 var hero_visual_p1: CardVisual = null
+var hero_bar_fill_p0: ColorRect = null
+var hero_bar_fill_p1: ColorRect = null
+var hero_bar_label_p0: Label = null
+var hero_bar_label_p1: Label = null
 @onready var effect_resolver: EffectResolver = $EffectResolver
 @onready var card_detail_popup: PanelContainer = $UI/CardDetailPopup
 @onready var detail_name: Label = $UI/CardDetailPopup/VBox/DetailName
 @onready var detail_meta: Label = $UI/CardDetailPopup/VBox/DetailMeta
 @onready var detail_power: Label = $UI/CardDetailPopup/VBox/DetailPower
 @onready var detail_ability: RichTextLabel = $UI/CardDetailPopup/VBox/DetailAbility
+@onready var detail_activate_button: Button = $UI/CardDetailPopup/VBox/ActivateButton
 @onready var detail_close_button: Button = $UI/CardDetailPopup/VBox/CloseButton
 
 const MENU_SCENE := "res://scenes/menus/main_menu.tscn"
 const CardTestRunnerScript := preload("res://scripts/game/card_test_runner.gd")
+const SettingsPanelScript := preload("res://scripts/ui/settings_panel.gd")
 
 # ── Game State ───────────────────────────────────────────────────────────────
 
@@ -48,7 +54,9 @@ var game_state: GameState = null
 var pending_unit_card: CardInstance = null
 var pending_drag_card: CardInstance = null
 var pending_target_callback: Callable = Callable()
+var pending_valid_targets: Array = []
 var _detail_card_visual: CardVisual = null
+var _detail_card_instance: CardInstance = null
 var choice_panel: PanelContainer = null
 var choice_title: Label = null
 var choice_options: VBoxContainer = null
@@ -72,13 +80,20 @@ var zone_close_button: Button = null
 var game_over_panel: PanelContainer = null
 var game_over_title: Label = null
 var game_over_summary: Label = null
+var _graveyard_sequence := 0
 var event_panel: PanelContainer = null
 var event_title_label: Label = null
 var event_detail_label: Label = null
 var event_queue: Array[Dictionary] = []
 var event_showing := false
+var event_hold_timer_active := false
+var popup_hold_until_ms := 0
 var status_panel_top: PanelContainer = null
 var status_panel_bottom: PanelContainer = null
+var turn_banner_panel: PanelContainer = null
+var turn_banner_player_label: Label = null
+var turn_banner_phase_label: Label = null
+var turn_banner_meta_label: Label = null
 var top_name_label: Label = null
 var top_sellary_label: Label = null
 var top_hp_label: Label = null
@@ -92,22 +107,29 @@ var ai_enabled := false
 var ai_running := false
 var ai_toggle_button: Button = null
 var sound_toggle_button: Button = null
+var settings_panel = null
+var debug_toggle_button: Button = null
 
 
 # ── Lifecycle ────────────────────────────────────────────────────────────────
 
 func _ready() -> void:
+	AudioManager.set_music_context(AudioManager.MUSIC_CONTEXT_GAMEPLAY)
 	_build_table_backdrop()
 	_build_menu_button()
+	_build_turn_banner()
 	_build_status_panels()
 	_build_action_log()
 	_build_event_panel()
 	_build_ability_panel()
 	_build_debug_panel()
+	_build_settings_panel()
 	_build_zone_panel()
 	_build_game_over_panel()
 	_build_choice_panel()
 	_apply_ui_theme()
+	_apply_settings()
+	SettingsManager.settings_changed.connect(_on_setting_changed)
 	_connect_signals()
 	_start_new_game(GameConstants.pending_faction_choices)
 
@@ -136,18 +158,30 @@ func _start_new_game(factions: Array[String]) -> void:
 			hero_visual_p0 = card_scene.instantiate()
 			hero_container_p0.add_child(hero_visual_p0)
 			hero_visual_p0.setup(game_state.players[0].hero)
-			hero_visual_p0.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			hero_visual_p0.custom_minimum_size = Vector2(180, 82)
+			hero_visual_p0.size = Vector2(180, 82)
+			hero_visual_p0.show_power_chip = false
+			hero_visual_p0.refresh_display()
+			hero_visual_p0.mouse_filter = Control.MOUSE_FILTER_STOP
 			hero_visual_p0.clicked.connect(_on_hero_clicked)
+			_build_hero_hp_bar(hero_container_p0, 0)
 		if hero_container_p1 and game_state.players[1].hero:
 			hero_visual_p1 = card_scene.instantiate()
 			hero_container_p1.add_child(hero_visual_p1)
 			hero_visual_p1.setup(game_state.players[1].hero)
-			hero_visual_p1.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			hero_visual_p1.custom_minimum_size = Vector2(180, 82)
+			hero_visual_p1.size = Vector2(180, 82)
+			hero_visual_p1.show_power_chip = false
+			hero_visual_p1.refresh_display()
+			hero_visual_p1.mouse_filter = Control.MOUSE_FILTER_STOP
 			hero_visual_p1.clicked.connect(_on_hero_clicked)
+			_build_hero_hp_bar(hero_container_p1, 1)
 
 	# Start first turn
 	game_state.start_turn()
 	_refresh_all()
+	if bool(SettingsManager.get_value("board_intro_enabled", true)):
+		call_deferred("_play_match_intro")
 
 
 func _connect_signals() -> void:
@@ -181,6 +215,8 @@ func _connect_signals() -> void:
 	EventBus.card_detail_requested.connect(show_card_detail)
 	EventBus.choice_requested.connect(_on_choice_requested)
 	EventBus.ability_panel_requested.connect(_on_ability_panel_requested)
+	if detail_activate_button:
+		detail_activate_button.pressed.connect(_on_detail_activate_pressed)
 	if detail_close_button:
 		detail_close_button.pressed.connect(_close_card_detail)
 	
@@ -204,10 +240,12 @@ func _connect_signals() -> void:
 	if board_p0:
 		board_p0.row_selected.connect(_on_board_row_selected.bind(0))
 		board_p0.target_card_clicked.connect(_on_target_card_clicked)
+		board_p0.inspect_card_clicked.connect(_on_board_inspect_card_clicked)
 		board_p0.ability_card_clicked.connect(_on_board_ability_card_clicked)
 	if board_p1:
 		board_p1.row_selected.connect(_on_board_row_selected.bind(1))
 		board_p1.target_card_clicked.connect(_on_target_card_clicked)
+		board_p1.inspect_card_clicked.connect(_on_board_inspect_card_clicked)
 		board_p1.ability_card_clicked.connect(_on_board_ability_card_clicked)
 	if hand_p0:
 		hand_p0.card_drag_started.connect(_on_hand_card_drag_started)
@@ -427,6 +465,8 @@ func _clear_hand_selection() -> void:
 
 func _on_card_played(card: CardInstance, _player_id: int) -> void:
 	_log_action("Played: %s" % card.data.name)
+	if card.zone == "graveyard":
+		_mark_graveyard_recent(card)
 	_queue_game_event("Played", card.data.name, _rarity_event_color(card.data.rarity), 0.75)
 
 
@@ -436,11 +476,14 @@ func _on_card_drawn(card: CardInstance, player_id: int, source: String) -> void:
 
 
 func _on_card_discarded(card: CardInstance, player_id: int) -> void:
+	_mark_graveyard_recent(card)
 	_log_action("%s discarded %s" % ["You" if player_id == 0 else "Opponent", card.data.name])
 	_refresh_all()
 
 
 func _on_card_destroyed(card: CardInstance, _source: CardInstance) -> void:
+	if card.zone == "graveyard":
+		_mark_graveyard_recent(card)
 	_log_action("Destroyed: %s" % card.data.name)
 	_queue_game_event("Destroyed", card.data.name, Color(0.95, 0.32, 0.24), 0.9)
 	_refresh_all()
@@ -480,6 +523,7 @@ func _on_damage_dealt(target: CardInstance, amount: int, source: CardInstance) -
 	if amount > 0:
 		_queue_game_event("Damage %d" % amount, "%s -> %s" % [src_name, target.data.name], Color(0.95, 0.32, 0.24), 0.65)
 	_mark_card_event(target, Color(0.95, 0.32, 0.24))
+	_float_card_event(target, "-%d" % amount, Color(1.0, 0.38, 0.32))
 	_refresh_all()
 
 
@@ -488,6 +532,7 @@ func _on_heal_applied(target: CardInstance, amount: int) -> void:
 	if amount > 0:
 		_queue_game_event("Heal %d" % amount, target.data.name, Color(0.35, 0.95, 0.62), 0.65)
 	_mark_card_event(target, Color(0.35, 0.95, 0.62))
+	_float_card_event(target, "+%d" % amount, Color(0.48, 1.0, 0.58))
 	_refresh_all()
 
 
@@ -496,6 +541,7 @@ func _on_boost_applied(target: CardInstance, amount: int) -> void:
 	if amount > 0:
 		_queue_game_event("Boost %d" % amount, target.data.name, Color(0.62, 0.9, 0.38), 0.65)
 	_mark_card_event(target, Color(0.62, 0.9, 0.38))
+	_float_card_event(target, "+%d" % amount, Color(0.64, 0.95, 0.36))
 	_refresh_all()
 
 
@@ -503,6 +549,7 @@ func _on_status_applied(target: CardInstance, status_name: String, stacks: int) 
 	_log_action("%s gained %s %d" % [target.data.name, status_name, stacks])
 	_queue_game_event("Status: %s" % status_name, "%s x%d" % [target.data.name, stacks], Color(0.52, 0.72, 1.0), 0.75)
 	_mark_card_event(target, Color(0.52, 0.72, 1.0))
+	_float_card_event(target, status_name, Color(0.62, 0.78, 1.0))
 	_refresh_all()
 
 
@@ -559,9 +606,6 @@ func _on_game_ended(winner_id: int) -> void:
 
 func _on_message(text: String) -> void:
 	print("[Game] %s" % text)
-	if message_label:
-		message_label.text = text
-		_pulse_label(message_label, Color(0.95, 0.82, 0.35))
 	_log_action(text)
 
 
@@ -576,10 +620,14 @@ func _pulse_label(label: Label, color: Color) -> void:
 func _on_end_turn_pressed() -> void:
 	if not game_state or game_state.game_over:
 		return
+	if _is_interaction_locked():
+		EventBus.message_shown.emit("Resolve the open prompt first.")
+		return
 	if game_state.current_phase != GameConstants.TurnPhase.PLAY_CARDS:
 		return
 	_clear_pending_unit()
 	_clear_hand_selection()
+	popup_hold_until_ms = Time.get_ticks_msec() + 350
 	game_state.end_turn()
 	_refresh_all()
 
@@ -588,6 +636,7 @@ func _on_end_turn_pressed() -> void:
 
 func _on_target_requested(valid_targets: Array, callback: Callable) -> void:
 	pending_target_callback = callback
+	pending_valid_targets = valid_targets
 	if board_p0:
 		board_p0.enter_target_mode(valid_targets)
 	if board_p1:
@@ -598,19 +647,21 @@ func _on_target_requested(valid_targets: Array, callback: Callable) -> void:
 			hv.mouse_filter = Control.MOUSE_FILTER_STOP
 			hv.modulate = Color(1.0, 0.6, 0.2)
 		elif hv:
-			hv.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			hv.mouse_filter = Control.MOUSE_FILTER_STOP
 	EventBus.message_shown.emit("Select a target.")
 
 
 func _on_hero_clicked(cv: CardVisual) -> void:
-	if not pending_target_callback.is_valid():
+	if pending_target_callback.is_valid():
+		if not (cv.card_instance in pending_valid_targets):
+			EventBus.message_shown.emit("That hero is not a valid target.")
+			return
+		var cb: Callable = pending_target_callback
+		_clear_target_mode()
+		cb.call(cv.card_instance)
+		_refresh_all()
 		return
-	if cv.modulate != Color(1.0, 0.6, 0.2):
-		return
-	var cb: Callable = pending_target_callback
-	_clear_target_mode()
-	cb.call(cv.card_instance)
-	_refresh_all()
+	show_card_instance_detail(cv.card_instance)
 
 
 func _on_target_card_clicked(target: CardInstance) -> void:
@@ -627,24 +678,27 @@ func _on_board_ability_card_clicked(card: CardInstance) -> void:
 		return
 	if game_state.current_phase != GameConstants.TurnPhase.PLAY_CARDS:
 		return
-	if game_state.activate_order(card):
-		EventBus.message_shown.emit("Activated Order: %s." % card.data.name)
-		_refresh_all()
-		return
 	if game_state.activate_pay(card):
 		EventBus.message_shown.emit("Activated Pay: %s." % card.data.name)
 		_refresh_all()
+	else:
+		EventBus.message_shown.emit("%s has no payable Pay ability right now." % card.data.name)
+
+
+func _on_board_inspect_card_clicked(card: CardInstance) -> void:
+	show_card_instance_detail(card)
 
 
 func _clear_target_mode() -> void:
 	pending_target_callback = Callable()
+	pending_valid_targets = []
 	if board_p0:
 		board_p0.exit_target_mode()
 	if board_p1:
 		board_p1.exit_target_mode()
 	for hv in [hero_visual_p0, hero_visual_p1]:
 		if hv:
-			hv.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			hv.mouse_filter = Control.MOUSE_FILTER_STOP
 			hv.modulate = Color.WHITE
 
 
@@ -656,6 +710,17 @@ func _mark_card_event(card: CardInstance, color: Color) -> void:
 		board_p0.pulse_card(card, color)
 	if board_p1:
 		board_p1.pulse_card(card, color)
+	if hero_visual_p0 and hero_visual_p0.card_instance == card:
+		hero_visual_p0.pulse_event(color)
+	if hero_visual_p1 and hero_visual_p1.card_instance == card:
+		hero_visual_p1.pulse_event(color)
+
+
+func _float_card_event(card: CardInstance, text: String, color: Color) -> void:
+	if not card:
+		return
+	card.ability_state["ui_float_text"] = text
+	card.ability_state["ui_float_color"] = color
 
 
 func _event_color(trigger: String) -> Color:
@@ -754,9 +819,9 @@ func _build_menu_button() -> void:
 	button.text = "X"
 	button.tooltip_text = "Return to main menu"
 	button.offset_left = 1848.0
-	button.offset_top = 20.0
+	button.offset_top = 70.0
 	button.offset_right = 1898.0
-	button.offset_bottom = 58.0
+	button.offset_bottom = 108.0
 	button.add_theme_font_size_override("font_size", 18)
 	button.pressed.connect(func():
 		get_tree().change_scene_to_file(MENU_SCENE)
@@ -764,58 +829,97 @@ func _build_menu_button() -> void:
 	ui.add_child(button)
 
 
+func _build_settings_panel() -> void:
+	settings_panel = SettingsPanelScript.new()
+	settings_panel.name = "GameSettings"
+	settings_panel.build(Vector2(1800, 70), true)
+	settings_panel.debug_visibility_requested.connect(_set_debug_visible)
+	$UI.add_child(settings_panel)
+
+
 func _build_table_backdrop() -> void:
 	var bg := ColorRect.new()
 	bg.name = "TableBackdrop"
-	bg.color = Color(0.045, 0.052, 0.068)
-	bg.offset_left = 0.0
-	bg.offset_top = 0.0
-	bg.offset_right = 1920.0
-	bg.offset_bottom = 1080.0
+	bg.color = SettingsManager.color("background")
+	bg.offset_left = -320.0
+	bg.offset_top = -240.0
+	bg.offset_right = 2560.0
+	bg.offset_bottom = 1600.0
 	bg.z_index = -100
 	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(bg)
 	move_child(bg, 0)
 
-	var board_band := Panel.new()
-	board_band.name = "BoardBand"
-	board_band.offset_left = 250.0
-	board_band.offset_top = 200.0
-	board_band.offset_right = 1670.0
-	board_band.offset_bottom = 810.0
-	board_band.z_index = -90
-	board_band.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	board_band.add_theme_stylebox_override("panel", _make_panel_style(Color(0.07, 0.08, 0.105, 0.92), Color(0.19, 0.22, 0.3), 1, 6))
-	add_child(board_band)
-	move_child(board_band, 1)
-
 	var left_rail := Panel.new()
 	left_rail.name = "LeftRail"
-	left_rail.offset_left = 8.0
-	left_rail.offset_top = 8.0
-	left_rail.offset_right = 252.0
-	left_rail.offset_bottom = 1072.0
-	left_rail.z_index = -85
+	left_rail.offset_left = 0.0
+	left_rail.offset_top = -40.0
+	left_rail.offset_right = 270.0
+	left_rail.offset_bottom = 1240.0
+	left_rail.z_index = -92
 	left_rail.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	left_rail.add_theme_stylebox_override("panel", _make_panel_style(Color(0.055, 0.064, 0.085, 0.94), Color(0.16, 0.19, 0.26), 1, 6))
+	left_rail.add_theme_stylebox_override("panel", _make_panel_style(SettingsManager.color("rail"), SettingsManager.color("border"), 1, 0))
 	add_child(left_rail)
 	move_child(left_rail, 1)
 
 	var right_rail := Panel.new()
 	right_rail.name = "RightRail"
-	right_rail.offset_left = 1668.0
-	right_rail.offset_top = 8.0
-	right_rail.offset_right = 1912.0
-	right_rail.offset_bottom = 1072.0
-	right_rail.z_index = -85
+	right_rail.offset_left = 1686.0
+	right_rail.offset_top = -40.0
+	right_rail.offset_right = 2240.0
+	right_rail.offset_bottom = 1240.0
+	right_rail.z_index = -92
 	right_rail.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	right_rail.add_theme_stylebox_override("panel", _make_panel_style(Color(0.055, 0.064, 0.085, 0.88), Color(0.16, 0.19, 0.26), 1, 6))
+	right_rail.add_theme_stylebox_override("panel", _make_panel_style(SettingsManager.color("rail"), SettingsManager.color("border"), 1, 0))
 	add_child(right_rail)
 	move_child(right_rail, 1)
 
+	var board_band := Panel.new()
+	board_band.name = "BoardBand"
+	board_band.offset_left = 270.0
+	board_band.offset_top = 176.0
+	board_band.offset_right = 1686.0
+	board_band.offset_bottom = 846.0
+	board_band.z_index = -90
+	board_band.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	board_band.add_theme_stylebox_override("panel", _make_panel_style(SettingsManager.color("panel_soft"), SettingsManager.color("border"), 1, 4))
+	add_child(board_band)
+	move_child(board_band, 1)
+
+	for rect in [
+		Rect2(286, 194, 1384, 294),
+		Rect2(286, 532, 1384, 294),
+	]:
+		var lane := Panel.new()
+		lane.name = "BoardLane"
+		lane.offset_left = rect.position.x
+		lane.offset_top = rect.position.y
+		lane.offset_right = rect.position.x + rect.size.x
+		lane.offset_bottom = rect.position.y + rect.size.y
+		lane.z_index = -88
+		lane.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		lane.add_theme_stylebox_override("panel", _make_panel_style(SettingsManager.color("background"), SettingsManager.color("border"), 1, 4))
+		add_child(lane)
+		move_child(lane, 1)
+
+	for y in [496.0, 508.0]:
+		var line := ColorRect.new()
+		line.name = "CenterTableLine"
+		line.offset_left = 286.0
+		line.offset_top = y
+		line.offset_right = 1670.0
+		line.offset_bottom = y + 1.0
+		line.color = Color(0.32, 0.39, 0.52, 0.52)
+		line.z_index = -80
+		line.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		add_child(line)
+		move_child(line, 1)
+
 
 func _apply_ui_theme() -> void:
-	_style_info_panel(hud)
+	var table_bg := get_node_or_null("TableBackdrop") as ColorRect
+	if table_bg:
+		table_bg.color = SettingsManager.color("background")
 	_style_info_panel(neutral_deck_panel)
 	_style_info_panel(faction_deck_panel_p0)
 	_style_info_panel(faction_deck_panel_p1)
@@ -837,26 +941,86 @@ func _apply_ui_theme() -> void:
 		if old_label:
 			old_label.visible = false
 	if turn_label:
+		turn_label.visible = false
 		turn_label.offset_left = 24.0
 		turn_label.offset_top = 18.0
 		turn_label.offset_right = 232.0
 		turn_label.offset_bottom = 44.0
 	if phase_label:
+		phase_label.visible = false
 		phase_label.offset_left = 24.0
 		phase_label.offset_top = 48.0
 		phase_label.offset_right = 232.0
 		phase_label.offset_bottom = 74.0
 	if message_label:
-		message_label.offset_left = 24.0
-		message_label.offset_top = 96.0
-		message_label.offset_right = 240.0
-		message_label.offset_bottom = 172.0
+		message_label.visible = false
+		message_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	if card_detail_popup:
-		card_detail_popup.offset_left = -332.0
-		card_detail_popup.offset_top = 220.0
-		card_detail_popup.offset_right = -14.0
-		card_detail_popup.offset_bottom = 720.0
+		card_detail_popup.offset_left = -442.0
+		card_detail_popup.offset_top = 124.0
+		card_detail_popup.offset_right = -12.0
+		card_detail_popup.offset_bottom = 424.0
+	if graveyard_panel_p0:
+		graveyard_panel_p0.offset_left = 70.0
+		graveyard_panel_p0.offset_top = 746.0
+		graveyard_panel_p0.offset_right = 250.0
+		graveyard_panel_p0.offset_bottom = 826.0
+		graveyard_panel_p0.add_theme_stylebox_override("panel", _make_panel_style(Color(0.05, 0.055, 0.066, 0.82), Color(0.18, 0.2, 0.24), 1, 4))
+	for panel in [neutral_deck_panel, faction_deck_panel_p0, faction_deck_panel_p1, graveyard_panel_p0]:
+		_decorate_stack_panel(panel)
+	if graveyard_panel_p1:
+		graveyard_panel_p1.visible = false
+	if hero_container_p0:
+		hero_container_p0.offset_left = 70.0
+		hero_container_p0.offset_top = 924.0
+		hero_container_p0.offset_right = 250.0
+		hero_container_p0.offset_bottom = 1024.0
+	if hero_container_p1:
+		hero_container_p1.offset_left = 70.0
+		hero_container_p1.offset_top = 64.0
+		hero_container_p1.offset_right = 250.0
+		hero_container_p1.offset_bottom = 164.0
+	if end_turn_button:
+		end_turn_button.offset_left = 1696.0
+		end_turn_button.offset_top = 562.0
+		end_turn_button.offset_right = 1884.0
+		end_turn_button.offset_bottom = 614.0
 	_style_control_tree($UI)
+
+
+func _decorate_stack_panel(panel: Control) -> void:
+	if not panel or panel.has_meta("stack_decorated"):
+		return
+	panel.set_meta("stack_decorated", true)
+	for i in range(3):
+		var card := Panel.new()
+		card.name = "StackOffset%d" % i
+		card.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		card.show_behind_parent = true
+		card.z_index = -3 + i
+		card.anchor_right = 1.0
+		card.anchor_bottom = 1.0
+		card.offset_left = 5.0 + float(i) * 4.0
+		card.offset_top = 5.0 - float(i) * 3.0
+		card.offset_right = -7.0 + float(i) * 4.0
+		card.offset_bottom = -7.0 - float(i) * 3.0
+		card.add_theme_stylebox_override("panel", _make_panel_style(SettingsManager.color("panel_soft"), SettingsManager.color("border"), 1, 4))
+		panel.add_child(card)
+		panel.move_child(card, 0)
+
+
+func _play_match_intro() -> void:
+	if bool(SettingsManager.get_value("reduced_motion", false)):
+		return
+	if hand_p0:
+		hand_p0.play_deal_intro(false)
+	if hand_p1:
+		hand_p1.play_deal_intro(true)
+	for panel in [neutral_deck_panel, faction_deck_panel_p0, faction_deck_panel_p1]:
+		if panel:
+			panel.scale = Vector2(0.96, 0.96)
+			var tween := create_tween()
+			tween.tween_property(panel, "scale", Vector2.ONE, 0.18)
 
 
 func _style_control_tree(node: Node) -> void:
@@ -870,24 +1034,24 @@ func _style_info_panel(node: Control) -> void:
 	if not node:
 		return
 	if node is Panel:
-		node.add_theme_stylebox_override("panel", _make_panel_style(Color(0.075, 0.085, 0.112, 0.96), Color(0.23, 0.27, 0.36), 1, 6))
+		node.add_theme_stylebox_override("panel", _make_panel_style(SettingsManager.color("panel"), SettingsManager.color("border"), 1, 6))
 	elif node is PanelContainer:
-		node.add_theme_stylebox_override("panel", _make_panel_style(Color(0.075, 0.085, 0.112, 0.97), Color(0.28, 0.31, 0.4), 1, 6))
+		node.add_theme_stylebox_override("panel", _make_panel_style(SettingsManager.color("panel"), SettingsManager.color("border"), 1, 6))
 
 
 func _style_label(label: Label) -> void:
 	if not label:
 		return
-	label.add_theme_color_override("font_color", Color(0.84, 0.87, 0.94))
+	label.add_theme_color_override("font_color", SettingsManager.color("text"))
 	label.add_theme_font_size_override("font_size", 14)
 
 
 func _style_button(button: Button) -> void:
 	if not button:
 		return
-	button.add_theme_stylebox_override("normal", _make_panel_style(Color(0.12, 0.145, 0.19, 1), Color(0.34, 0.39, 0.52), 1, 5))
-	button.add_theme_stylebox_override("hover", _make_panel_style(Color(0.16, 0.19, 0.25, 1), Color(0.62, 0.71, 0.92), 1, 5))
-	button.add_theme_stylebox_override("pressed", _make_panel_style(Color(0.09, 0.11, 0.15, 1), Color(0.95, 0.75, 0.28), 1, 5))
+	button.add_theme_stylebox_override("normal", _make_panel_style(SettingsManager.color("panel_soft"), SettingsManager.color("border"), 1, 5))
+	button.add_theme_stylebox_override("hover", _make_panel_style(SettingsManager.color("panel"), SettingsManager.color("accent"), 1, 5))
+	button.add_theme_stylebox_override("pressed", _make_panel_style(SettingsManager.color("rail"), SettingsManager.color("accent"), 1, 5))
 	button.add_theme_color_override("font_color", Color(0.9, 0.92, 0.96))
 
 
@@ -911,14 +1075,140 @@ func _hide_overlays(except: Control = null) -> void:
 	for panel in [debug_panel, zone_panel, card_detail_popup, choice_panel, ability_panel]:
 		if panel and panel != except:
 			panel.visible = false
+	if settings_panel and settings_panel.panel and settings_panel.panel != except:
+		settings_panel.panel.visible = false
+	if event_panel and except != event_panel:
+		event_panel.visible = false
+		event_showing = false
+	if not (except == debug_panel or except == card_detail_popup):
+		_set_debug_overlay_mode(false)
+
+
+func _set_debug_overlay_mode(open: bool) -> void:
+	for control in [turn_banner_panel, end_turn_button]:
+		if control:
+			control.visible = not open
+
+
+func _set_debug_visible(open: bool) -> void:
+	if debug_panel:
+		if open:
+			_hide_overlays(debug_panel)
+		debug_panel.visible = open
+		_set_debug_overlay_mode(open)
+	SettingsManager.set_value("debug_enabled", open)
+
+
+func _on_setting_changed(key: String, _value: Variant) -> void:
+	match key:
+		"theme":
+			_apply_ui_theme()
+		"action_log_enabled", "event_popups_enabled", "ability_popups_enabled", "debug_enabled":
+			_apply_settings()
+
+
+func _apply_settings() -> void:
+	if action_log_panel:
+		action_log_panel.visible = bool(SettingsManager.get_value("action_log_enabled", true))
+	if event_panel and not bool(SettingsManager.get_value("event_popups_enabled", true)):
+		event_panel.visible = false
+		event_showing = false
+		event_queue.clear()
+	if ability_panel and not bool(SettingsManager.get_value("ability_popups_enabled", true)):
+		ability_panel.visible = false
+	if debug_panel:
+		var show_debug := bool(SettingsManager.get_value("debug_enabled", false))
+		debug_panel.visible = show_debug
+		_set_debug_overlay_mode(show_debug)
+
+
+func _build_turn_banner() -> void:
+	var ui := $UI
+	turn_banner_panel = PanelContainer.new()
+	turn_banner_panel.name = "TurnBanner"
+	turn_banner_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	turn_banner_panel.offset_left = 1696.0
+	turn_banner_panel.offset_top = 452.0
+	turn_banner_panel.offset_right = 1884.0
+	turn_banner_panel.offset_bottom = 536.0
+	turn_banner_panel.add_theme_stylebox_override("panel", _make_panel_style(Color(0.06, 0.055, 0.045, 0.96), Color(0.7, 0.52, 0.22), 2, 7))
+	ui.add_child(turn_banner_panel)
+
+	var box := VBoxContainer.new()
+	box.alignment = BoxContainer.ALIGNMENT_CENTER
+	box.add_theme_constant_override("separation", 1)
+	turn_banner_panel.add_child(box)
+
+	turn_banner_player_label = Label.new()
+	turn_banner_player_label.text = "Player Turn"
+	turn_banner_player_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	turn_banner_player_label.add_theme_font_size_override("font_size", 17)
+	turn_banner_player_label.add_theme_color_override("font_color", Color(0.96, 0.82, 0.42))
+	box.add_child(turn_banner_player_label)
+
+	turn_banner_phase_label = Label.new()
+	turn_banner_phase_label.text = "Phase"
+	turn_banner_phase_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	turn_banner_phase_label.add_theme_font_size_override("font_size", 11)
+	turn_banner_phase_label.add_theme_color_override("font_color", Color(0.88, 0.9, 0.94))
+	box.add_child(turn_banner_phase_label)
+
+	turn_banner_meta_label = Label.new()
+	turn_banner_meta_label.text = "Turn 1"
+	turn_banner_meta_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	turn_banner_meta_label.add_theme_font_size_override("font_size", 10)
+	turn_banner_meta_label.add_theme_color_override("font_color", Color(0.63, 0.68, 0.76))
+	box.add_child(turn_banner_meta_label)
 
 
 func _build_status_panels() -> void:
 	var ui := $UI
-	status_panel_top = _create_status_panel("BoardStatusOpponent", Vector2(280, 160), "Opponent")
-	status_panel_bottom = _create_status_panel("BoardStatusPlayer", Vector2(280, 812), "You")
+	status_panel_top = _create_status_panel("BoardStatusPlayer2", Vector2(1668, 12), "P2")
+	status_panel_bottom = _create_status_panel("BoardStatusPlayer1", Vector2(1668, 1016), "P1")
 	ui.add_child(status_panel_top)
 	ui.add_child(status_panel_bottom)
+
+
+func _build_hero_hp_bar(container: Control, player_id: int) -> void:
+	var back := ColorRect.new()
+	back.name = "HeroHPBack"
+	back.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	back.offset_left = 0.0
+	back.offset_top = 86.0
+	back.offset_right = 180.0
+	back.offset_bottom = 98.0
+	back.color = Color(0.11, 0.035, 0.04, 0.94)
+	container.add_child(back)
+
+	var fill := ColorRect.new()
+	fill.name = "HeroHPFill"
+	fill.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	fill.offset_left = 1.0
+	fill.offset_top = 87.0
+	fill.offset_right = 179.0
+	fill.offset_bottom = 97.0
+	fill.color = Color(0.55, 0.88, 0.48, 0.96)
+	container.add_child(fill)
+
+	var label := Label.new()
+	label.name = "HeroHPText"
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	label.offset_left = 0.0
+	label.offset_top = 82.0
+	label.offset_right = 180.0
+	label.offset_bottom = 100.0
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.add_theme_font_size_override("font_size", 10)
+	label.add_theme_color_override("font_color", Color(0.96, 0.98, 1.0))
+	container.add_child(label)
+
+	if player_id == 0:
+		hero_bar_fill_p0 = fill
+		hero_bar_label_p0 = label
+	else:
+		hero_bar_fill_p1 = fill
+		hero_bar_label_p1 = label
 
 
 func _create_status_panel(panel_name: String, pos: Vector2, label_text: String) -> PanelContainer:
@@ -927,42 +1217,42 @@ func _create_status_panel(panel_name: String, pos: Vector2, label_text: String) 
 	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	panel.offset_left = pos.x
 	panel.offset_top = pos.y
-	panel.offset_right = pos.x + 420.0
-	panel.offset_bottom = pos.y + 52.0
-	panel.add_theme_stylebox_override("panel", _make_panel_style(Color(0.064, 0.074, 0.098, 0.94), Color(0.28, 0.32, 0.42), 1, 7))
+	panel.offset_right = pos.x + 226.0
+	panel.offset_bottom = pos.y + 46.0
+	panel.add_theme_stylebox_override("panel", _make_panel_style(Color(0.055, 0.062, 0.074, 0.96), Color(0.26, 0.29, 0.34), 1, 7))
 
 	var row := HBoxContainer.new()
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
-	row.add_theme_constant_override("separation", 14)
+	row.add_theme_constant_override("separation", 4)
 	panel.add_child(row)
 
 	var name := Label.new()
 	name.text = label_text
-	name.custom_minimum_size = Vector2(110, 32)
+	name.custom_minimum_size = Vector2(74, 30)
 	name.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	name.add_theme_font_size_override("font_size", 15)
+	name.add_theme_font_size_override("font_size", 12)
 	name.add_theme_color_override("font_color", Color(0.84, 0.88, 0.95))
 	row.add_child(name)
 
 	var sellary := Label.new()
 	sellary.text = "Sellary 0"
-	sellary.custom_minimum_size = Vector2(140, 32)
+	sellary.custom_minimum_size = Vector2(58, 30)
 	sellary.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	sellary.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	sellary.add_theme_font_size_override("font_size", 18)
+	sellary.add_theme_font_size_override("font_size", 14)
 	sellary.add_theme_color_override("font_color", Color(0.95, 0.79, 0.32))
 	row.add_child(sellary)
 
 	var hp := Label.new()
-	hp.text = "Hero 0"
-	hp.custom_minimum_size = Vector2(120, 32)
-	hp.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	hp.text = "H0 C0"
+	hp.custom_minimum_size = Vector2(76, 30)
+	hp.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	hp.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	hp.add_theme_font_size_override("font_size", 15)
+	hp.add_theme_font_size_override("font_size", 12)
 	hp.add_theme_color_override("font_color", Color(0.68, 0.92, 0.78))
 	row.add_child(hp)
 
-	if label_text == "Opponent":
+	if label_text == "P2":
 		top_name_label = name
 		top_sellary_label = sellary
 		top_hp_label = hp
@@ -1051,6 +1341,9 @@ func _build_ability_panel() -> void:
 
 
 func _on_ability_panel_requested(title: String, items: Array) -> void:
+	if not bool(SettingsManager.get_value("ability_popups_enabled", true)):
+		_log_action("%s: %d item(s)" % [title, items.size()])
+		return
 	_show_ability_panel(title, items)
 
 
@@ -1071,6 +1364,10 @@ func _show_ability_panel(title: String, items: Array) -> void:
 		for item in items:
 			ability_items.add_child(_ability_item_control(item))
 	ability_panel.visible = true
+	if bool(SettingsManager.get_value("reduced_motion", false)):
+		ability_panel.modulate.a = 1.0
+		ability_panel.scale = Vector2.ONE
+		return
 	ability_panel.modulate.a = 0.0
 	ability_panel.scale = Vector2(0.985, 0.985)
 	var tween := create_tween()
@@ -1134,7 +1431,7 @@ func _ability_item_control(item) -> Control:
 
 
 func _queue_game_event(title: String, detail: String, color: Color, duration: float = 0.85) -> void:
-	if not event_panel:
+	if not event_panel or not bool(SettingsManager.get_value("event_popups_enabled", true)):
 		return
 	event_queue.append({
 		"title": title,
@@ -1151,6 +1448,15 @@ func _queue_game_event(title: String, detail: String, color: Color, duration: fl
 func _show_next_game_event() -> void:
 	if event_showing or event_queue.is_empty() or not event_panel:
 		return
+	var wait_ms := popup_hold_until_ms - Time.get_ticks_msec()
+	if wait_ms > 0:
+		if not event_hold_timer_active:
+			event_hold_timer_active = true
+			get_tree().create_timer(float(wait_ms) / 1000.0).timeout.connect(func() -> void:
+				event_hold_timer_active = false
+				_show_next_game_event()
+			)
+		return
 	event_showing = true
 	var event: Dictionary = event_queue.pop_front()
 	var color: Color = event.get("color", Color(0.95, 0.82, 0.35))
@@ -1163,6 +1469,14 @@ func _show_next_game_event() -> void:
 		style.border_color = color
 		event_panel.add_theme_stylebox_override("panel", style)
 	event_panel.visible = true
+	if bool(SettingsManager.get_value("reduced_motion", false)):
+		event_panel.modulate.a = 1.0
+		event_panel.scale = Vector2.ONE
+		await get_tree().create_timer(duration * 0.6).timeout
+		event_panel.visible = false
+		event_showing = false
+		_show_next_game_event()
+		return
 	event_panel.modulate.a = 0.0
 	event_panel.scale = Vector2(0.985, 0.985)
 	var tween := create_tween()
@@ -1255,9 +1569,9 @@ func _build_action_log() -> void:
 	action_log_panel = PanelContainer.new()
 	action_log_panel.name = "ActionLog"
 	action_log_panel.offset_left = 8.0
-	action_log_panel.offset_top = 282.0
+	action_log_panel.offset_top = 168.0
 	action_log_panel.offset_right = 252.0
-	action_log_panel.offset_bottom = 444.0
+	action_log_panel.offset_bottom = 318.0
 	action_log_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	ui.add_child(action_log_panel)
 
@@ -1283,16 +1597,19 @@ func _build_action_log() -> void:
 func _build_debug_panel() -> void:
 	var ui := $UI
 	var toggle := Button.new()
+	debug_toggle_button = toggle
 	toggle.name = "DebugToggleButton"
 	toggle.text = "Debug"
+	toggle.visible = false
 	toggle.offset_left = 1676.0
-	toggle.offset_top = 20.0
+	toggle.offset_top = 70.0
 	toggle.offset_right = 1832.0
-	toggle.offset_bottom = 58.0
+	toggle.offset_bottom = 108.0
 	toggle.pressed.connect(func():
 		if debug_panel:
 			_hide_overlays(debug_panel)
 			debug_panel.visible = not debug_panel.visible
+			_set_debug_overlay_mode(debug_panel.visible)
 	)
 	ui.add_child(toggle)
 
@@ -1863,6 +2180,41 @@ func _show_card_zone(title: String, cards: Array) -> void:
 	zone_panel.visible = true
 
 
+func _show_card_zone_randomized(title: String, cards: Array) -> void:
+	var preview := cards.duplicate()
+	preview.shuffle()
+	_show_card_zone("%s (randomized preview)" % title, preview)
+
+
+func _shared_graveyard_cards() -> Array:
+	var cards: Array = []
+	if not game_state:
+		return cards
+	for player in game_state.players:
+		for card in player.graveyard:
+			if card is CardInstance:
+				_ensure_graveyard_sequence(card)
+				cards.append(card)
+	cards.sort_custom(func(a: CardInstance, b: CardInstance) -> bool:
+		return int(a.ability_state.get("ui_grave_seq", 0)) > int(b.ability_state.get("ui_grave_seq", 0))
+	)
+	return cards
+
+
+func _mark_graveyard_recent(card: CardInstance) -> void:
+	if not card:
+		return
+	_graveyard_sequence += 1
+	card.ability_state["ui_grave_seq"] = _graveyard_sequence
+
+
+func _ensure_graveyard_sequence(card: CardInstance) -> void:
+	if not card or card.ability_state.has("ui_grave_seq"):
+		return
+	_graveyard_sequence += 1
+	card.ability_state["ui_grave_seq"] = _graveyard_sequence
+
+
 func _show_text_report(title: String, lines: PackedStringArray) -> void:
 	if not zone_panel or not zone_list:
 		return
@@ -1874,20 +2226,28 @@ func _show_text_report(title: String, lines: PackedStringArray) -> void:
 		var empty := Label.new()
 		empty.text = "No report lines."
 		empty.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		empty.custom_minimum_size = Vector2(820, 28)
 		zone_list.add_child(empty)
 	else:
+		var report := RichTextLabel.new()
+		report.custom_minimum_size = Vector2(820, 650)
+		report.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		report.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		report.bbcode_enabled = true
+		report.fit_content = false
+		report.scroll_active = true
+		report.add_theme_font_size_override("normal_font_size", 13)
+		var formatted: Array[String] = []
 		for line in lines:
-			var label := Label.new()
-			label.text = line
-			label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-			label.add_theme_font_size_override("font_size", 13)
+			var escaped := str(line).replace("[", "\\[").replace("]", "\\]")
 			if line.begins_with("FAIL"):
-				label.add_theme_color_override("font_color", Color(1.0, 0.46, 0.42))
+				formatted.append("[color=#ff746b]%s[/color]" % escaped)
 			elif line.begins_with("WARN"):
-				label.add_theme_color_override("font_color", Color(1.0, 0.82, 0.35))
+				formatted.append("[color=#ffd45a]%s[/color]" % escaped)
 			else:
-				label.add_theme_color_override("font_color", Color(0.86, 0.9, 0.96))
-			zone_list.add_child(label)
+				formatted.append("[color=#dbe4f2]%s[/color]" % escaped)
+		report.text = "\n".join(formatted)
+		zone_list.add_child(report)
 	zone_panel.visible = true
 
 
@@ -1928,6 +2288,9 @@ func _build_choice_panel() -> void:
 func _on_choice_requested(prompt: String, options: Array, callback: Callable) -> void:
 	if not choice_panel or not choice_options:
 		return
+	var wait_ms := popup_hold_until_ms - Time.get_ticks_msec()
+	if wait_ms > 0:
+		await get_tree().create_timer(float(wait_ms) / 1000.0).timeout
 	_hide_overlays(choice_panel)
 	for child in choice_options.get_children():
 		child.queue_free()
@@ -1949,16 +2312,8 @@ func _on_choice_requested(prompt: String, options: Array, callback: Callable) ->
 			_refresh_all()
 		)
 		choice_options.add_child(button)
-	var cancel := Button.new()
-	cancel.text = "Cancel"
-	cancel.custom_minimum_size = Vector2(0, 36)
-	cancel.pressed.connect(func():
-		choice_panel.visible = false
-		EventBus.target_cancelled.emit()
-	)
-	choice_options.add_child(cancel)
-	_style_button(cancel)
 	choice_panel.visible = true
+	_refresh_all()
 
 
 func _ability_choice_button(title: String, detail: String = "") -> Button:
@@ -1983,29 +2338,29 @@ func _discard_card(player: PlayerState, card: CardInstance) -> void:
 	_refresh_all()
 
 
-func _is_over_graveyard(pos: Vector2, player: PlayerState) -> bool:
-	var panel: Panel = graveyard_panel_p0 if player.player_id == 0 else graveyard_panel_p1
+func _is_over_graveyard(pos: Vector2, _player: PlayerState) -> bool:
+	var panel: Panel = graveyard_panel_p0
 	if not panel:
 		return false
 	var rect: Rect2 = Rect2(panel.global_position, panel.size)
 	return rect.has_point(pos)
 
 
-func _highlight_graveyard(player: PlayerState) -> void:
-	var panel: Panel = graveyard_panel_p0 if player.player_id == 0 else graveyard_panel_p1
-	if panel:
-		panel.modulate = Color(1.0, 0.4, 0.4)
+func _highlight_graveyard(_player: PlayerState) -> void:
+	if graveyard_panel_p0:
+		graveyard_panel_p0.add_theme_stylebox_override("panel", _make_panel_style(Color(0.18, 0.075, 0.07, 0.96), Color(0.96, 0.36, 0.28), 2, 4))
 
 
 func _clear_graveyard_highlight() -> void:
 	if graveyard_panel_p0:
 		graveyard_panel_p0.modulate = Color.WHITE
+		graveyard_panel_p0.add_theme_stylebox_override("panel", _make_panel_style(Color(0.05, 0.055, 0.066, 0.82), Color(0.18, 0.2, 0.24), 1, 4))
 	if graveyard_panel_p1:
 		graveyard_panel_p1.modulate = Color.WHITE
 
 
 func _on_hand_card_right_clicked(_card: CardInstance) -> void:
-	pass  # Right-click opens detail popup via card_detail_requested (handled in card_visual.gd)
+	show_card_instance_detail(_card)
 
 
 func _on_neutral_deck_input(event: InputEvent) -> void:
@@ -2015,13 +2370,16 @@ func _on_neutral_deck_input(event: InputEvent) -> void:
 		return
 	if not game_state or game_state.game_over:
 		return
+	if _is_interaction_locked():
+		EventBus.message_shown.emit("Resolve the open prompt first.")
+		return
 	if (event as InputEventMouseButton).button_index == MOUSE_BUTTON_RIGHT:
-		_show_card_zone("Neutral Deck Order", game_state.neutral_deck)
+		_show_card_zone_randomized("Neutral Deck", game_state.neutral_deck)
 		return
 	if (event as InputEventMouseButton).button_index != MOUSE_BUTTON_LEFT:
 		return
 	if game_state.current_phase != GameConstants.TurnPhase.PLAY_CARDS:
-		_show_card_zone("Neutral Deck Order", game_state.neutral_deck)
+		_show_card_zone_randomized("Neutral Deck", game_state.neutral_deck)
 		return
 	var player: PlayerState = game_state.get_current_player()
 	var cost: int = player.get_neutral_draw_cost()
@@ -2042,13 +2400,16 @@ func _on_faction_deck_input(event: InputEvent, player_id: int) -> void:
 		return
 	if not game_state or game_state.game_over:
 		return
+	if _is_interaction_locked():
+		EventBus.message_shown.emit("Resolve the open prompt first.")
+		return
 	if (event as InputEventMouseButton).button_index == MOUSE_BUTTON_RIGHT:
-		_show_card_zone("%s Faction Deck Order" % ("Your" if player_id == 0 else "Opponent"), game_state.players[player_id].faction_deck)
+		_show_card_zone_randomized("Player %d Faction Deck" % (player_id + 1), game_state.players[player_id].faction_deck)
 		return
 	if (event as InputEventMouseButton).button_index != MOUSE_BUTTON_LEFT:
 		return
 	if game_state.current_phase != GameConstants.TurnPhase.PLAY_CARDS:
-		_show_card_zone("%s Faction Deck Order" % ("Your" if player_id == 0 else "Opponent"), game_state.players[player_id].faction_deck)
+		_show_card_zone_randomized("Player %d Faction Deck" % (player_id + 1), game_state.players[player_id].faction_deck)
 		return
 	var player: PlayerState = game_state.get_current_player()
 	if player.player_id != player_id:
@@ -2065,16 +2426,16 @@ func _on_faction_deck_input(event: InputEvent, player_id: int) -> void:
 	_refresh_all()
 
 
-func _on_graveyard_input(event: InputEvent, player_id: int) -> void:
+func _on_graveyard_input(event: InputEvent, _player_id: int) -> void:
 	if not event is InputEventMouseButton:
 		return
 	if not (event as InputEventMouseButton).pressed:
 		return
 	if (event as InputEventMouseButton).button_index != MOUSE_BUTTON_LEFT:
 		return
-	if not game_state or player_id >= game_state.players.size():
+	if not game_state:
 		return
-	_show_card_zone("%s Graveyard" % ("Your" if player_id == 0 else "Opponent"), game_state.players[player_id].graveyard)
+	_show_card_zone("Shared Graveyard, newest first", _shared_graveyard_cards())
 
 
 func _update_deck_labels() -> void:
@@ -2087,25 +2448,28 @@ func _update_deck_labels() -> void:
 		neutral_deck_label.text = "Neutral\n(%d cards)\nCost: %d" % [game_state.neutral_deck.size(), nc]
 	if faction_deck_label_p0:
 		var p0: PlayerState = game_state.players[0]
-		faction_deck_label_p0.text = "Your Faction\n%d cards\nCost %d" % [p0.faction_deck.size(), p0.get_faction_draw_cost()]
+		faction_deck_label_p0.text = "P1 Faction\n%d cards\nCost %d" % [p0.faction_deck.size(), p0.get_faction_draw_cost()]
 	if faction_deck_label_p1:
 		var p1: PlayerState = game_state.players[1]
-		faction_deck_label_p1.text = "Opponent\n%d cards\nCost %d" % [p1.faction_deck.size(), p1.get_faction_draw_cost()]
+		faction_deck_label_p1.text = "P2 Faction\n%d cards\nCost %d" % [p1.faction_deck.size(), p1.get_faction_draw_cost()]
 
 
 func _update_graveyard_labels() -> void:
 	if not game_state or game_state.players.size() < 2:
 		return
+	var total := game_state.players[0].graveyard.size() + game_state.players[1].graveyard.size()
 	if graveyard_label_p0:
-		graveyard_label_p0.text = "Your Graveyard\n%d cards" % game_state.players[0].graveyard.size()
+		graveyard_label_p0.text = "Shared Grave\n%d cards" % total
 	if graveyard_label_p1:
-		graveyard_label_p1.text = "Opponent\nGraveyard\n%d cards" % game_state.players[1].graveyard.size()
+		graveyard_label_p1.text = "Shared Grave\n%d cards" % total
 
 
 # ── Refresh ──────────────────────────────────────────────────────────────────
 
 func _can_play_card(card: CardInstance) -> bool:
 	if not game_state or game_state.game_over:
+		return false
+	if _is_interaction_locked():
 		return false
 	var current: PlayerState = game_state.get_current_player()
 	# card must belong to the active player and be playable
@@ -2117,6 +2481,16 @@ func _can_play_card(card: CardInstance) -> bool:
 	if not owner or owner.player_id != current.player_id:
 		return false
 	return game_state.can_play_card(current, card) and card.data.type in ["Unit", "Spell", "Artifact"]
+
+
+func _is_interaction_locked() -> bool:
+	if pending_target_callback.is_valid():
+		return true
+	if choice_panel and choice_panel.visible:
+		return true
+	if ability_panel and ability_panel.visible:
+		return true
+	return false
 
 
 func _refresh_all() -> void:
@@ -2146,13 +2520,13 @@ func _update_active_hand_visibility() -> void:
 		return
 	var active_id: int = game_state.get_current_player().player_id
 	if hand_p0:
-		hand_p0.visible = active_id == 0
+		hand_p0.visible = true
 	if hand_p1:
-		hand_p1.visible = active_id == 1
+		hand_p1.visible = true
 	if graveyard_panel_p0:
-		graveyard_panel_p0.visible = active_id == 0
+		graveyard_panel_p0.visible = true
 	if graveyard_panel_p1:
-		graveyard_panel_p1.visible = active_id == 1
+		graveyard_panel_p1.visible = false
 
 
 func _refresh_hud() -> void:
@@ -2160,6 +2534,8 @@ func _refresh_hud() -> void:
 		return
 	var p0: PlayerState = game_state.players[0]
 	var p1: PlayerState = game_state.players[1]
+	var active_id: int = game_state.get_current_player().player_id
+	var phase_text: String = GameConstants.PHASE_NAMES.get(game_state.current_phase, "Unknown")
 	
 	if sellary_label_p0:
 		sellary_label_p0.text = "Sellary: %d" % p0.sellary
@@ -2169,18 +2545,77 @@ func _refresh_hud() -> void:
 		hero_hp_p0.text = "Hero: %d" % p0.hero.current_power
 	if hero_hp_p1 and p1.hero:
 		hero_hp_p1.text = "Hero: %d" % p1.hero.current_power
+	if turn_banner_player_label:
+		turn_banner_player_label.text = "PLAYER %d ACTIVE" % (active_id + 1)
+		turn_banner_player_label.add_theme_color_override("font_color", Color(0.96, 0.82, 0.42) if active_id == 0 else Color(0.86, 0.62, 0.52))
+	if turn_banner_phase_label:
+		turn_banner_phase_label.text = phase_text
+	if turn_banner_meta_label:
+		turn_banner_meta_label.text = "Turn %d | Cards played %d/%d" % [
+			game_state.turn_number,
+			game_state.get_current_player().cards_played_this_turn,
+			GameConstants.MAX_CARDS_PER_TURN + game_state.get_current_player().extra_card_plays,
+		]
+	_style_turn_banner(active_id)
 	if bottom_name_label:
-		bottom_name_label.text = "You"
+		bottom_name_label.text = "P1 ACTIVE" if active_id == 0 else "P1"
 	if bottom_sellary_label:
-		bottom_sellary_label.text = "Sellary %d" % p0.sellary
+		bottom_sellary_label.text = "$%d" % p0.sellary
 	if bottom_hp_label and p0.hero:
-		bottom_hp_label.text = "Hero %d" % p0.hero.current_power
+		bottom_hp_label.text = "H%d C%d" % [
+			p0.hero.current_power,
+			p0.hand.size(),
+		]
 	if top_name_label:
-		top_name_label.text = "Opponent"
+		top_name_label.text = "P2 ACTIVE" if active_id == 1 else "P2"
 	if top_sellary_label:
-		top_sellary_label.text = "Sellary %d" % p1.sellary
+		top_sellary_label.text = "$%d" % p1.sellary
 	if top_hp_label and p1.hero:
-		top_hp_label.text = "Hero %d" % p1.hero.current_power
+		top_hp_label.text = "H%d C%d" % [
+			p1.hero.current_power,
+			p1.hand.size(),
+		]
+	_refresh_hero_bar(0, p0)
+	_refresh_hero_bar(1, p1)
+	_style_status_panel(status_panel_bottom, active_id == 0)
+	_style_status_panel(status_panel_top, active_id == 1)
+	if end_turn_button:
+		end_turn_button.disabled = game_state.current_phase != GameConstants.TurnPhase.PLAY_CARDS or _is_interaction_locked()
+
+
+func _refresh_hero_bar(player_id: int, player: PlayerState) -> void:
+	if not player or not player.hero:
+		return
+	var fill := hero_bar_fill_p0 if player_id == 0 else hero_bar_fill_p1
+	var label := hero_bar_label_p0 if player_id == 0 else hero_bar_label_p1
+	var max_hp: float = maxf(float(player.hero.data.base_power), 1.0)
+	var pct: float = clampf(float(player.hero.current_power) / max_hp, 0.0, 1.0)
+	if fill:
+		fill.offset_right = 1.0 + 178.0 * pct
+		if pct <= 0.3:
+			fill.color = Color(0.92, 0.28, 0.22, 0.96)
+		elif pct <= 0.6:
+			fill.color = Color(0.95, 0.68, 0.25, 0.96)
+		else:
+			fill.color = Color(0.46, 0.86, 0.48, 0.96)
+	if label:
+		label.text = "HP %d/%d" % [player.hero.current_power, int(max_hp)]
+
+
+func _style_status_panel(panel: PanelContainer, active: bool) -> void:
+	if not panel:
+		return
+	var bg := Color(0.095, 0.075, 0.046, 0.98) if active else Color(0.055, 0.062, 0.074, 0.94)
+	var border := Color(0.95, 0.72, 0.28) if active else Color(0.26, 0.29, 0.34)
+	panel.add_theme_stylebox_override("panel", _make_panel_style(bg, border, 2 if active else 1, 7))
+
+
+func _style_turn_banner(active_id: int) -> void:
+	if not turn_banner_panel:
+		return
+	var border := Color(0.96, 0.74, 0.28) if active_id == 0 else Color(0.78, 0.42, 0.34)
+	var bg := Color(0.06, 0.055, 0.045, 0.9) if active_id == 0 else Color(0.064, 0.045, 0.043, 0.9)
+	turn_banner_panel.add_theme_stylebox_override("panel", _make_panel_style(bg, border, 1, 5))
 
 
 # ── Card Detail Popup ────────────────────────────────────────────────────────
@@ -2193,6 +2628,7 @@ func show_card_detail(cv: CardVisual) -> void:
 	if _detail_card_visual and is_instance_valid(_detail_card_visual):
 		_detail_card_visual.set_detail_highlighted(false)
 	_detail_card_visual = cv
+	_detail_card_instance = cv.card_instance
 	cv.set_detail_highlighted(true)
 	show_card_instance_detail(cv.card_instance)
 
@@ -2201,6 +2637,7 @@ func show_card_instance_detail(inst: CardInstance) -> void:
 	if not card_detail_popup or not inst:
 		return
 	_hide_overlays(card_detail_popup)
+	_detail_card_instance = inst
 	var data: CardData = inst.data
 
 	detail_name.text = data.name
@@ -2217,7 +2654,62 @@ func show_card_instance_detail(inst: CardInstance) -> void:
 		detail_ability.visible = summary != ""
 		detail_ability.text = summary
 
+	_update_detail_activate_button(inst)
 	card_detail_popup.visible = true
+	_set_debug_overlay_mode(true)
+
+
+func _update_detail_activate_button(inst: CardInstance) -> void:
+	if not detail_activate_button:
+		return
+	detail_activate_button.visible = false
+	detail_activate_button.disabled = true
+	if not game_state or game_state.game_over:
+		return
+	if game_state.current_phase != GameConstants.TurnPhase.PLAY_CARDS:
+		return
+	var player := game_state.get_current_player()
+	if inst.controller_id != player.player_id or not (inst in player.get_all_board_units()):
+		return
+	var pay_cost := _first_trigger_sellary_cost(inst, "pay")
+	if pay_cost >= 0:
+		detail_activate_button.text = "Activate Pay%s" % (" (%d)" % pay_cost if pay_cost > 0 else "")
+		detail_activate_button.visible = true
+		detail_activate_button.disabled = pay_cost > player.sellary
+		return
+	if _has_trigger(inst, "order"):
+		detail_activate_button.text = "Activate Order"
+		detail_activate_button.visible = true
+		detail_activate_button.disabled = false
+
+
+func _first_trigger_sellary_cost(inst: CardInstance, trigger: String) -> int:
+	for effect in inst.data.effects:
+		if effect.trigger == trigger:
+			return effect.pay_cost
+	return -1
+
+
+func _has_trigger(inst: CardInstance, trigger: String) -> bool:
+	for effect in inst.data.effects:
+		if effect.trigger == trigger:
+			return true
+	return false
+
+
+func _on_detail_activate_pressed() -> void:
+	var inst := _detail_card_instance
+	if not inst or not game_state or game_state.game_over:
+		return
+	if game_state.activate_pay(inst):
+		EventBus.message_shown.emit("Activated Pay: %s." % inst.data.name)
+	elif game_state.activate_order(inst):
+		EventBus.message_shown.emit("Activated Order: %s." % inst.data.name)
+	else:
+		EventBus.message_shown.emit("%s has no activatable ability right now." % inst.data.name)
+	_refresh_all()
+	if card_detail_popup and card_detail_popup.visible and inst:
+		show_card_instance_detail(inst)
 
 
 func _format_detail_state(inst: CardInstance) -> String:
@@ -2258,4 +2750,6 @@ func _close_card_detail() -> void:
 	if _detail_card_visual and is_instance_valid(_detail_card_visual):
 		_detail_card_visual.set_detail_highlighted(false)
 	_detail_card_visual = null
+	_detail_card_instance = null
 	card_detail_popup.visible = false
+	_set_debug_overlay_mode(false)

@@ -346,7 +346,9 @@ def parse_ability_effects(text: str, card_name: str = "") -> list[dict]:
 
     # Detect triggers
     trigger = "passive"
-    if "deploy" in text_lower:
+    if re.search(r'\bpay\s+\d+', text_lower):
+        trigger = "pay"
+    elif "deploy" in text_lower:
         trigger = "deploy"
     elif "last word" in text_lower:
         trigger = "last_word"
@@ -368,8 +370,6 @@ def parse_ability_effects(text: str, card_name: str = "") -> list[dict]:
         trigger = "spot_67"
     elif re.search(r'order\b', text_lower):
         trigger = "order"
-    elif re.search(r'pay\s+\d+', text_lower):
-        trigger = "pay"
 
     # Detect effect types
     # Damage
@@ -540,7 +540,7 @@ def parse_ability_effects(text: str, card_name: str = "") -> list[dict]:
     pay_match = re.search(r'pay\s+(\d+)', text_lower)
     if pay_match:
         for eff in effects:
-            if eff["trigger"] in ("pay", "passive"):
+            if eff["trigger"] in ("pay", "passive", "turn_start", "turn_end"):
                 eff["trigger"] = "pay"
                 eff["pay_cost"] = int(pay_match.group(1))
 

@@ -23,6 +23,9 @@ func setup(gs: GameState) -> void:
 
 func _on_ability_triggered(card: CardInstance, effect: CardEffect) -> void:
 	EventBus.message_shown.emit("ABILITY: %s %s/%s" % [card.data.name, effect.type, effect.trigger])
+	if card.data.id == "endest_pearl_incident":
+		_complex_endest_pearl_incident(card)
+		return
 	if not _check_costs(card, effect):
 		return
 	if effect.counter_delta != 0:
@@ -494,6 +497,8 @@ func _resolve_complex(source: CardInstance, effect: CardEffect) -> void:
 			_complex_everything_here_here(source)
 		"sibal_so_sledovanim_lucov":
 			_complex_sibal_so_sledovanim_lucov(source)
+		"endest_pearl_incident":
+			_complex_endest_pearl_incident(source)
 		"the_lion_does_not_care":
 			_complex_the_lion_does_not_care(source)
 		"sir_vival":
@@ -734,23 +739,84 @@ func _complex_sibal_so_sledovanim_lucov(source: CardInstance) -> void:
 	var player: PlayerState = _get_controller(source)
 	if not player:
 		return
-	# Draw 3 faction
-	var drawn: int = 0
-	for i in range(3):
-		var card: CardInstance = player.draw_faction_card()
-		if card:
-			EventBus.card_drawn.emit(card, player.player_id, "ability")
-			drawn += 1
-	# Shuffle 3 back
-	var shuffled: int = 0
-	while shuffled < 3 and not player.hand.is_empty():
-		var card: CardInstance = player.hand[player.hand.size() - 1]
-		player.remove_from_hand(card)
-		card.move_to_zone("faction_deck")
-		player.faction_deck.append(card)
-		shuffled += 1
-	player.faction_deck.shuffle()
-	EventBus.message_shown.emit("Šibal so sledovaním lúčov: drew %d, shuffled %d back" % [drawn, shuffled])
+	var revealed: Array[String] = []
+	for i in range(mini(3, player.faction_deck.size())):
+		revealed.append(player.faction_deck[i].data.name)
+	var detail := "Next faction cards: %s" % (", ".join(revealed) if not revealed.is_empty() else "none")
+	EventBus.choice_requested.emit("Šibal so sledovaním lúčov", [
+		{"label": "Continue", "detail": detail, "value": true},
+	], func(_confirmed: bool) -> void:
+		# Draw 3 faction
+		var drawn: int = 0
+		for i in range(3):
+			var card: CardInstance = player.draw_faction_card()
+			if card:
+				EventBus.card_drawn.emit(card, player.player_id, "ability")
+				drawn += 1
+		# Shuffle 3 back
+		var shuffled: int = 0
+		while shuffled < 3 and not player.hand.is_empty():
+			var card: CardInstance = player.hand[player.hand.size() - 1]
+			player.remove_from_hand(card)
+			card.move_to_zone("faction_deck")
+			player.faction_deck.append(card)
+			shuffled += 1
+		player.faction_deck.shuffle()
+		EventBus.message_shown.emit("Šibal so sledovaním lúčov: drew %d, shuffled %d back" % [drawn, shuffled])
+	)
+
+
+func _complex_endest_pearl_incident(source: CardInstance) -> void:
+	var player: PlayerState = _get_controller(source)
+	if not player:
+		return
+	EventBus.choice_requested.emit("Endest Pearl Incident", [
+		{"label": "Destroy an artifact", "detail": "Choose any artifact on the board.", "value": "destroy_artifact"},
+		{"label": "Damage all units", "detail": "Deal 2 damage to every unit.", "value": "damage_units"},
+		{"label": "Damage a hero", "detail": "Deal 7 damage to a chosen hero.", "value": "damage_hero"},
+	], func(choice: String) -> void:
+		match choice:
+			"destroy_artifact":
+				var targets := _get_board_cards_by_filter("any", "artifact", player)
+				if targets.is_empty():
+					EventBus.message_shown.emit("No artifact to destroy.")
+					_shuffle_endest_back(source)
+					return
+				EventBus.target_requested.emit(targets, func(target: CardInstance) -> void:
+					_destroy_effect_target(target)
+					_shuffle_endest_back(source)
+				)
+			"damage_units":
+				var units := _get_board_cards_by_filter("any", "unit", player)
+				for target in units:
+					_apply_damage(source, target, 2)
+				_shuffle_endest_back(source)
+			"damage_hero":
+				var heroes := _get_board_cards_by_filter("any", "hero", player)
+				if heroes.is_empty():
+					EventBus.message_shown.emit("No hero target.")
+					_shuffle_endest_back(source)
+					return
+				EventBus.target_requested.emit(heroes, func(target: CardInstance) -> void:
+					_apply_damage(source, target, 7)
+					_shuffle_endest_back(source)
+				)
+	)
+
+
+func _shuffle_endest_back(source: CardInstance) -> void:
+	for player in game_state.players:
+		if source in player.graveyard:
+			player.graveyard.erase(source)
+		if source in player.hand:
+			player.remove_from_hand(source)
+	source.apply_status("Cursed", 1, true)
+	source.move_to_zone("deck")
+	source.owner_id = -1
+	source.controller_id = -1
+	game_state.neutral_deck.append(source)
+	game_state.neutral_deck.shuffle()
+	EventBus.message_shown.emit("Endest Pearl Incident gained Cursed and shuffled into neutral deck.")
 
 
 func _complex_the_lion_does_not_care(source: CardInstance) -> void:

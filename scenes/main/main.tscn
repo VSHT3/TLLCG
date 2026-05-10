@@ -268,6 +268,11 @@ size_flags_vertical = 3
 bbcode_enabled = true
 fit_content = true
 
+[node name="ActivateButton" type="Button" parent="UI/CardDetailPopup/VBox"]
+visible = false
+layout_mode = 2
+text = "Activate Pay"
+
 [node name="CloseButton" type="Button" parent="UI/CardDetailPopup/VBox" unique_id=1941137484]
 layout_mode = 2
 text = "✕ Close"

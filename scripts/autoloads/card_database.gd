@@ -208,10 +208,161 @@ func _load_cards() -> void:
 			effect.raw_text = eff.get("raw_text", "")
 			card.effects.append(effect)
 
+		_ensure_pay_effects_from_text(card)
+
 		if card.ability_text.strip_edges() == "" and card.effects.is_empty():
 			card.has_ability = false
 		
 		cards[card.id] = card
+
+
+func _ensure_pay_effects_from_text(card: CardData) -> void:
+	if card.ability_text.strip_edges() == "":
+		return
+	if _has_costed_pay_effect(card):
+		return
+	var pay_regex := RegEx.new()
+	pay_regex.compile("(?i)\\bpay\\s+(\\d+)")
+	for raw_line in card.ability_text.split("\n"):
+		var line := str(raw_line).strip_edges()
+		if line == "":
+			continue
+		var pay_match := pay_regex.search(line)
+		if not pay_match:
+			continue
+		var cost := int(pay_match.get_string(1))
+		var added := _append_simple_pay_effects(card, line, cost)
+		if not added:
+			var effect := _new_pay_effect("complex", cost, line)
+			effect.requires_target = false
+			card.effects.append(effect)
+
+
+func _has_costed_pay_effect(card: CardData) -> bool:
+	for effect in card.effects:
+		if effect.trigger == "pay" and effect.pay_cost > 0:
+			return true
+	return false
+
+
+func _append_simple_pay_effects(card: CardData, line: String, cost: int) -> bool:
+	var lower := line.to_lower()
+	var added := false
+	if "destroy self" in lower:
+		var effect := _new_pay_effect("destroy", cost, line)
+		effect.target_scope = "self"
+		effect.requires_target = false
+		card.effects.append(effect)
+		added = true
+	elif "destroy" in lower:
+		card.effects.append(_new_pay_effect("destroy", cost, line))
+		added = true
+
+	if "banish self" in lower:
+		var effect := _new_pay_effect("banish", cost, line)
+		effect.target_scope = "self"
+		effect.requires_target = false
+		card.effects.append(effect)
+		added = true
+	elif "banish" in lower:
+		card.effects.append(_new_pay_effect("banish", cost, line))
+		added = true
+
+	var boost_value := _first_number_after(lower, "boost")
+	if boost_value > 0:
+		var effect := _new_pay_effect("boost", cost, line)
+		effect.value = boost_value
+		effect.target_scope = "self" if "self" in lower else "ally"
+		effect.target_kind = "unit"
+		effect.requires_target = not ("self" in lower)
+		card.effects.append(effect)
+		added = true
+
+	if "heal" in lower:
+		var effect := _new_pay_effect("heal", cost, line)
+		effect.value = _first_number_after(lower, "heal")
+		effect.target_scope = "ally"
+		effect.target_kind = "hero" if "hero" in lower else "unit"
+		effect.requires_target = not ("your hero" in lower)
+		card.effects.append(effect)
+		added = true
+
+	var damage_value := _first_damage_value(lower)
+	if damage_value > 0:
+		var effect := _new_pay_effect("damage", cost, line)
+		effect.value = damage_value
+		effect.target_scope = "any" if "a hero" in lower or "hero" in lower else "enemy"
+		effect.target_kind = "hero" if "hero" in lower else "unit"
+		effect.requires_target = true
+		card.effects.append(effect)
+		added = true
+
+	var draw_value := _first_number_after(lower, "draw")
+	if draw_value > 0:
+		var effect := _new_pay_effect("draw", cost, line)
+		effect.value = draw_value
+		effect.target_scope = "self"
+		effect.requires_target = false
+		card.effects.append(effect)
+		added = true
+
+	for status_name in ["invisible", "vulnerable", "cursed", "crit", "poison", "burn", "wither"]:
+		if status_name in lower:
+			var effect := _new_pay_effect("apply_status", cost, line)
+			effect.status = status_name.capitalize()
+			effect.stacks = 1
+			effect.target_scope = "self" if "self" in lower else "enemy"
+			effect.target_kind = "card"
+			effect.requires_target = not ("self" in lower)
+			card.effects.append(effect)
+			added = true
+	if added:
+		_charge_pay_line_once(card, line, cost)
+	return added
+
+
+func _charge_pay_line_once(card: CardData, raw_text: String, cost: int) -> void:
+	var charged := false
+	for effect in card.effects:
+		if effect.trigger != "pay" or effect.raw_text != raw_text:
+			continue
+		if charged:
+			effect.pay_cost = 0
+		else:
+			effect.pay_cost = cost
+			charged = true
+
+
+func _new_pay_effect(effect_type: String, cost: int, raw_text: String) -> CardEffect:
+	var effect := CardEffect.new()
+	effect.type = effect_type
+	effect.trigger = "pay"
+	effect.pay_cost = cost
+	effect.raw_text = raw_text
+	effect.target_scope = "enemy"
+	effect.target_kind = "card"
+	effect.requires_target = true
+	return effect
+
+
+func _first_number_after(text: String, word: String) -> int:
+	var regex := RegEx.new()
+	regex.compile("%s\\s+(\\d+)" % word)
+	var result := regex.search(text)
+	if result:
+		return int(result.get_string(1))
+	regex.compile("%s\\s+[^0-9]*(\\d+)" % word)
+	result = regex.search(text)
+	return int(result.get_string(1)) if result else 0
+
+
+func _first_damage_value(text: String) -> int:
+	var regex := RegEx.new()
+	regex.compile("(?:deal\\s+)?(\\d+)\\s+damage|damage\\s+[^0-9]*(\\d+)")
+	var result := regex.search(text)
+	if not result:
+		return 0
+	return int(result.get_string(1) if result.get_string(1) != "" else result.get_string(2))
 
 
 func _build_faction_card_index() -> Dictionary:
