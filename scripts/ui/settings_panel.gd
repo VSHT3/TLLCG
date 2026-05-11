@@ -7,11 +7,14 @@ var include_gameplay_options := false
 var panel: PanelContainer = null
 var cog_button: Button = null
 var track_label: Label = null
+var jukebox_status_label: Label = null
 var music_slider: HSlider = null
 var sfx_slider: HSlider = null
 var theme_select: OptionButton = null
 var debug_check: CheckButton = null
 var wave_bars: Array[ColorRect] = []
+var theme_swatches: Array[ColorRect] = []
+var _label_refresh_accum := 0.0
 
 
 func build(cog_pos: Vector2, gameplay_options: bool) -> void:
@@ -65,6 +68,11 @@ func build(cog_pos: Vector2, gameplay_options: bool) -> void:
 	track_label.add_theme_font_size_override("font_size", 12)
 	track_label.add_theme_color_override("font_color", SettingsManager.color("muted"))
 	root.add_child(track_label)
+	jukebox_status_label = Label.new()
+	jukebox_status_label.text = AudioManager.jukebox_status()
+	jukebox_status_label.add_theme_font_size_override("font_size", 11)
+	jukebox_status_label.add_theme_color_override("font_color", SettingsManager.color("accent"))
+	root.add_child(jukebox_status_label)
 	root.add_child(_wave_row())
 	root.add_child(_toggle_row("Sound", "sound_enabled"))
 	root.add_child(_toggle_row("Music", "music_enabled"))
@@ -90,6 +98,7 @@ func build(cog_pos: Vector2, gameplay_options: bool) -> void:
 		_apply_theme()
 	)
 	root.add_child(_labeled_control("Color theme", theme_select))
+	root.add_child(_theme_swatch_row())
 	root.add_child(_toggle_row("Reduce motion", "reduced_motion"))
 	if gameplay_options:
 		root.add_child(_toggle_row("Action log", "action_log_enabled"))
@@ -100,18 +109,41 @@ func build(cog_pos: Vector2, gameplay_options: bool) -> void:
 		root.add_child(debug_check)
 
 	SettingsManager.settings_changed.connect(_on_setting_changed)
+	AudioManager.track_changed.connect(_on_track_changed)
 	_refresh_from_settings()
 	set_process(true)
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	if not panel or not panel.visible:
 		return
-	var ticks := float(Time.get_ticks_msec()) / 1000.0
+	_label_refresh_accum += delta
+	if _label_refresh_accum >= 0.25:
+		_label_refresh_accum = 0.0
+		if track_label:
+			track_label.text = "Now playing: %s" % AudioManager.current_track_label()
+		if jukebox_status_label:
+			jukebox_status_label.text = "Jukebox: %s" % AudioManager.jukebox_status()
+	var levels := AudioManager.get_spectrum_bands(wave_bars.size())
+	var peak := 0.0
+	var floor_level := 1.0
+	for level in levels:
+		var value := float(level)
+		peak = maxf(peak, value)
+		floor_level = minf(floor_level, value)
+	if peak <= 0.01 or peak - floor_level <= 0.015:
+		levels = AudioManager.synthetic_music_bands(wave_bars.size())
+	var volume := float(SettingsManager.get_value("music_volume", 0.4))
+	var active := bool(SettingsManager.get_value("sound_enabled", true)) and bool(SettingsManager.get_value("music_enabled", true))
 	for i in range(wave_bars.size()):
 		var bar := wave_bars[i]
-		var amp: float = 0.35 + abs(sin(ticks * (2.4 + float(i) * 0.35) + float(i))) * 0.65
-		bar.custom_minimum_size.y = 7.0 + 25.0 * amp * float(SettingsManager.get_value("music_volume", 0.4))
+		var target := 6.0
+		if active and i < levels.size():
+			target += 30.0 * float(levels[i]) * volume
+		var current_height := bar.size.y if bar.size.y > 0.0 else 14.0
+		var next_height := lerpf(current_height, target, clampf(delta * 18.0, 0.0, 1.0))
+		bar.offset_top = 36.0 - next_height
+		bar.offset_bottom = 36.0
 
 
 func _toggle_panel() -> void:
@@ -180,10 +212,17 @@ func _wave_row() -> HBoxContainer:
 	row.custom_minimum_size = Vector2(0, 36)
 	row.add_theme_constant_override("separation", 5)
 	for i in range(18):
+		var slot := Control.new()
+		slot.custom_minimum_size = Vector2(4, 36)
 		var bar := ColorRect.new()
 		bar.color = SettingsManager.color("accent")
-		bar.custom_minimum_size = Vector2(4, 14)
-		row.add_child(bar)
+		bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		bar.offset_left = 0.0
+		bar.offset_right = 4.0
+		bar.offset_top = 22.0
+		bar.offset_bottom = 36.0
+		slot.add_child(bar)
+		row.add_child(slot)
 		wave_bars.append(bar)
 	return row
 
@@ -191,6 +230,8 @@ func _wave_row() -> HBoxContainer:
 func _refresh_from_settings() -> void:
 	if track_label:
 		track_label.text = "Now playing: %s" % AudioManager.current_track_label()
+	if jukebox_status_label:
+		jukebox_status_label.text = "Jukebox: %s" % AudioManager.jukebox_status()
 	if music_slider:
 		music_slider.set_value_no_signal(float(SettingsManager.get_value("music_volume", 0.42)))
 	if sfx_slider:
@@ -201,6 +242,7 @@ func _refresh_from_settings() -> void:
 			if str(theme_select.get_item_metadata(i)) == current:
 				theme_select.select(i)
 				break
+	_update_theme_swatches()
 
 
 func _on_setting_changed(key: String, _value: Variant) -> void:
@@ -209,23 +251,95 @@ func _on_setting_changed(key: String, _value: Variant) -> void:
 	_refresh_from_settings()
 
 
+func _on_track_changed(_label: String) -> void:
+	_refresh_from_settings()
+
+
 func _apply_theme() -> void:
 	if panel:
 		panel.add_theme_stylebox_override("panel", _panel_style(SettingsManager.color("panel"), SettingsManager.color("border"), 1, 7))
+	if track_label:
+		track_label.add_theme_color_override("font_color", SettingsManager.color("muted"))
+	if jukebox_status_label:
+		jukebox_status_label.add_theme_color_override("font_color", SettingsManager.color("accent"))
+	if cog_button:
+		_style_button(cog_button)
 	for bar in wave_bars:
 		bar.color = SettingsManager.color("accent")
+	_update_theme_swatches()
+
+
+func _theme_swatch_row() -> HBoxContainer:
+	var row := HBoxContainer.new()
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	row.custom_minimum_size = Vector2(0, 20)
+	row.add_theme_constant_override("separation", 6)
+	for i in range(6):
+		var swatch := ColorRect.new()
+		swatch.custom_minimum_size = Vector2(44, 12)
+		row.add_child(swatch)
+		theme_swatches.append(swatch)
+	_update_theme_swatches()
+	return row
+
+
+func _update_theme_swatches() -> void:
+	var roles := ["background", "rail", "panel", "panel_soft", "border", "accent"]
+	for i in range(mini(theme_swatches.size(), roles.size())):
+		theme_swatches[i].color = SettingsManager.color(roles[i])
 
 
 func _style_button(button: Button) -> void:
-	button.add_theme_stylebox_override("normal", _panel_style(Color(0.13, 0.105, 0.07), Color(0.46, 0.35, 0.16), 1, 5))
-	button.add_theme_stylebox_override("hover", _panel_style(Color(0.2, 0.15, 0.08), SettingsManager.color("accent"), 1, 5))
-	button.add_theme_stylebox_override("pressed", _panel_style(Color(0.08, 0.068, 0.05), SettingsManager.color("accent"), 1, 5))
-	button.add_theme_color_override("font_color", Color(0.9, 0.92, 0.96))
+	button.add_theme_stylebox_override("normal", _button_style(SettingsManager.color("panel_soft"), SettingsManager.color("border"), 1, 5))
+	button.add_theme_stylebox_override("hover", _button_style(_hover_bg(), SettingsManager.color("accent"), 2, 5))
+	button.add_theme_stylebox_override("pressed", _button_style(SettingsManager.color("accent").darkened(0.28), SettingsManager.color("accent").lightened(0.12), 2, 5))
+	button.add_theme_stylebox_override("focus", _button_style(_hover_bg(), SettingsManager.color("accent"), 2, 5))
+	button.add_theme_color_override("font_color", SettingsManager.color("text"))
+	button.add_theme_color_override("font_hover_color", SettingsManager.color("text"))
+	button.add_theme_color_override("font_pressed_color", SettingsManager.color("text"))
+	button.add_theme_color_override("font_focus_color", SettingsManager.color("text"))
+	_wire_button_motion(button)
+
+
+func _wire_button_motion(button: Button) -> void:
+	if button.has_meta("motion_wired"):
+		return
+	button.set_meta("motion_wired", true)
+	button.mouse_entered.connect(func() -> void:
+		_tween_button_scale(button, Vector2(1.025, 1.025), 0.11)
+	)
+	button.mouse_exited.connect(func() -> void:
+		_tween_button_scale(button, Vector2.ONE, 0.14)
+	)
+	button.button_down.connect(func() -> void:
+		_tween_button_scale(button, Vector2(0.985, 0.985), 0.06)
+	)
+	button.button_up.connect(func() -> void:
+		_tween_button_scale(button, Vector2(1.025, 1.025) if button.is_hovered() else Vector2.ONE, 0.12)
+	)
+
+
+func _tween_button_scale(button: Button, target: Vector2, duration: float) -> void:
+	button.pivot_offset = button.size * 0.5
+	if bool(SettingsManager.get_value("reduced_motion", false)):
+		button.scale = target
+		return
+	var tween := create_tween()
+	tween.set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_OUT)
+	tween.tween_property(button, "scale", target, duration)
 
 
 func _style_check(check: CheckButton) -> void:
 	check.add_theme_color_override("font_color", SettingsManager.color("text"))
+	check.add_theme_color_override("font_hover_color", SettingsManager.color("text"))
+	check.add_theme_color_override("font_pressed_color", SettingsManager.color("text"))
+	check.add_theme_color_override("font_focus_color", SettingsManager.color("text"))
 	check.add_theme_font_size_override("font_size", 13)
+	check.add_theme_stylebox_override("normal", _button_style(SettingsManager.color("panel_soft"), SettingsManager.color("border"), 1, 5))
+	check.add_theme_stylebox_override("hover", _button_style(_hover_bg(), SettingsManager.color("accent"), 2, 5))
+	check.add_theme_stylebox_override("pressed", _button_style(SettingsManager.color("accent").darkened(0.28), SettingsManager.color("accent").lightened(0.12), 2, 5))
+	check.add_theme_stylebox_override("focus", _button_style(_hover_bg(), SettingsManager.color("accent"), 2, 5))
+	_wire_button_motion(check)
 
 
 func _panel_style(bg: Color, border: Color, border_width: int, radius: int) -> StyleBoxFlat:
@@ -239,3 +353,14 @@ func _panel_style(bg: Color, border: Color, border_width: int, radius: int) -> S
 	style.content_margin_right = 12
 	style.content_margin_bottom = 10
 	return style
+
+
+func _button_style(bg: Color, border: Color, border_width: int, radius: int) -> StyleBoxFlat:
+	var style := _panel_style(bg, border, border_width, radius)
+	style.shadow_size = 8 if border_width > 1 else 4
+	style.shadow_color = Color(SettingsManager.color("accent"), 0.18 if border_width > 1 else 0.08)
+	return style
+
+
+func _hover_bg() -> Color:
+	return SettingsManager.color("panel").lerp(SettingsManager.color("accent"), 0.18)

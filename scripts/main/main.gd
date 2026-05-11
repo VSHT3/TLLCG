@@ -109,6 +109,7 @@ var ai_toggle_button: Button = null
 var sound_toggle_button: Button = null
 var settings_panel = null
 var debug_toggle_button: Button = null
+var _last_turn_banner_key := ""
 
 
 # ── Lifecycle ────────────────────────────────────────────────────────────────
@@ -919,6 +920,18 @@ func _apply_ui_theme() -> void:
 	var table_bg := get_node_or_null("TableBackdrop") as ColorRect
 	if table_bg:
 		table_bg.color = SettingsManager.color("background")
+	for rail_name in ["LeftRail", "RightRail"]:
+		var rail := get_node_or_null(rail_name) as Panel
+		if rail:
+			rail.add_theme_stylebox_override("panel", _make_panel_style(SettingsManager.color("rail"), SettingsManager.color("border"), 1, 0))
+	var board_band := get_node_or_null("BoardBand") as Panel
+	if board_band:
+		board_band.add_theme_stylebox_override("panel", _make_panel_style(SettingsManager.color("panel_soft"), SettingsManager.color("border"), 1, 4))
+	for child in get_children():
+		if child is Panel and child.name == "BoardLane":
+			child.add_theme_stylebox_override("panel", _make_panel_style(SettingsManager.color("background"), SettingsManager.color("border"), 1, 4))
+		elif child is ColorRect and child.name == "CenterTableLine":
+			child.color = Color(SettingsManager.color("accent"), 0.42)
 	_style_info_panel(neutral_deck_panel)
 	_style_info_panel(faction_deck_panel_p0)
 	_style_info_panel(faction_deck_panel_p1)
@@ -964,7 +977,7 @@ func _apply_ui_theme() -> void:
 		graveyard_panel_p0.offset_top = 746.0
 		graveyard_panel_p0.offset_right = 250.0
 		graveyard_panel_p0.offset_bottom = 826.0
-		graveyard_panel_p0.add_theme_stylebox_override("panel", _make_panel_style(Color(0.05, 0.055, 0.066, 0.82), Color(0.18, 0.2, 0.24), 1, 4))
+		graveyard_panel_p0.add_theme_stylebox_override("panel", _make_panel_style(SettingsManager.color("panel_soft"), SettingsManager.color("border"), 1, 4))
 	for panel in [neutral_deck_panel, faction_deck_panel_p0, faction_deck_panel_p1, graveyard_panel_p0]:
 		_decorate_stack_panel(panel)
 	if graveyard_panel_p1:
@@ -1051,7 +1064,50 @@ func _style_button(button: Button) -> void:
 	button.add_theme_stylebox_override("normal", _make_panel_style(SettingsManager.color("panel_soft"), SettingsManager.color("border"), 1, 5))
 	button.add_theme_stylebox_override("hover", _make_panel_style(SettingsManager.color("panel"), SettingsManager.color("accent"), 1, 5))
 	button.add_theme_stylebox_override("pressed", _make_panel_style(SettingsManager.color("rail"), SettingsManager.color("accent"), 1, 5))
-	button.add_theme_color_override("font_color", Color(0.9, 0.92, 0.96))
+	button.add_theme_color_override("font_color", SettingsManager.color("text"))
+	_wire_button_motion(button)
+
+
+func _wire_button_motion(button: Button) -> void:
+	if button.has_meta("motion_wired"):
+		return
+	button.set_meta("motion_wired", true)
+	button.mouse_entered.connect(func() -> void:
+		_tween_control_scale(button, Vector2(1.025, 1.025), 0.11)
+	)
+	button.mouse_exited.connect(func() -> void:
+		_tween_control_scale(button, Vector2.ONE, 0.14)
+	)
+	button.button_down.connect(func() -> void:
+		_tween_control_scale(button, Vector2(0.985, 0.985), 0.06)
+	)
+	button.button_up.connect(func() -> void:
+		_tween_control_scale(button, Vector2(1.025, 1.025) if button.is_hovered() else Vector2.ONE, 0.12)
+	)
+
+
+func _tween_control_scale(control: Control, target: Vector2, duration: float) -> void:
+	if not control:
+		return
+	control.pivot_offset = control.size * 0.5
+	if bool(SettingsManager.get_value("reduced_motion", false)):
+		control.scale = target
+		return
+	var tween := create_tween()
+	tween.set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_OUT)
+	tween.tween_property(control, "scale", target, duration)
+
+
+func _pulse_control(control: Control, color: Color = Color(1.0, 0.82, 0.38)) -> void:
+	if not control or bool(SettingsManager.get_value("reduced_motion", false)):
+		return
+	control.pivot_offset = control.size * 0.5
+	var tween := create_tween()
+	tween.set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_OUT)
+	tween.tween_property(control, "scale", Vector2(1.035, 1.035), 0.08)
+	tween.parallel().tween_property(control, "modulate", color, 0.08)
+	tween.tween_property(control, "scale", Vector2.ONE, 0.16)
+	tween.parallel().tween_property(control, "modulate", Color.WHITE, 0.16)
 
 
 func _make_panel_style(bg: Color, border: Color, width: int, radius: int) -> StyleBoxFlat:
@@ -2560,6 +2616,10 @@ func _refresh_hud() -> void:
 			GameConstants.MAX_CARDS_PER_TURN + game_state.get_current_player().extra_card_plays,
 		]
 	_style_turn_banner(active_id)
+	var banner_key := "%d:%d:%d" % [active_id, game_state.current_phase, game_state.turn_number]
+	if banner_key != _last_turn_banner_key:
+		_last_turn_banner_key = banner_key
+		_pulse_control(turn_banner_panel, SettingsManager.color("accent"))
 	if bottom_name_label:
 		bottom_name_label.text = "P1 ACTIVE" if active_id == 0 else "P1"
 	if bottom_sellary_label:
@@ -2594,13 +2654,22 @@ func _refresh_hero_bar(player_id: int, player: PlayerState) -> void:
 	var max_hp: float = maxf(float(player.hero.data.base_power), 1.0)
 	var pct: float = clampf(float(player.hero.current_power) / max_hp, 0.0, 1.0)
 	if fill:
-		fill.offset_right = 1.0 + 178.0 * pct
+		var target_right := 1.0 + 178.0 * pct
 		if pct <= 0.3:
 			fill.color = Color(0.92, 0.28, 0.22, 0.96)
 		elif pct <= 0.6:
 			fill.color = Color(0.95, 0.68, 0.25, 0.96)
 		else:
 			fill.color = Color(0.46, 0.86, 0.48, 0.96)
+		var previous_pct: float = float(fill.get_meta("last_pct", pct))
+		fill.set_meta("last_pct", pct)
+		if bool(SettingsManager.get_value("reduced_motion", false)) or absf(previous_pct - pct) < 0.001:
+			fill.offset_right = target_right
+		else:
+			var tween := create_tween()
+			tween.set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_OUT)
+			tween.tween_property(fill, "offset_right", target_right, 0.18)
+			_pulse_control(label, fill.color)
 	if label:
 		label.text = "HP %d/%d" % [player.hero.current_power, int(max_hp)]
 
@@ -2608,16 +2677,21 @@ func _refresh_hero_bar(player_id: int, player: PlayerState) -> void:
 func _style_status_panel(panel: PanelContainer, active: bool) -> void:
 	if not panel:
 		return
-	var bg := Color(0.095, 0.075, 0.046, 0.98) if active else Color(0.055, 0.062, 0.074, 0.94)
-	var border := Color(0.95, 0.72, 0.28) if active else Color(0.26, 0.29, 0.34)
+	var bg := SettingsManager.color("panel") if active else SettingsManager.color("panel_soft")
+	var border := SettingsManager.color("accent") if active else SettingsManager.color("border")
 	panel.add_theme_stylebox_override("panel", _make_panel_style(bg, border, 2 if active else 1, 7))
+	var was_active := bool(panel.get_meta("active_state", active))
+	panel.set_meta("active_state", active)
+	if active and not was_active:
+		_pulse_control(panel, SettingsManager.color("accent"))
 
 
 func _style_turn_banner(active_id: int) -> void:
 	if not turn_banner_panel:
 		return
 	var border := Color(0.96, 0.74, 0.28) if active_id == 0 else Color(0.78, 0.42, 0.34)
-	var bg := Color(0.06, 0.055, 0.045, 0.9) if active_id == 0 else Color(0.064, 0.045, 0.043, 0.9)
+	var bg := SettingsManager.color("panel")
+	border = SettingsManager.color("accent") if active_id == 0 else SettingsManager.color("border").lightened(0.18)
 	turn_banner_panel.add_theme_stylebox_override("panel", _make_panel_style(bg, border, 1, 5))
 
 

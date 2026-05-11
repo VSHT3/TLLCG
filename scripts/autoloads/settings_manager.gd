@@ -18,12 +18,17 @@ const DEFAULTS := {
 	"board_intro_enabled": true,
 }
 
-const THEME_NAMES := ["classic", "ember", "midnight", "verdant"]
+const THEME_NAMES := ["classic", "ember", "midnight", "verdant", "ivory", "storm", "ruby", "sunken", "arcane"]
 const THEME_LABELS := {
 	"classic": "Classic Table",
 	"ember": "Ember Hall",
 	"midnight": "Midnight Blue",
 	"verdant": "Verdant Felt",
+	"ivory": "Ivory Ledger",
+	"storm": "Storm Glass",
+	"ruby": "Ruby Court",
+	"sunken": "Sunken Archive",
+	"arcane": "Arcane Violet",
 }
 
 var values: Dictionary = DEFAULTS.duplicate(true)
@@ -117,6 +122,61 @@ func _palette(theme: String) -> Dictionary:
 				"accent": Color(0.58, 0.86, 0.48),
 				"text": Color(0.88, 0.94, 0.89),
 				"muted": Color(0.62, 0.74, 0.65),
+			}
+		"ivory":
+			return {
+				"background": Color(0.78, 0.74, 0.66),
+				"rail": Color(0.69, 0.65, 0.57),
+				"panel": Color(0.9, 0.86, 0.76, 0.98),
+				"panel_soft": Color(0.82, 0.78, 0.68, 0.92),
+				"border": Color(0.38, 0.33, 0.25),
+				"accent": Color(0.58, 0.22, 0.16),
+				"text": Color(0.13, 0.12, 0.1),
+				"muted": Color(0.36, 0.32, 0.27),
+			}
+		"storm":
+			return {
+				"background": Color(0.075, 0.087, 0.092),
+				"rail": Color(0.095, 0.105, 0.11),
+				"panel": Color(0.15, 0.165, 0.17, 0.97),
+				"panel_soft": Color(0.105, 0.118, 0.124, 0.9),
+				"border": Color(0.38, 0.46, 0.48),
+				"accent": Color(0.72, 0.87, 0.76),
+				"text": Color(0.89, 0.93, 0.91),
+				"muted": Color(0.62, 0.69, 0.68),
+			}
+		"ruby":
+			return {
+				"background": Color(0.055, 0.035, 0.045),
+				"rail": Color(0.072, 0.045, 0.058),
+				"panel": Color(0.12, 0.07, 0.084, 0.97),
+				"panel_soft": Color(0.085, 0.052, 0.066, 0.9),
+				"border": Color(0.43, 0.19, 0.24),
+				"accent": Color(0.93, 0.53, 0.47),
+				"text": Color(0.94, 0.89, 0.9),
+				"muted": Color(0.72, 0.61, 0.64),
+			}
+		"sunken":
+			return {
+				"background": Color(0.025, 0.046, 0.055),
+				"rail": Color(0.032, 0.058, 0.068),
+				"panel": Color(0.052, 0.092, 0.105, 0.97),
+				"panel_soft": Color(0.038, 0.072, 0.085, 0.9),
+				"border": Color(0.16, 0.38, 0.42),
+				"accent": Color(0.72, 0.73, 0.48),
+				"text": Color(0.86, 0.93, 0.92),
+				"muted": Color(0.58, 0.72, 0.72),
+			}
+		"arcane":
+			return {
+				"background": Color(0.04, 0.035, 0.058),
+				"rail": Color(0.052, 0.044, 0.072),
+				"panel": Color(0.082, 0.068, 0.112, 0.97),
+				"panel_soft": Color(0.06, 0.05, 0.088, 0.9),
+				"border": Color(0.34, 0.27, 0.5),
+				"accent": Color(0.74, 0.61, 0.96),
+				"text": Color(0.9, 0.88, 0.96),
+				"muted": Color(0.66, 0.61, 0.76),
 			}
 		_:
 			return {

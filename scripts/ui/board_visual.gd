@@ -11,6 +11,7 @@ var rows: Array = [[], [], []]  # Visual slots per row
 var player_state: PlayerState = null
 var _target_mode: bool = false
 var _valid_targets: Array = []
+var _highlighted_slots: Array[Panel] = []
 
 signal card_dropped_on_row(card: CardInstance, row_idx: int)
 signal row_selected(row_idx: int, col_idx: int)
@@ -50,7 +51,7 @@ func _create_slot(row_idx: int, col: int) -> Panel:
 	slot.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	
 	# Visual styling
-	slot.add_theme_stylebox_override("panel", _slot_style(Color(0.042, 0.05, 0.064, 0.76), Color(0.18, 0.21, 0.27, 0.9), 1))
+	_apply_slot_idle_style(slot)
 	
 	# Store metadata
 	slot.set_meta("row", row_idx)
@@ -108,8 +109,9 @@ func _apply_target_highlights() -> void:
 				if child is CardVisual:
 					var inst: CardInstance = child.card_instance
 					if _target_mode and inst in _valid_targets:
-						child.modulate = Color(1.0, 0.72, 0.28)
+						child.modulate = SettingsManager.color("accent")
 						child.set_detail_highlighted(true)
+						child.pulse_event(SettingsManager.color("accent"))
 					else:
 						child.modulate = Color.WHITE
 						child.set_detail_highlighted(false)
@@ -184,14 +186,35 @@ func highlight_valid_rows(valid_rows: Array[int]) -> void:
 			var occupied: bool = player_state and player_state.is_slot_occupied(row_idx, col_idx)
 			if row_idx in valid_rows and not occupied:
 				slot.add_theme_stylebox_override("panel", _slot_style(Color(0.07, 0.17, 0.105, 0.96), Color(0.54, 0.92, 0.46), 3))
+				_pulse_slot(slot)
 			else:
-				slot.add_theme_stylebox_override("panel", _slot_style(Color(0.042, 0.05, 0.064, 0.76), Color(0.18, 0.21, 0.27, 0.9), 1))
+				_apply_slot_idle_style(slot)
 
 
 func clear_highlights() -> void:
 	for row in rows:
 		for slot in row:
-			slot.add_theme_stylebox_override("panel", _slot_style(Color(0.042, 0.05, 0.064, 0.76), Color(0.18, 0.21, 0.27, 0.9), 1))
+			_apply_slot_idle_style(slot)
+			slot.modulate = Color.WHITE
+	_highlighted_slots.clear()
+
+
+func _apply_slot_idle_style(slot: Panel) -> void:
+	slot.add_theme_stylebox_override("panel", _slot_style(SettingsManager.color("panel_soft") * Color(0.82, 0.86, 0.92, 0.76), SettingsManager.color("border"), 1))
+
+
+func _pulse_slot(slot: Panel) -> void:
+	if slot in _highlighted_slots:
+		return
+	_highlighted_slots.append(slot)
+	if bool(SettingsManager.get_value("reduced_motion", false)):
+		return
+	slot.pivot_offset = slot.size * 0.5
+	var tween := create_tween()
+	tween.set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_OUT)
+	tween.tween_property(slot, "scale", Vector2(1.025, 1.025), 0.1)
+	tween.parallel().tween_property(slot, "modulate", Color(1.0, 1.0, 1.0, 1.0), 0.1)
+	tween.tween_property(slot, "scale", Vector2.ONE, 0.18)
 
 
 func _slot_style(bg: Color, border: Color, width: int) -> StyleBoxFlat:

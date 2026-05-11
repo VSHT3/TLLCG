@@ -307,7 +307,36 @@ func _style_button(button: Button) -> void:
 	button.add_theme_stylebox_override("normal", _panel_style(SettingsManager.color("panel_soft"), SettingsManager.color("border"), 1))
 	button.add_theme_stylebox_override("hover", _panel_style(SettingsManager.color("panel"), SettingsManager.color("accent"), 1))
 	button.add_theme_stylebox_override("pressed", _panel_style(SettingsManager.color("rail"), SettingsManager.color("accent"), 1))
-	button.add_theme_color_override("font_color", Color(0.9, 0.92, 0.96))
+	button.add_theme_color_override("font_color", SettingsManager.color("text"))
+	_wire_button_motion(button)
+
+
+func _wire_button_motion(button: Button) -> void:
+	if button.has_meta("motion_wired"):
+		return
+	button.set_meta("motion_wired", true)
+	button.mouse_entered.connect(func() -> void:
+		_tween_button_scale(button, Vector2(1.025, 1.025), 0.11)
+	)
+	button.mouse_exited.connect(func() -> void:
+		_tween_button_scale(button, Vector2.ONE, 0.14)
+	)
+	button.button_down.connect(func() -> void:
+		_tween_button_scale(button, Vector2(0.985, 0.985), 0.06)
+	)
+	button.button_up.connect(func() -> void:
+		_tween_button_scale(button, Vector2(1.025, 1.025) if button.is_hovered() else Vector2.ONE, 0.12)
+	)
+
+
+func _tween_button_scale(button: Button, target: Vector2, duration: float) -> void:
+	button.pivot_offset = button.size * 0.5
+	if bool(SettingsManager.get_value("reduced_motion", false)):
+		button.scale = target
+		return
+	var tween := create_tween()
+	tween.set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_OUT)
+	tween.tween_property(button, "scale", target, duration)
 
 
 func _menu_button(text: String, min_size: Vector2) -> Button:
@@ -787,6 +816,7 @@ func _animate_panel_open(panel: Control) -> void:
 	panel.scale = Vector2(0.98, 0.98)
 	panel.modulate.a = 0.0
 	var tween := create_tween()
+	tween.set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_OUT)
 	tween.tween_property(panel, "scale", Vector2.ONE, 0.12)
 	tween.parallel().tween_property(panel, "modulate:a", 1.0, 0.12)
 

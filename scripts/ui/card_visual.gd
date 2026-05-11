@@ -556,8 +556,14 @@ func _consume_pending_flash() -> void:
 func pulse_event(color: Color = Color(1.0, 0.72, 0.24)) -> void:
 	if not card_frame:
 		return
+	if bool(SettingsManager.get_value("reduced_motion", false)):
+		card_frame.modulate = color
+		await get_tree().process_frame
+		card_frame.modulate = Color.WHITE
+		return
 	var original_scale := scale
 	var tween := create_tween()
+	tween.set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_OUT)
 	tween.tween_property(self, "scale", original_scale * 1.06, 0.08)
 	tween.parallel().tween_property(card_frame, "modulate", color, 0.08)
 	tween.tween_property(self, "scale", original_scale, 0.18)
@@ -582,7 +588,12 @@ func float_text(text: String, color: Color) -> void:
 	label.offset_bottom = 42.0
 	label.z_index = 20
 	add_child(label)
+	if bool(SettingsManager.get_value("reduced_motion", false)):
+		await get_tree().create_timer(0.18).timeout
+		label.queue_free()
+		return
 	var tween := create_tween()
+	tween.set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_OUT)
 	tween.tween_property(label, "position:y", label.position.y - 22.0, 0.42)
 	tween.parallel().tween_property(label, "modulate:a", 0.0, 0.42)
 	tween.tween_callback(label.queue_free)
@@ -629,7 +640,7 @@ func _start_drag_visual() -> void:
 	top_level = true
 	global_position = original_global_position
 	z_index = 100
-	scale = Vector2(1.04, 1.04)
+	_tween_scale(Vector2(1.065, 1.065), 0.08)
 
 
 func _end_drag_visual() -> void:
@@ -637,24 +648,35 @@ func _end_drag_visual() -> void:
 	global_position = original_global_position
 	top_level = false
 	z_index = original_z_index
-	scale = Vector2.ONE
+	_tween_scale(Vector2.ONE, 0.12)
 
 
 func _on_mouse_entered() -> void:
 	is_hovered = true
-	var tween := create_tween()
-	tween.tween_property(self, "scale", Vector2(1.04, 1.04), 0.08)
+	_tween_scale(Vector2(1.04, 1.04), 0.1)
 	hovered.emit(self)
 	EventBus.card_hovered.emit(card_instance)
 
 
 func _on_mouse_exited() -> void:
 	is_hovered = false
-	var tween := create_tween()
-	tween.tween_property(self, "scale", Vector2(1.0, 1.0), 0.08)
+	if not is_dragging:
+		_tween_scale(Vector2.ONE, 0.14)
 	unhovered.emit(self)
 
 
 func set_selected(selected: bool) -> void:
 	is_selected = selected
 	_update_status_visuals()
+	if selected:
+		pulse_event(Color(1.0, 0.82, 0.36))
+
+
+func _tween_scale(target: Vector2, duration: float) -> void:
+	pivot_offset = size * 0.5
+	if bool(SettingsManager.get_value("reduced_motion", false)):
+		scale = target
+		return
+	var tween := create_tween()
+	tween.set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_OUT)
+	tween.tween_property(self, "scale", target, duration)
