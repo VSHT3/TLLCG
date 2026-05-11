@@ -31,6 +31,9 @@ func _run() -> void:
 	_run_test("hoard_threshold", _test_hoard_threshold)
 	_run_test("upkeep_income", _test_upkeep_income)
 	_run_test("timer_end_turn", _test_timer_end_turn)
+	_run_test("heal_no_value_full_heals", _test_heal_no_value_full_heals)
+	_run_test("hnusny_timer_rules", _test_hnusny_timer_rules)
+	_run_test("velky_jazykovy_model_repeat", _test_velky_jazykovy_model_repeat)
 	_run_test("last_word_destroy", _test_last_word_destroy)
 	_run_test("banish_no_last_word", _test_banish_no_last_word)
 	_run_test("devour_target", _test_devour_target)
@@ -112,6 +115,8 @@ func _effect(type: String, trigger: String, value: int = 0, opts: Dictionary = {
 	effect.tribute_cost = opts.get("tribute_cost", 0)
 	effect.hoard_threshold = opts.get("hoard_threshold", 0)
 	effect.pay_cost = opts.get("pay_cost", 0)
+	effect.counter_delta = opts.get("counter_delta", 0)
+	effect.counter_threshold = opts.get("counter_threshold", 0)
 	effect.initial_charges = opts.get("initial_charges", 0)
 	effect.charges = opts.get("charges", 0)
 	effect.max_charges = opts.get("max_charges", 0)
@@ -204,6 +209,54 @@ func _test_timer_end_turn() -> bool:
 	var card := _board(player, _card_data("timer_profit", "Unit", 3, [_effect("profit", "timer", 3, {"timer_value": 1})]))
 	gs._trigger_end_of_turn(player)
 	return card.timer == 0 and player.sellary == 3
+
+
+func _test_heal_no_value_full_heals() -> bool:
+	var gs := _new_game()
+	var player := gs.players[0]
+	player.sellary = 1
+	var card := _board(player, _card_data("heal_full", "Unit", 5, [_effect("heal", "pay", 0, {"pay_cost": 1})]))
+	card.current_power = 2
+	return gs.activate_pay(card) and card.current_power == 5 and player.sellary == 0
+
+
+func _test_hnusny_timer_rules() -> bool:
+	var gs := _new_game()
+	var player := gs.players[0]
+	var data := _card_data("hnusny_domaci_produkt", "Artifact", 0, [
+		_effect("profit", "turn_start", 1, {"target_kind": "card"}),
+		_effect("destroy", "timer", 0, {"timer_value": 3, "target_kind": "card"}),
+	])
+	var card := _board(player, data)
+	card.timer = 11
+	gs._trigger_start_of_turn(player)
+	gs._trigger_end_of_turn(player)
+	if player.sellary != 2 or card.timer != 9 or card.zone != "board":
+		return false
+	card.timer = 1
+	gs._trigger_end_of_turn(player)
+	return card.zone == "graveyard" and card in player.graveyard
+
+
+func _test_velky_jazykovy_model_repeat() -> bool:
+	var gs := _new_game()
+	var player := gs.players[0]
+	var profit_card := _board(player, _card_data("last_profit", "Unit", 3, [_effect("profit", "deploy", 2)]), 0, 0)
+	var ai_data := _card_data("ai_unit", "Unit", 1, [])
+	ai_data.factions = ["A.I. Gods"]
+	_board(player, ai_data, 0, 1)
+	_board(player, ai_data, 0, 2)
+	var model_data := _card_data("velky_jazykovy_model", "Artifact", 0, [
+		_effect("banish", "turn_end", 0, {"counter_threshold": 2, "target_kind": "card"}),
+		_effect("complex", "pay", 0, {"pay_cost": 8, "target_kind": "card"}),
+	])
+	model_data.factions = ["A.I. Gods"]
+	var model := _board(player, model_data, 0, 3)
+	player.sellary = 6
+	_event_bus.ability_triggered.emit(profit_card, profit_card.data.effects[0])
+	if player.sellary != 8:
+		return false
+	return gs.activate_pay(model) and player.sellary == 4 and model.counter == 1 and model.zone == "board"
 
 
 func _test_last_word_destroy() -> bool:
@@ -314,6 +367,9 @@ func _test_rulebook_has_content() -> bool:
 func _test_main_event_banner_queues() -> bool:
 	_constants.set("pending_faction_choices", ["Sir Can", "The Plague"])
 	_constants.set("first_player_id", 0)
+	var settings := get_tree().root.get_node_or_null("SettingsManager")
+	if settings:
+		settings.call("set_value", "event_popups_enabled", true)
 	var scene: PackedScene = load("res://scenes/main/main.tscn")
 	var main: Node = scene.instantiate()
 	add_child(main)
@@ -366,7 +422,10 @@ func _find_rich_text_labels(node: Node) -> Array[RichTextLabel]:
 func _test_all_playable_cards_smoke() -> bool:
 	var failures: Array[String] = []
 	var tested := 0
-	for data in CardDatabase.cards.values():
+	var database := get_tree().root.get_node_or_null("CardDatabase")
+	if not database:
+		return false
+	for data in database.get("cards").values():
 		var card_data: CardData = data
 		if card_data.type == "Hero":
 			continue

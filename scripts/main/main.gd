@@ -155,25 +155,11 @@ func _start_new_game(factions: Array[String]) -> void:
 	var card_scene: PackedScene = hand_p0.card_visual_scene if hand_p0 else null
 	if card_scene:
 		if hero_container_p0 and game_state.players[0].hero:
-			hero_visual_p0 = card_scene.instantiate()
-			hero_container_p0.add_child(hero_visual_p0)
-			hero_visual_p0.setup(game_state.players[0].hero)
-			hero_visual_p0.custom_minimum_size = Vector2(180, 82)
-			hero_visual_p0.size = Vector2(180, 82)
-			hero_visual_p0.show_power_chip = false
-			hero_visual_p0.refresh_display()
-			hero_visual_p0.mouse_filter = Control.MOUSE_FILTER_STOP
+			hero_visual_p0 = _setup_hero_visual(card_scene, hero_container_p0, game_state.players[0].hero)
 			hero_visual_p0.clicked.connect(_on_hero_clicked)
 			_build_hero_hp_bar(hero_container_p0, 0)
 		if hero_container_p1 and game_state.players[1].hero:
-			hero_visual_p1 = card_scene.instantiate()
-			hero_container_p1.add_child(hero_visual_p1)
-			hero_visual_p1.setup(game_state.players[1].hero)
-			hero_visual_p1.custom_minimum_size = Vector2(180, 82)
-			hero_visual_p1.size = Vector2(180, 82)
-			hero_visual_p1.show_power_chip = false
-			hero_visual_p1.refresh_display()
-			hero_visual_p1.mouse_filter = Control.MOUSE_FILTER_STOP
+			hero_visual_p1 = _setup_hero_visual(card_scene, hero_container_p1, game_state.players[1].hero)
 			hero_visual_p1.clicked.connect(_on_hero_clicked)
 			_build_hero_hp_bar(hero_container_p1, 1)
 
@@ -182,6 +168,19 @@ func _start_new_game(factions: Array[String]) -> void:
 	_refresh_all()
 	if bool(SettingsManager.get_value("board_intro_enabled", true)):
 		call_deferred("_play_match_intro")
+
+
+func _setup_hero_visual(card_scene: PackedScene, container: Control, hero: CardInstance) -> CardVisual:
+	container.clip_contents = true
+	container.custom_minimum_size = Vector2(180, 100)
+	var visual: CardVisual = card_scene.instantiate()
+	container.add_child(visual)
+	visual.setup(hero)
+	visual.show_power_chip = false
+	visual.set_card_dimensions(Vector2(180, 82))
+	visual.refresh_display()
+	visual.mouse_filter = Control.MOUSE_FILTER_STOP
+	return visual
 
 
 func _connect_signals() -> void:
@@ -2278,9 +2277,12 @@ func _build_choice_panel() -> void:
 	box.add_child(choice_title)
 
 	choice_options = VBoxContainer.new()
+	choice_options.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	choice_options.add_theme_constant_override("separation", 8)
 	var scroll := ScrollContainer.new()
 	scroll.custom_minimum_size = Vector2(580, 318)
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.add_child(choice_options)
 	box.add_child(scroll)
 
@@ -2321,7 +2323,8 @@ func _ability_choice_button(title: String, detail: String = "") -> Button:
 	button.text = title if detail == "" else "%s\n%s" % [title, detail]
 	button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	button.custom_minimum_size = Vector2(0, 54 if detail != "" else 42)
+	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	button.custom_minimum_size = Vector2(560, 54 if detail != "" else 42)
 	button.add_theme_font_size_override("font_size", 14)
 	_style_button(button)
 	return button

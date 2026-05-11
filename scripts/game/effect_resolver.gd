@@ -5,7 +5,11 @@
 class_name EffectResolver
 extends Node
 
+const _EffectCosts = preload("res://scripts/game/effect_costs.gd")
+
 var game_state: GameState
+var _last_ability_by_player: Dictionary = {}
+var _replaying_ability := false
 
 
 func _ready() -> void:
@@ -13,6 +17,9 @@ func _ready() -> void:
 	EventBus.deploy_triggered.connect(_on_deploy_triggered)
 	EventBus.timer_expired.connect(_on_timer_expired)
 	EventBus.damage_dealt.connect(_on_damage_dealt)
+	EventBus.turn_started.connect(func(player_id: int, _turn_number: int) -> void:
+		_last_ability_by_player.erase(player_id)
+	)
 
 
 func setup(gs: GameState) -> void:
@@ -23,8 +30,22 @@ func setup(gs: GameState) -> void:
 
 func _on_ability_triggered(card: CardInstance, effect: CardEffect) -> void:
 	EventBus.message_shown.emit("ABILITY: %s %s/%s" % [card.data.name, effect.type, effect.trigger])
+	var should_record := _should_record_last_ability(card, effect)
 	if card.data.id == "endest_pearl_incident":
 		_complex_endest_pearl_incident(card)
+		if should_record:
+			_record_last_ability(card, effect)
+		return
+	if card.data.id == "hnusny_domaci_produkt":
+		if not _check_costs(card, effect):
+			return
+		_complex_hnusny_domaci_produkt(card, effect)
+		if should_record:
+			_record_last_ability(card, effect)
+		return
+	if card.data.id == "velky_jazykovy_model" and effect.trigger == "turn_end" and effect.type == "banish":
+		if card.counter <= 0:
+			_banish_effect_target(card)
 		return
 	if not _check_costs(card, effect):
 		return
@@ -68,6 +89,8 @@ func _on_ability_triggered(card: CardInstance, effect: CardEffect) -> void:
 			_resolve_discard(card, effect)
 		_:
 			push_warning("[EffectResolver] Unknown effect type: %s" % effect.type)
+	if should_record:
+		_record_last_ability(card, effect)
 
 
 func _on_deploy_triggered(_card: CardInstance) -> void:
@@ -125,13 +148,31 @@ func _check_costs(card: CardInstance, effect: CardEffect) -> bool:
 	
 	# Pay: explicit sellary cost
 	if effect.trigger == "pay" and effect.pay_cost > 0:
-		if not player.spend_sellary(effect.pay_cost):
+		var cost: int = _EffectCosts.effective_pay_cost(card, effect, player)
+		if not player.spend_sellary(cost):
 			return false
 	
 	if effect.max_uses_per_turn > 0:
 		card.effect_uses_this_turn[use_key] = card.effect_uses_this_turn.get(use_key, 0) + 1
 	
 	return true
+
+
+func _should_record_last_ability(card: CardInstance, effect: CardEffect) -> bool:
+	if _replaying_ability or not game_state or not card or not effect:
+		return false
+	if card.data.id == "velky_jazykovy_model":
+		return false
+	var player := _get_controller(card)
+	if not player or not game_state.get_current_player() or player.player_id != game_state.get_current_player().player_id:
+		return false
+	return effect.trigger != "pay" or effect.type != "complex"
+
+
+func _record_last_ability(card: CardInstance, effect: CardEffect) -> void:
+	var player := _get_controller(card)
+	if player:
+		_last_ability_by_player[player.player_id] = {"card": card, "effect": effect}
 
 
 # ── Effect Resolvers ─────────────────────────────────────────────────────────
@@ -545,6 +586,8 @@ func _resolve_complex(source: CardInstance, effect: CardEffect) -> void:
 			_complex_obratnost_ruk(source)
 		"mr_rural":
 			_complex_mr_rural(source, effect)
+		"velky_jazykovy_model":
+			_complex_velky_jazykovy_model(source, effect)
 		"velke_jazykove_monstrum":
 			_complex_velke_jazykove_monstrum(source, effect)
 		"nak_mitchrbat":
@@ -1245,6 +1288,59 @@ func _complex_mr_rural(source: CardInstance, effect: CardEffect) -> void:
 			EventBus.message_shown.emit("Both players drew an Egg.")
 
 
+func _complex_hnusny_domaci_produkt(source: CardInstance, effect: CardEffect) -> void:
+	var player: PlayerState = _get_controller(source)
+	if not player:
+		return
+	match effect.trigger:
+		"turn_start":
+			if effect.type != "profit":
+				return
+			var amount := 2 if source.timer > 10 else 1
+			player.gain_sellary(amount)
+			EventBus.message_shown.emit("Hnusny Domaci Produkt: profit %d." % amount)
+		"pay":
+			var increase := effect.value if effect.value > 0 else 3
+			source.timer += increase
+			EventBus.message_shown.emit("Hnusny Domaci Produkt: timer +%d." % increase)
+		"timer":
+			if effect.type != "destroy":
+				return
+			_destroy_effect_target(source)
+
+
+func _complex_sir_plus(source: CardInstance, effect: CardEffect) -> void:
+	if effect.trigger != "pay":
+		return
+	var amount := source.missing_health()
+	if amount <= 0:
+		EventBus.message_shown.emit("Sir Plus is already at base health.")
+		return
+	source.apply_heal(amount)
+	EventBus.heal_applied.emit(source, amount)
+
+
+func _complex_velky_jazykovy_model(source: CardInstance, effect: CardEffect) -> void:
+	if effect.trigger != "pay":
+		return
+	var player: PlayerState = _get_controller(source)
+	if not player:
+		return
+	var last: Dictionary = _last_ability_by_player.get(player.player_id, {})
+	var repeated_card: CardInstance = last.get("card")
+	var repeated_effect: CardEffect = last.get("effect")
+	if not _can_repeat_last_ability(repeated_card, repeated_effect):
+		EventBus.message_shown.emit("Velky Jazykovy Model: no valid ability to repeat.")
+		return
+	_replaying_ability = true
+	_repeat_ability_without_cost(repeated_card, repeated_effect)
+	_replaying_ability = false
+	source.change_counter(-1)
+	EventBus.message_shown.emit("Velky Jazykovy Model repeated %s." % repeated_card.data.name)
+	if source.counter <= 0:
+		_banish_effect_target(source)
+
+
 func _complex_velke_jazykove_monstrum(source: CardInstance, effect: CardEffect) -> void:
 	match effect.trigger:
 		"deploy":
@@ -1290,6 +1386,59 @@ func _complex_nak_mitchrbat(source: CardInstance) -> void:
 func _complex_masovystit(_source: CardInstance) -> void:
 	# The actual redirect is handled by _on_damage_dealt so it can react globally.
 	pass
+
+
+func _can_repeat_last_ability(card: CardInstance, effect: CardEffect) -> bool:
+	if not card or not effect:
+		return false
+	if card.data.id == "velky_jazykovy_model":
+		return false
+	var owner := _find_card_owner_or_zone_owner(card)
+	if not owner:
+		return false
+	if card.zone == "banished":
+		return false
+	if card.zone == "graveyard" and card.data.type != "Spell":
+		return false
+	return true
+
+
+func _repeat_ability_without_cost(card: CardInstance, effect: CardEffect) -> void:
+	match effect.type:
+		"damage":
+			_resolve_damage(card, effect)
+		"boost":
+			_resolve_boost(card, effect)
+		"heal":
+			_resolve_heal(card, effect)
+		"profit":
+			_resolve_profit(card, effect)
+		"income":
+			_resolve_income(card, effect)
+		"draw":
+			_resolve_draw(card, effect)
+		"apply_status":
+			_resolve_apply_status(card, effect)
+		"destroy":
+			_resolve_destroy(card, effect)
+		"banish":
+			_resolve_banish(card, effect)
+		"spy":
+			_resolve_spy(card, effect)
+		"devour":
+			_resolve_devour(card, effect)
+		"seize":
+			_resolve_seize(card, effect)
+		"block":
+			_resolve_block(card, effect)
+		"gain_charge":
+			_resolve_gain_charge(card, effect)
+		"cleanse":
+			_resolve_cleanse(card, effect)
+		"discard":
+			_resolve_discard(card, effect)
+		"complex":
+			_resolve_complex(card, effect)
 
 
 func _resolve_cleanse(source: CardInstance, _effect: CardEffect) -> void:

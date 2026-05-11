@@ -4,6 +4,8 @@
 class_name GameState
 extends RefCounted
 
+const _EffectCosts = preload("res://scripts/game/effect_costs.gd")
+
 # ── State ────────────────────────────────────────────────────────────────────
 
 var players: Array[PlayerState] = []
@@ -392,7 +394,8 @@ func _card_has_payable_trigger(card: CardInstance, trigger: String, player: Play
 	for effect in card.data.effects:
 		if effect.trigger != trigger:
 			continue
-		if effect.pay_cost > 0 and player.sellary < effect.pay_cost:
+		var pay_cost: int = _EffectCosts.effective_pay_cost(card, effect, player)
+		if pay_cost > 0 and player.sellary < pay_cost:
 			continue
 		if effect.upkeep_cost > 0 and player.sellary < effect.upkeep_cost:
 			continue

@@ -8,6 +8,12 @@ Guidance for Claude Code working in this repo.
 # Headless startup check (verifies autoloads, scene, no crash)
 /Applications/Godot.app/Contents/MacOS/Godot --headless --path /Users/vsht/tllcg --quit
 
+# System tests
+/Applications/Godot.app/Contents/MacOS/Godot --headless --path /Users/vsht/tllcg scenes/tools/system_tests.tscn
+
+# Card data audit
+/Applications/Godot.app/Contents/MacOS/Godot --headless --path /Users/vsht/tllcg --script res://scripts/tools/run_card_audit.gd
+
 # Regenerate JSON data from Obsidian vault
 python tools/yaml_to_json.py ./TLLCG ./data
 
@@ -15,7 +21,7 @@ python tools/yaml_to_json.py ./TLLCG ./data
 /Applications/Godot.app/Contents/MacOS/Godot --path /Users/vsht/tllcg
 ```
 
-No test suite. Headless check + manual verify in Godot editor.
+Run system tests + card audit before handing off rules/card parser changes.
 
 ---
 
@@ -142,6 +148,8 @@ Win condition: `_check_game_over()` after each turn — fires `game_ended` when 
 | `CardData` | `scripts/resources/card_data.gd` | Immutable definition. `id`, `name`, `type`, `base_power`, `effects[]`, `factions[]`, `has_ability`, `ability_text` |
 | `CardEffect` | `scripts/resources/card_effect.gd` | One parsed effect. `type`, `trigger`, `value`, `status`, `stacks`, `upkeep_cost`, `tribute_cost`, `hoard_threshold`, `charges`, `raw_text` |
 | `CardInstance` | `scripts/resources/card_instance.gd` | Mutable runtime state. `current_power`, `statuses{}`, `zone`, `board_position{row,col}`, `owner_id`, `controller_id`, `block`, `charges` |
+| `CardRuleDefaults` | `scripts/game/card_rule_defaults.gd` | Special runtime defaults and timer tick rules that must apply to every instance of a card |
+| `EffectCosts` | `scripts/game/effect_costs.gd` | Shared cost rules used by both UI/payability checks and `EffectResolver` spending |
 
 Effect `type` values: `damage / boost / heal / profit / income / draw / apply_status / destroy / banish / spy / devour / seize / block / complex`
 
@@ -159,7 +167,7 @@ Effect `trigger` values: `deploy / last_word / deathblow / turn_start / turn_end
 **Currently implemented complex cards (38):**
 `accountant_pro_max`, `biblography`, `breakthru`, `carry_on`, `catch_up`, `claws_the_production`, `damina`, `dawood`, `discard_this_card`, `everything_here_here`, `fukacia_pracicka`, `hhmds`, `individual_sailor`, `knight`, `mikrofo_novy_pokles`, `miss_spell`, `mr_rural`, `my_country_called_me`, `masovystit`, `negromancy_premium`, `negromancy`, `obratnost_ruk`, `opakovacia_dedinka`, `premium_account`, `scrolling_papers`, `sellers_sailors`, `sir_vant`, `sir_veillance`, `sir_vival`, `s_ibal`, `tax_er`, `the_lion_does_not_care`, `the_prophet`, `the_why_axes`, `trembling_lips`, `velke_jazykove_monstrum`, `nak_mitchrbat`, `sibal_so_sledovanim_lucov`
 
-**Complex cards TODO:** none currently; check `cards.json` where `effects[].type == "complex"` and `implemented` absent after importing new card data.
+**Complex cards TODO:** `mr_hornier` still needs clarified manual system mapping. Check `cards.json` where `effects[].type == "complex"` and `implemented` absent after importing new card data.
 
 ---
 

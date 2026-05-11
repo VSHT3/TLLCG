@@ -1417,7 +1417,8 @@
 		"effects": [
 			{
 				"type": "destroy",
-				"trigger": "turn_start",
+				"trigger": "timer",
+				"timer_value": 3,
 				"pay_cost": 0,
 				"max_charges": 0,
 				"counter_delta": 0,
@@ -1824,7 +1825,8 @@
 			},
 			{
 				"type": "destroy",
-				"trigger": "turn_start",
+				"trigger": "timer",
+				"timer_value": 3,
 				"pay_cost": 0,
 				"max_charges": 0,
 				"counter_delta": 0,
@@ -5042,7 +5044,7 @@
 				"pay_cost": 0,
 				"max_charges": 0,
 				"counter_delta": 0,
-				"counter_threshold": 0,
+				"counter_threshold": 2,
 				"raw_text": "",
 				"target_scope": "self",
 				"target_kind": "unit",

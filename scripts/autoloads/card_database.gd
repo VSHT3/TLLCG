@@ -281,9 +281,18 @@ func _append_simple_pay_effects(card: CardData, line: String, cost: int) -> bool
 	if "heal" in lower:
 		var effect := _new_pay_effect("heal", cost, line)
 		effect.value = _first_number_after(lower, "heal")
-		effect.target_scope = "ally"
+		effect.target_scope = "self" if effect.value <= 0 or "self" in lower else "ally"
 		effect.target_kind = "hero" if "hero" in lower else "unit"
-		effect.requires_target = not ("your hero" in lower)
+		effect.requires_target = false if effect.target_scope == "self" or "your hero" in lower else true
+		card.effects.append(effect)
+		added = true
+
+	var timer_value := _first_number_after(lower, "timer")
+	if timer_value > 0 and ("increase timer" in lower or "timer by" in lower):
+		var effect := _new_pay_effect("complex", cost, line)
+		effect.value = timer_value
+		effect.target_scope = "self"
+		effect.requires_target = false
 		card.effects.append(effect)
 		added = true
 

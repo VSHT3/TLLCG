@@ -4,6 +4,8 @@
 class_name CardInstance
 extends RefCounted
 
+const _CardRuleDefaults = preload("res://scripts/game/card_rule_defaults.gd")
+
 # ── Identity ─────────────────────────────────────────────────────────────────
 
 ## The immutable card definition.
@@ -80,6 +82,7 @@ static func create(card_data: CardData, owner: int) -> CardInstance:
 			inst.max_charges = max(inst.max_charges, effect.max_charges)
 		if effect.counter_threshold > 0 and inst.counter == 0:
 			inst.counter = effect.counter_threshold
+	_CardRuleDefaults.apply_instance_defaults(inst)
 	
 	return inst
 
@@ -200,7 +203,7 @@ func diminish_statuses() -> void:
 func tick_timer() -> bool:
 	"""Reduce timer by 1. Returns true if timer just reached 0."""
 	if timer > 0:
-		timer -= 1
+		timer = maxi(timer - _CardRuleDefaults.timer_tick_amount(self), 0)
 		return timer == 0
 	return false
 

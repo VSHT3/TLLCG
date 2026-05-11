@@ -26,7 +26,7 @@ const IMPLEMENTED_COMPLEX_IDS := [
 	"premium_account", "scrolling_papers", "damina", "trembling_lips",
 	"miss_spell", "mikrofo_novy_pokles", "the_why_axes", "sir_veillance",
 	"obratnost_ruk", "mr_rural", "velke_jazykove_monstrum", "nak_mitchrbat",
-	"masovystit"
+	"masovystit", "hnusny_domaci_produkt", "sir_plus", "velky_jazykovy_model"
 ]
 
 
@@ -96,7 +96,7 @@ func _audit_effect(card: CardData, effect: CardEffect, result: Dictionary) -> vo
 		_check(result, effect.pay_cost > 0 or _has_paid_pay_sibling(card, effect), context, "pay trigger without cost")
 	if effect.type == "apply_status":
 		_check(result, _is_known_status(effect.status), context, "unknown status: %s" % effect.status)
-	if effect.type in ["damage", "boost", "heal", "profit", "income", "draw", "block", "gain_charge"] and effect.value <= 0:
+	if effect.type in ["damage", "boost", "profit", "income", "draw", "block", "gain_charge"] and effect.value <= 0:
 		_warn(result, context, "numeric effect has no positive value")
 	if effect.type == "complex" and not (card.id in IMPLEMENTED_COMPLEX_IDS):
 		_warn(result, context, "complex fallback still needs manual system mapping")

@@ -62,6 +62,8 @@ func load_settings() -> void:
 	for key in DEFAULTS.keys():
 		if cfg.has_section_key("settings", key):
 			values[key] = cfg.get_value("settings", key, DEFAULTS[key])
+	# Debug tools are dev-only. Always start hidden; user can turn them on per session.
+	values["debug_enabled"] = false
 
 
 func save_settings() -> void:

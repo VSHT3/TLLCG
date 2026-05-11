@@ -144,16 +144,20 @@ func start_music() -> void:
 		return
 	_music_running = true
 	if music_context == MUSIC_CONTEXT_GAMEPLAY and _ensure_gameplay_player():
+		_stop_generated_music()
 		_play_next_gameplay_track()
 		set_process(true)
+		return
+	if music_context == MUSIC_CONTEXT_GAMEPLAY:
+		_music_running = false
+		set_process(false)
 		return
 	_start_generated_music()
 
 
 func stop_music() -> void:
 	_music_running = false
-	if _generated_player:
-		_generated_player.stop()
+	_stop_generated_music()
 	if _track_player:
 		_track_player.stop()
 	set_process(false)
@@ -184,6 +188,8 @@ func skip_gameplay_track() -> void:
 		return
 	if not _ensure_gameplay_player():
 		return
+	_music_running = true
+	_stop_generated_music()
 	_play_next_gameplay_track()
 
 
@@ -248,6 +254,12 @@ func _start_generated_music() -> void:
 	set_process(true)
 
 
+func _stop_generated_music() -> void:
+	if _generated_player:
+		_generated_player.stop()
+	_music_playback = null
+
+
 func _ensure_gameplay_player() -> bool:
 	if _gameplay_tracks.is_empty():
 		_load_gameplay_tracks()
@@ -270,7 +282,10 @@ func _load_gameplay_tracks() -> void:
 	var file_name := dir.get_next()
 	while file_name != "":
 		if not dir.current_is_dir() and file_name.get_extension().to_lower() == "mp3":
-			var stream := load("%s/%s" % [GAMEPLAY_MUSIC_DIR, file_name])
+			var path := "%s/%s" % [GAMEPLAY_MUSIC_DIR, file_name]
+			var stream := load(path)
+			if not (stream is AudioStream) and AudioStreamMP3:
+				stream = AudioStreamMP3.load_from_file(path)
 			if stream is AudioStream:
 				_gameplay_tracks.append(stream)
 		file_name = dir.get_next()
@@ -280,7 +295,7 @@ func _load_gameplay_tracks() -> void:
 
 func _play_next_gameplay_track() -> void:
 	if not _track_player or _gameplay_tracks.is_empty():
-		_start_generated_music()
+		_music_running = false
 		return
 	if _gameplay_queue.is_empty():
 		_gameplay_queue = _gameplay_tracks.duplicate()
@@ -289,7 +304,14 @@ func _play_next_gameplay_track() -> void:
 			var first: AudioStream = _gameplay_queue.pop_front()
 			_gameplay_queue.append(first)
 	var stream: AudioStream = _gameplay_queue.pop_front()
+	if _gameplay_tracks.size() > 1:
+		var guard := 0
+		while stream == _last_track and guard < _gameplay_queue.size():
+			_gameplay_queue.append(stream)
+			stream = _gameplay_queue.pop_front()
+			guard += 1
 	_last_track = stream
+	_track_player.stop()
 	_track_player.stream = stream
 	_track_player.volume_db = linear_to_db(maxf(music_volume * 0.58, 0.001))
 	_track_player.play()
