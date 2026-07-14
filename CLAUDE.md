@@ -2,26 +2,79 @@
 
 Guidance for Claude Code working in this repo.
 
-## Commands
+## Project direction (2026-07)
+
+**The web port in `web/` is the primary development target.** The Godot project
+(`scripts/`, `scenes/`) is the legacy implementation kept as the semantic
+reference — the TS engine was ported 1:1 from it. New gameplay work happens in
+`web/`; the vault → JSON data pipeline is shared by both.
+
+## Commands — web (primary)
+
+```bash
+cd web
+pnpm install            # once
+pnpm test               # vitest: 69 tests incl. seeded full-game fuzz on real data
+pnpm typecheck          # tsc strict
+pnpm dev                # vite dev server (hot-seat game in browser)
+
+# Regenerate JSON data from Obsidian vault (from repo root)
+python tools/yaml_to_json.py ./TLLCG ./data
+```
+
+## Web architecture (`web/`)
+
+```
+data/*.json ──► src/data.ts ──► CardDatabase (src/engine/cardDatabase.ts)
+
+src/engine/  — pure TS, zero DOM, fully unit-tested:
+  types.ts          CardData/CardEffect (camelCase) + CardDatabaseApi contract
+  constants.ts      GameConstants port; loadRules(rules.json)
+  events.ts         EventBus — typed emitter, snake_case event names kept 1:1
+  rng.ts            seeded mulberry32 — ALL randomness injected (deterministic tests)
+  interaction.ts    InteractionHandler — async requestTarget/requestChoice/showPanel
+  abilityResolver.ts seam: GameState awaits resolver instead of fire-and-forget signals
+  cardInstance.ts / playerState.ts / boardManager.ts / gameState.ts  state layer
+  effectResolver.ts  all effect types + 39 complex card handlers (COMPLEX_HANDLERS map)
+
+src/ui/      — React hot-seat UI; UiInteractionHandler bridges engine awaits
+               to click-resolved Promise.withResolvers(); re-render via events.onAny.
+test/        — vitest; helpers.ts has FakeDb/ScriptedInteraction/makeGame;
+               fullGame.test.ts fuzzes whole games on real card data.
+```
+
+**Deliberate deviations from the GDScript original** (all engine-level bug fixes):
+- `target_requested`/`choice_requested` callbacks → awaited `InteractionHandler` promises.
+- `destroyCard` is idempotent + re-entrancy-safe (Godot hangs forever when a
+  card's last_word re-kills itself — `dr_glass_cannon_chasuble`).
+- deathblow/destroy only fire when the hit actually killed a living target
+  (Godot loops on mass-damage deathblow spells — `ja_n_bravc_ovy`).
+- `opakovacia_dedinka` cannot replay itself (infinite recursion in Godot).
+- destruction removes the card from every player's board (spy cards cross boards).
+- `hasTauntInFront` Protector-for-hero check actually runs (dead code in Godot).
+
+## Adding a complex card (web)
+
+1. Fix effects in `data/cards.json` if the converter missed them.
+2. Add handler to `COMPLEX_HANDLERS` in `src/engine/effectResolver.ts` and a
+   `complexYourCard(source, effect)` method using the existing helpers
+   (`getController`, `getEnemyHero`, `applyDamage`, `game.spawnCardForPlayer`, …).
+3. Add a test in `test/effectResolver.test.ts`; run the fuzz suite.
+
+---
+
+## Commands — Godot (legacy reference)
 
 ```bash
 # Headless startup check (verifies autoloads, scene, no crash)
-/Applications/Godot.app/Contents/MacOS/Godot --headless --path /Users/vsht/tllcg --quit
+godot --headless --path . --quit
 
 # System tests
-/Applications/Godot.app/Contents/MacOS/Godot --headless --path /Users/vsht/tllcg scenes/tools/system_tests.tscn
+godot --headless --path . scenes/tools/system_tests.tscn
 
 # Card data audit
-/Applications/Godot.app/Contents/MacOS/Godot --headless --path /Users/vsht/tllcg --script res://scripts/tools/run_card_audit.gd
-
-# Regenerate JSON data from Obsidian vault
-python tools/yaml_to_json.py ./TLLCG ./data
-
-# Open in editor
-/Applications/Godot.app/Contents/MacOS/Godot --path /Users/vsht/tllcg
+godot --headless --path . --script res://scripts/tools/run_card_audit.gd
 ```
-
-Run system tests + card audit before handing off rules/card parser changes.
 
 ---
 

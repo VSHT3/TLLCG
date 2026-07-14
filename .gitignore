@@ -22,3 +22,7 @@ thumbnails/
 Personal/
 Personal 2/
 Personal 3/
+
+# Web
+node_modules/
+web/dist/
