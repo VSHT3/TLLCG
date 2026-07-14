@@ -160,7 +160,7 @@ Effect `trigger` values: `deploy / last_word / deathblow / turn_start / turn_end
 ## Card data format & deck filtering
 
 - Source of truth: `TLLCG/*.md` → `tools/yaml_to_json.py` → `data/cards.json`
-- **TLLCG/ is separate nested git repo** — don't track files here
+- **TLLCG/ vault is tracked in this repo** (Obsidian workspace junk ignored via .gitignore)
 - Decks only include `has_ability == true` cards (neutral + faction)
 - `"implemented": true` in `cards.json` marks complex cards with working code
 
